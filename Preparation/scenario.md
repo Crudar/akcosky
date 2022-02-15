@@ -2,9 +2,8 @@
 
 ## Scenario
 
-App where user can create an event. Basic functions should be: login, register, handling event. Event creation should consist of: name, description, time, location, wanted group 
-or selected individuals from specific group. Other users should be able to react if they will attend event to which they were invited to. They could make some adjustments like
-change time or change location.
+App where user can create an event and others should be able to react to this created event in form of attendance. Basic functions should be: login, register, handling event. Event creation should consist of: name, description, time, location, wanted group 
+or selected individuals from specific group. Other users could make some adjustments like change time or change location and users should be able to // TO DO
 
 ## Questions
 
@@ -20,12 +19,16 @@ change time or change location.
 ## Time schedule
 
 * 1st week 
+Login, register UI + backend
 
 * 2nd week
+Event creation UI + adding to database
 
 * 3rd week
+Events list UI
 
 * 4th week
+Event detail UI - creation
 
 * 5th week
 
