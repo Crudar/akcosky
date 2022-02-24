@@ -1,3 +1,4 @@
+import 'package:akcosky/UI/login.dart';
 import 'package:flutter/material.dart';
 import 'AppSettings.dart';
 import 'dart:async';
@@ -5,7 +6,8 @@ import 'dart:async';
 import 'Database.dart';
 
 void main() async{
-  runApp(const MyApp());
+  runApp(const Login());
+  //runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
