@@ -19,19 +19,14 @@ class Theme_ {
       color: Colors.black,
     ),
     headline3: GoogleFonts.openSans(
-      fontSize: 16.0,
+      fontSize: 14.0,
       fontWeight: FontWeight.w600,
-      color: Colors.black,
+      color: Colors.white,
     ),
     headline6: GoogleFonts.openSans(
       fontSize: 20.0,
       fontWeight: FontWeight.w600,
       color: Colors.black,
-    ),
-    headlineMedium: GoogleFonts.openSans(
-      fontSize: 14.0,
-      fontWeight: FontWeight.w600,
-      color: Colors.white,
     ),
   );
 
@@ -83,6 +78,15 @@ class Theme_ {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedItemColor: Colors.green,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white, width: 1.0),
+          ),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white, width: 1.0),
+          ),
+          hintStyle: Theme_.lightTextTheme.headline3,
       ),
       textTheme: lightTextTheme,
     );

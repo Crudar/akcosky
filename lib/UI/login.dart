@@ -8,15 +8,17 @@ class Login extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: Theme_.light(),
       home: Scaffold(
+        resizeToAvoidBottomInset: false,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: <Color>[
-              Color(0xff649173),
-              Color(0xffDBD5A4)
+              Color(0xff2980b9),
+              Color(0xff2c3e50)
             ]
           )
         ),
@@ -33,41 +35,46 @@ class Login extends StatelessWidget{
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                      const SizedBox(
+                        height: 25,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         child: TextField(
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white, width: 1.0),
-                              ),
-                              hintStyle: TextStyle(fontSize: 15.0, color: Colors.white), // TODO - brat zo súboru ?
+                            decoration: const InputDecoration(
                               hintText: 'Zadaj prihlasovacie meno',
+                              prefixIcon: Icon(FontAwesomeIcons.user, color: Colors.white)
                             ),
+                          style: Theme_.lightTextTheme.headline3,
                           ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                      const SizedBox(
+                        height: 25,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         child: TextField(
-                          decoration: InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white, width: 1.0),
-                            ),
-                            hintStyle: TextStyle(fontSize: 15.0, color: Colors.white), // TODO - brat zo súboru ?
+                          decoration: const InputDecoration(
                             hintText: 'Zadaj heslo',
+                            prefixIcon: Icon(FontAwesomeIcons.lock, color: Colors.white)
                           ),
+                          style: Theme_.lightTextTheme.headline3
                         ),
                       ),
                       Center(
-                          child: ElevatedButton(
-                          onPressed: () {},
-                          child: const Icon(FontAwesomeIcons.arrowRight),
-                          style: ElevatedButton.styleFrom(
-                            shape: const CircleBorder(),
-                            padding: const EdgeInsets.all(20),
-                            primary: Color(0xff649173), // <-- Button color
-                            onPrimary: Colors.white, // <-- Splash color
-                          )
+                          child: Padding(
+                              padding: EdgeInsets.only(top: 50),
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                child: const Icon(FontAwesomeIcons.arrowRight),
+                                style: ElevatedButton.styleFrom(
+                                  shape: const CircleBorder(),
+                                  padding: const EdgeInsets.all(20),
+                                  primary: Color(0xff2980b9), // <-- Button color
+                                  onPrimary: Colors.white, // <-- Splash color
+                                )
                       )
+                          )
                       )
                     ],
                   ),
