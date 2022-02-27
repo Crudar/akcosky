@@ -17,8 +17,8 @@ class Login extends StatelessWidget{
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: <Color>[
-              Color(0xff2980b9),
-              Color(0xff2c3e50)
+              Color(0xff240b36),
+              Color(0xffc31432)
             ]
           )
         ),
@@ -70,7 +70,7 @@ class Login extends StatelessWidget{
                                 style: ElevatedButton.styleFrom(
                                   shape: const CircleBorder(),
                                   padding: const EdgeInsets.all(20),
-                                  primary: Color(0xff2980b9), // <-- Button color
+                                  primary: Color(0xff000428), // <-- Button color
                                   onPrimary: Colors.white, // <-- Splash color
                                 )
                       )
