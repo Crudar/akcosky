@@ -1,9 +1,24 @@
+import 'package:akcosky/UI/register.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:akcosky/theme.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class Login extends StatelessWidget{
+class Login extends StatefulWidget{
   const Login({Key? key}) : super(key: key);
+
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login>{
+  bool passwordNotShown = true;
+
+  showPassword() {
+    setState(() {
+      passwordNotShown = !passwordNotShown;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,15 +69,22 @@ class Login extends StatelessWidget{
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         child: TextField(
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'Zadaj heslo',
-                            prefixIcon: Icon(FontAwesomeIcons.lock, color: Colors.white)
+                            prefixIcon: const Icon(FontAwesomeIcons.lock, color: Colors.white),
+                              suffixIcon: IconButton(
+                                  onPressed: () => showPassword(),
+                                  icon: Icon(passwordNotShown ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash, color: Colors.white)
+                              )
                           ),
-                          style: Theme_.lightTextTheme.headline3
+                          style: Theme_.lightTextTheme.headline3,
+                          obscureText: passwordNotShown
                         ),
                       ),
                       Center(
-                          child: Padding(
+                          child: Column(
+                              children:[
+                          Padding(
                               padding: EdgeInsets.only(top: 50),
                               child: ElevatedButton(
                                 onPressed: () {},
@@ -73,7 +95,36 @@ class Login extends StatelessWidget{
                                   primary: Color(0xff000428), // <-- Button color
                                   onPrimary: Colors.white, // <-- Splash color
                                 )
-                      )
+                              ),
+                            ),
+                                Padding(padding: const EdgeInsets.only(top: 15),
+                                  child: Builder(
+                                    builder: (context) => RichText(
+                                    text: TextSpan(children: [
+                                      TextSpan(
+                                        text: 'Nemáš účet ? ',
+                                        style: Theme_.lightTextTheme.headline3
+                                      ),
+                                      TextSpan(
+                                        text: "Vytvor si ho",
+                                        style: TextStyle(
+                                          color: const Color(0xff000428),
+                                          fontSize: Theme_.lightTextTheme.headline3?.fontSize,
+                                          fontWeight: Theme_.lightTextTheme.headline3?.fontWeight,
+                                        ),
+                                        recognizer: TapGestureRecognizer()..onTap = (){
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => const Register())
+                                          );
+                                        }
+                                      )
+                                    ]
+                                    )
+                                  ),
+                                  )
+                                )
+                            ]
                           )
                       )
                     ],

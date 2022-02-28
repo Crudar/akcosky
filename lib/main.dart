@@ -1,4 +1,6 @@
+import 'package:akcosky/UI/email_verification.dart';
 import 'package:akcosky/UI/login.dart';
+import 'package:akcosky/UI/register.dart';
 import 'package:flutter/material.dart';
 import 'AppSettings.dart';
 import 'dart:async';
@@ -8,6 +10,8 @@ import 'Database.dart';
 void main() async{
   runApp(const Login());
   //runApp(const MyApp());
+  //runApp(const Register());
+  //runApp(const EmailVerification());
 }
 
 class MyApp extends StatelessWidget {
