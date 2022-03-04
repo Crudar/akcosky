@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
 import 'package:akcosky/AppSettings.dart';
 import 'package:flutter/foundation.dart';
@@ -28,6 +30,8 @@ class Database{
     return component;
   }
 
+  Database._internal();
+
   String test(){
     return service.runtimeType.toString();
   }
@@ -36,5 +40,21 @@ class Database{
     return 'starting cooking!';
   }
 
-  Database._internal();
+  Future<void> addUserToDatabase(String id_, String username_, String email_, String passHash_, String passSalt_) async {
+    String tableName_ = "Uzivatelia";
+
+    Map<String, AttributeValue> item = {};
+    item.addEntries([MapEntry("ID", AttributeValue(s: id_))]);
+    item.addEntries([MapEntry("Meno_login", AttributeValue(s: username_))]);
+    item.addEntries([MapEntry("Email", AttributeValue(s: email_))]);
+    item.addEntries([MapEntry("Hash_HESLA", AttributeValue(s: passHash_))]);
+    item.addEntries([MapEntry("Salt", AttributeValue(s: passSalt_))]);
+
+    try{
+      PutItemOutput output = await service.putItem(item: item, tableName: tableName_);
+    }
+    on SocketException catch(e){
+      print(e.message); // TODO - return error and show on screen ???
+    }
+  }
 }

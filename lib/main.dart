@@ -1,15 +1,16 @@
 import 'package:akcosky/UI/email_verification.dart';
 import 'package:akcosky/UI/login.dart';
 import 'package:akcosky/UI/register.dart';
+import 'package:akcosky/models/User.dart';
 import 'package:flutter/material.dart';
 import 'AppSettings.dart';
 import 'dart:async';
 
-import 'Database.dart';
+import 'resources/Database.dart';
 
 void main() async{
-  runApp(const Login());
-  //runApp(const MyApp());
+  //runApp(const Login());
+  runApp(const MyApp());
   //runApp(const Register());
   //runApp(const EmailVerification());
 }
@@ -60,9 +61,9 @@ class MyHomePage extends StatefulWidget {
 Future<String> testAsync() async {
   Database s1 = await Database.create();
 
-  String test = s1.startCooking();
+  s1.addUserToDatabase("db26k8d0-1f2f-4b8b-be92-9dd09504dfvg", "kotva", "kotva@mail.com", "asjudhuiasdhuasd", "uasdhuiashd56662");
 
-  return test;
+  return "test";
 }
 
 class _MyHomePageState extends State<MyHomePage> {
