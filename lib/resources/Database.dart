@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
 import 'package:akcosky/AppSettings.dart';
-import 'package:flutter/foundation.dart';
 
 class Database{
   static final Database _database = Database._internal();
@@ -40,7 +39,7 @@ class Database{
     return 'starting cooking!';
   }
 
-  Future<void> addUserToDatabase(String id_, String username_, String email_, String passHash_, String passSalt_) async {
+  Future<bool> addUserToDatabase(String id_, String username_, String email_, String passHash_, String passSalt_) async {
     String tableName_ = "Uzivatelia";
 
     Map<String, AttributeValue> item = {};
@@ -52,9 +51,11 @@ class Database{
 
     try{
       PutItemOutput output = await service.putItem(item: item, tableName: tableName_);
+
+      return true;
     }
-    on SocketException catch(e){
-      print(e.message); // TODO - return error and show on screen ???
+    on SocketException {
+      return false;
     }
   }
 }

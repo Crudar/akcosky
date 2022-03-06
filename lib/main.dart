@@ -9,8 +9,8 @@ import 'dart:async';
 import 'resources/Database.dart';
 
 void main() async{
-  //runApp(const Login());
-  runApp(const MyApp());
+  runApp(const Login());
+  //runApp(const MyApp());
   //runApp(const Register());
   //runApp(const EmailVerification());
 }

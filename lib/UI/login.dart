@@ -14,6 +14,9 @@ class Login extends StatefulWidget{
 class _LoginState extends State<Login>{
   bool passwordNotShown = true;
 
+  var login = TextEditingController();
+  var password = TextEditingController();
+
   showPassword() {
     setState(() {
       passwordNotShown = !passwordNotShown;
@@ -56,6 +59,7 @@ class _LoginState extends State<Login>{
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         child: TextField(
+                            controller: login,
                             decoration: const InputDecoration(
                               hintText: 'Zadaj prihlasovacie meno',
                               prefixIcon: Icon(FontAwesomeIcons.user, color: Colors.white)
@@ -69,6 +73,7 @@ class _LoginState extends State<Login>{
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         child: TextField(
+                          controller: password,
                           decoration: InputDecoration(
                             hintText: 'Zadaj heslo',
                             prefixIcon: const Icon(FontAwesomeIcons.lock, color: Colors.white),
