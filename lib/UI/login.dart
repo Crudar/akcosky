@@ -1,8 +1,11 @@
+import 'package:akcosky/UI/email_verification.dart';
 import 'package:akcosky/UI/register.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:akcosky/theme.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import '../Helpers/popwithresults.dart';
 
 class Login extends StatefulWidget{
   const Login({Key? key}) : super(key: key);
@@ -23,10 +26,28 @@ class _LoginState extends State<Login>{
     });
   }
 
+  void navigateToRegister(BuildContext context) async {
+
+    dynamic result = await Navigator.pushNamed(context, '/registerstart');
+
+    if(result as bool) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text("Bol si úspešne zaregistrovaný!")));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: Theme_.light(),
+      initialRoute: '/',
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        // When navigating to the "/second" route, build the SecondScreen widget.
+        '/registerstart': (context) => const Register(),
+        '/registerfinal': (context) => const EmailVerification()
+      },
       home: Scaffold(
         resizeToAvoidBottomInset: false,
       body: Container(
@@ -118,10 +139,11 @@ class _LoginState extends State<Login>{
                                           fontWeight: Theme_.lightTextTheme.headline3?.fontWeight,
                                         ),
                                         recognizer: TapGestureRecognizer()..onTap = (){
-                                          Navigator.push(
+                                          /*Navigator.push(
                                               context,
                                               MaterialPageRoute(builder: (context) => const Register())
-                                          );
+                                          );*/
+                                          navigateToRegister(context);
                                         }
                                       )
                                     ]

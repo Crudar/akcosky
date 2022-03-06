@@ -1,7 +1,7 @@
 import 'package:akcosky/UI/email_verification.dart';
-import 'package:akcosky/cubit/register/register_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../cubit/registerstart/registerstart_cubit.dart';
 import '../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -36,10 +36,8 @@ class _RegisterState extends State<Register>{
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (context) => RegisterCubit(),
-        child: MaterialApp(
-          theme: Theme_.light(),
-            home: Scaffold(
+        create: (context) => RegisterStartCubit(),
+        child: Scaffold(
               resizeToAvoidBottomInset: false,
               body: Container(
                 decoration: const BoxDecoration(
@@ -52,25 +50,18 @@ class _RegisterState extends State<Register>{
                       ]
                     )
                   ),
-                child: BlocConsumer<RegisterCubit, RegisterState>(
+                child: BlocConsumer<RegisterStartCubit, RegisterStartState>(
                   listener: (context, state) {
-                    if(state is RegisterAuthenticate){
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const EmailVerification())
-                      );
+                    if(state is RegisterStartAuthenticate){
+                      Navigator.pushNamed(context, '/registerfinal');
                     }
                   },
                   builder: (context, state) {
-                    if(state is RegisterInitial){
+                    if(state is RegisterStartInitial){
                       return buildInitialRegisterForm();
                     }
-                    else if(state is RegisterLoading){
+                    else if(state is RegisterStartLoading){
                       //TODO LOADING
-                      return buildInitialRegisterForm();
-                    }
-                    else if (state is RegisterSuccess){
-                      // TODO - SPRAV NIECO KED SA USPESNE ZAREGISTROVAL
                       return buildInitialRegisterForm();
                     }
                     else{
@@ -79,7 +70,6 @@ class _RegisterState extends State<Register>{
                   }
                 )
         )
-      )
       )
     );
   }
@@ -170,7 +160,7 @@ class _RegisterState extends State<Register>{
                         child: Builder(
                           builder: (context) => ElevatedButton(
                               onPressed: () {
-                                BlocProvider.of<RegisterCubit>(context).authenticate(login.text, email.text, password.text);
+                                BlocProvider.of<RegisterStartCubit>(context).authenticate(login.text, email.text, password.text);
                               },
                               child: const Icon(FontAwesomeIcons.arrowRight),
                               style: ElevatedButton.styleFrom(
