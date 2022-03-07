@@ -1,6 +1,7 @@
 import 'package:akcosky/UI/email_verification.dart';
 import 'package:akcosky/UI/login.dart';
 import 'package:akcosky/UI/register.dart';
+import 'package:akcosky/app.dart';
 import 'package:akcosky/models/User.dart';
 import 'package:flutter/material.dart';
 import 'AppSettings.dart';
@@ -9,7 +10,8 @@ import 'dart:async';
 import 'resources/Database.dart';
 
 void main() async{
-  runApp(const Login());
+  runApp(const App());
+  //runApp(const Login());
   //runApp(const MyApp());
   //runApp(const Register());
   //runApp(const EmailVerification());

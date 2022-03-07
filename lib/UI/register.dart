@@ -2,6 +2,7 @@ import 'package:akcosky/UI/email_verification.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../cubit/registerstart/registerstart_cubit.dart';
+import '../resources/RegisterRepository.dart';
 import '../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -33,44 +34,49 @@ class _RegisterState extends State<Register>{
     });
   }
 
+  final RegisterRepository _registerRepository = RegisterRepository();
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (context) => RegisterStartCubit(),
-        child: Scaffold(
-              resizeToAvoidBottomInset: false,
-              body: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[
-                      Color(0xff240b36),
-                      Color(0xffc31432)
-                      ]
-                    )
-                  ),
-                child: BlocConsumer<RegisterStartCubit, RegisterStartState>(
-                  listener: (context, state) {
-                    if(state is RegisterStartAuthenticate){
-                      Navigator.pushNamed(context, '/registerfinal');
+    return RepositoryProvider.value(
+        value: _registerRepository,
+        child: BlocProvider(
+          create: (context) => RegisterStartCubit(_registerRepository),
+          child: Scaffold(
+                resizeToAvoidBottomInset: false,
+                body: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        Color(0xff240b36),
+                        Color(0xffc31432)
+                        ]
+                      )
+                    ),
+                  child: BlocConsumer<RegisterStartCubit, RegisterStartState>(
+                    listener: (context, state) {
+                      if(state is RegisterStartAuthenticate){
+                        Navigator.pushNamed(context, '/registerfinal', arguments: RepositoryProvider.of<RegisterRepository>(context));
+                      }
+                    },
+                    builder: (context, state) {
+                      if(state is RegisterStartInitial){
+                        return buildInitialRegisterForm();
+                      }
+                      else if(state is RegisterStartLoading){
+                        //TODO LOADING
+                        return buildInitialRegisterForm();
+                      }
+                      else{
+                        return buildInitialRegisterForm();
+                      }
                     }
-                  },
-                  builder: (context, state) {
-                    if(state is RegisterStartInitial){
-                      return buildInitialRegisterForm();
-                    }
-                    else if(state is RegisterStartLoading){
-                      //TODO LOADING
-                      return buildInitialRegisterForm();
-                    }
-                    else{
-                      return buildInitialRegisterForm();
-                    }
-                  }
-                )
+                  )
+            )
+          )
         )
-      )
     );
   }
 

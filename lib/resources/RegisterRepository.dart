@@ -10,15 +10,17 @@ class RegisterRepository{
 
   RegisterRepository._internal();
 
+  String id = "";
   String email = "";
   String login = "";
   String password = "";
+  String passSalt_ = "";
   String verificationCode = "";
 
-  Future<bool> addUser(String id_, String username_, String email_, String passHash_, String passSalt_) async{
+  Future<bool> addUser() async{
     Database db = await Database.create();
 
-    bool response = await db.addUserToDatabase(id_, username_, email, passHash_, passSalt_);
+    bool response = await db.addUserToDatabase(id, login, email, password, passSalt_);
 
     return response;
   }
