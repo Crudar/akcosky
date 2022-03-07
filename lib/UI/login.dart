@@ -1,7 +1,9 @@
+import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:akcosky/theme.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Login extends StatefulWidget{
   const Login({Key? key}) : super(key: key);
@@ -101,7 +103,9 @@ class _LoginState extends State<Login>{
                           Padding(
                               padding: EdgeInsets.only(top: 50),
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  BlocProvider.of<AuthenticationCubit>(context).login(login.text, password.text);
+                                },
                                 child: const Icon(FontAwesomeIcons.arrowRight),
                                 style: ElevatedButton.styleFrom(
                                   shape: const CircleBorder(),

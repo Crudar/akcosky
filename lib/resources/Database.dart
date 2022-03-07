@@ -1,7 +1,9 @@
 import 'dart:io';
-
+import 'package:akcosky/models/User.dart';
+import 'package:akcosky/models/Domain/UserDomain.dart';
 import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
 import 'package:akcosky/AppSettings.dart';
+import 'package:collection/collection.dart';
 
 class Database{
   static final Database _database = Database._internal();
@@ -56,6 +58,35 @@ class Database{
     }
     on SocketException {
       return false;
+    }
+  }
+  
+  Future<UserDomain?> getUser(String username) async{
+    String tableName_ = "Uzivatelia";
+
+    String filterExpression_ = 'Meno_login = :m';
+
+    Map<String, AttributeValue> request = {};
+    request.addEntries([MapEntry(":m", AttributeValue(s: username))]);
+
+    ScanOutput output = await service.scan(tableName: tableName_,
+        filterExpression: filterExpression_,
+        expressionAttributeValues: request);
+
+    if(output.count != 0){
+      Map<String, AttributeValue> response = output.items![0];
+      String? id = response.entries.firstWhere((element) => element.key == "ID").value.s;
+      String? username = response.entries.firstWhere((element) => element.key == "Meno_login").value.s;
+      String? passwordHash = response.entries.firstWhere((element) => element.key == "Hash_HESLA").value.s;
+      String? passwordSalt = response.entries.firstWhere((element) => element.key == "Salt").value.s;
+      String? email = response.entries.firstWhere((element) => element.key == "Email").value.s;
+
+      UserDomain userDomain = UserDomain(id.toString(), username ?? "", email ?? "", passwordHash ?? "", passwordSalt ?? "");
+
+      return userDomain;
+    }
+    else{
+      return null;
     }
   }
 }

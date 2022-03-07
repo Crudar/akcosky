@@ -1,6 +1,6 @@
 part of 'login_cubit.dart';
 
-@immutable
+/*@immutable
 abstract class LoginState {
   const LoginState();
 }
@@ -26,4 +26,4 @@ class LoginFinished extends LoginState{
 
   @override
   int get hashCode => passed.hashCode;
-}
+}*/

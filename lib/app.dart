@@ -1,20 +1,30 @@
+import 'package:akcosky/resources/AuthenticationRepository.dart';
 import 'package:akcosky/resources/RegisterRepository.dart';
+import 'package:akcosky/resources/UserRepository.dart';
 import 'package:akcosky/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'UI/email_verification.dart';
 import 'UI/login.dart';
+import 'UI/mainUI.dart';
 import 'UI/register.dart';
 import 'cubit/authentication/authentication_cubit.dart';
 
 class App extends StatelessWidget{
-  const App({Key? key}) : super(key: key);
+  const App({Key? key, required this.authenticationRepository,required this.userRepository}) : super(key: key);
+
+  final AuthenticationRepository authenticationRepository;
+  final UserRepository userRepository;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (context) => AuthenticationCubit(),
-      child: AppView(),
+    return RepositoryProvider.value(
+        value: authenticationRepository,
+        child: BlocProvider(
+          create: (context) => AuthenticationCubit(authenticationRepository: authenticationRepository,
+            userRepository: userRepository,),
+          child: AppView(),
+      )
     );
   }
 }
@@ -55,6 +65,12 @@ class _AppViewState extends State<AppView> {
                   return Register();
                 }
             );
+          case '/mainUI':
+            return MaterialPageRoute(
+                builder: (context){
+                return MainUI();
+              }
+            );
           default:
             return null;
         }
@@ -63,7 +79,10 @@ class _AppViewState extends State<AppView> {
         return BlocListener<AuthenticationCubit, AuthenticationState>(
           listener: (context, state){
             if (state is AuthenticationUnAuthenticated) {
-              _navigator.pushNamedAndRemoveUntil('/login', (route) => false);
+              _navigator.pushNamedAndRemoveUntil('/', (route) => false); // TODO - toto nech nenaviguje na login lebo tam uz je, nech skusi ukazat snackbar ???
+              }
+            else if(state is AuthenticationAuthenticated){
+              _navigator.pushNamedAndRemoveUntil('/mainUI', (route) => false);
               }
             },
           child: child

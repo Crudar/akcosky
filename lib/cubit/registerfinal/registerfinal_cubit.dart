@@ -27,7 +27,7 @@ class RegisterFinalCubit extends Cubit<RegisterFinalState> {
         _registerRepository.password, passSalt_, 10101, 24);
 
     _registerRepository.id = id_;
-    _registerRepository.passSalt_ = passHash_;
+    _registerRepository.passSalt_ = passSalt_;
     _registerRepository.password = passHash_;
 
     bool response = await _registerRepository.addUser();

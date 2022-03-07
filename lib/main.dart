@@ -3,6 +3,8 @@ import 'package:akcosky/UI/login.dart';
 import 'package:akcosky/UI/register.dart';
 import 'package:akcosky/app.dart';
 import 'package:akcosky/models/User.dart';
+import 'package:akcosky/resources/AuthenticationRepository.dart';
+import 'package:akcosky/resources/UserRepository.dart';
 import 'package:flutter/material.dart';
 import 'AppSettings.dart';
 import 'dart:async';
@@ -10,7 +12,7 @@ import 'dart:async';
 import 'resources/Database.dart';
 
 void main() async{
-  runApp(const App());
+  runApp(App(authenticationRepository: AuthenticationRepository(), userRepository: UserRepository()));
   //runApp(const Login());
   //runApp(const MyApp());
   //runApp(const Register());
