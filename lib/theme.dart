@@ -14,9 +14,9 @@ class Theme_ {
       color: Colors.white,
     ),
     headline2: GoogleFonts.openSans(
-      fontSize: 21.0,
+      fontSize: 30.0,
       fontWeight: FontWeight.w700,
-      color: Colors.black,
+      color: Colors.white,
     ),
     headline3: GoogleFonts.openSans(
       fontSize: 14.0,
