@@ -1,10 +1,7 @@
-import 'package:akcosky/Helpers/popwithresults.dart';
-import 'package:akcosky/UI/register.dart';
 import 'package:akcosky/cubit/registerfinal/registerfinal_cubit.dart';
 import 'package:akcosky/resources/RegisterRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../cubit/registerstart/registerstart_cubit.dart';
 import '../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

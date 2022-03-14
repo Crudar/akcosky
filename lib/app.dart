@@ -1,3 +1,4 @@
+import 'package:akcosky/UI/groups.dart';
 import 'package:akcosky/resources/AuthenticationRepository.dart';
 import 'package:akcosky/resources/RegisterRepository.dart';
 import 'package:akcosky/resources/UserRepository.dart';
@@ -70,6 +71,12 @@ class _AppViewState extends State<AppView> {
                 builder: (context){
                 return MainUI();
               }
+            );
+          case '/groups':
+            return MaterialPageRoute(
+                builder: (context){
+                  return Groups();
+                }
             );
           default:
             return null;

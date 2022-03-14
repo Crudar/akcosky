@@ -3,8 +3,21 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../theme.dart';
 
-class MainUI extends StatelessWidget {
+class MainUI extends StatefulWidget {
   const MainUI({Key? key}) : super(key: key);
+
+  @override
+  State<MainUI> createState() => _MainUI();
+}
+
+class _MainUI extends State<MainUI>{
+  bool menuVisible = false;
+
+  showMenu(){
+    setState(() {
+      menuVisible = !menuVisible;
+    });
+  }
 
   @override
   Widget build(context) {
@@ -29,17 +42,25 @@ class MainUI extends StatelessWidget {
                   child: Row(
                     children:[
                       Visibility(
-                          visible: true,
-                          child: IconButton(
-                              onPressed: () {  },
-                              icon: Icon(FontAwesomeIcons.ellipsisH, color: Colors.white, size: 30)
+                          visible: !menuVisible,
+                          child: Center(
+                              child: IconButton(
+                                onPressed: () {
+                                  showMenu();
+                                },
+                                icon: Icon(FontAwesomeIcons.ellipsisH, color: Colors.white, size: 30)
+                            )
                           )
                       ),
                       Visibility(
-                          visible: false,
-                          child: IconButton(
-                              onPressed: () {  },
+                          visible: menuVisible,
+                          child: Center(
+                              child: IconButton(
+                              onPressed: () {
+                                showMenu();
+                              },
                               icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.white, size: 30)
+                            )
                           )
                       ),
                       SizedBox(width: 15),
@@ -51,92 +72,92 @@ class MainUI extends StatelessWidget {
                 ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Visibility(
-                    visible: true,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 15),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                         IconButton(
-                            icon: const Icon(FontAwesomeIcons.solidCalendarPlus, color: Colors.white, size: 50),
-                          onPressed: () {  },
-                          )
-                          ,
-                          const SizedBox(height: 15)
-                          ,
-                          IconButton(
+                     Visibility(
+                      visible: menuVisible,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 15),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                             IconButton(
+                                icon: const Icon(FontAwesomeIcons.solidCalendarPlus, color: Colors.white, size: 50),
                               onPressed: () {  },
-                              icon: const Icon(FontAwesomeIcons.userFriends, color: Colors.white, size: 50,)
-                          )
-                        ],
-                    ),
+                              )
+                              ,
+                              const SizedBox(height: 15)
+                              ,
+                              IconButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/groups');
+                                  },
+                                  icon: const Icon(FontAwesomeIcons.userFriends, color: Colors.white, size: 50,)
+                              )
+                            ],
+                        ),
+                      ),
                   ),
-                ),
                 const SizedBox(width: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: Flexible(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[//TODO - FIX OVERFLOW + LEFT COLUMN SHOULD STAY ON THE TOP
-                          Card(
-                            child: InkWell(
-                              splashColor: Colors.blue.withAlpha(30),
-                              onTap: () {
-                                debugPrint('Card tapped.');
-                              },
-                              child: const SizedBox(
-                                width: 300,
-                                height: 100,
-                                child: Text('A card that can be tapped'),
+                     Expanded(child:
+                       Padding(
+                        padding: const EdgeInsets.only(left: 15),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[//TODO - FIX OVERFLOW + LEFT COLUMN SHOULD STAY ON THE TOP
+                            Card(
+                              child: InkWell(
+                                splashColor: Colors.blue.withAlpha(30),
+                                onTap: () {
+                                  debugPrint('Card tapped.');
+                                },
+                                child: SizedBox(
+                                  height: 100,
+                                  child: Text('A card that can be tapped')
+                                ),
                               ),
                             ),
-                          ),
-                          Card(
-                            child: InkWell(
-                              splashColor: Colors.blue.withAlpha(30),
-                              onTap: () {
-                                debugPrint('Card tapped.');
-                              },
-                              child: const SizedBox(
-                                width: 300,
-                                height: 100,
-                                child: Text('A card that can be tapped'),
+                            Card(
+                              child: InkWell(
+                                splashColor: Colors.blue.withAlpha(30),
+                                onTap: () {
+                                  debugPrint('Card tapped.');
+                                },
+                                child: SizedBox(
+                                    height: 100,
+                                    child: Text('A card that can be tapped')
+                                ),
                               ),
                             ),
-                          ),
-                          Card(
-                            child: InkWell(
-                              splashColor: Colors.blue.withAlpha(30),
-                              onTap: () {
-                                debugPrint('Card tapped.');
-                              },
-                              child: const SizedBox(
-                                width: 300,
-                                height: 100,
-                                child: Text('A card that can be tapped'),
+                            Card(
+                              child: InkWell(
+                                splashColor: Colors.blue.withAlpha(30),
+                                onTap: () {
+                                  debugPrint('Card tapped.');
+                                },
+                                child: SizedBox(
+                                    height: 100,
+                                    child: Text('A card that can be tapped')
+                                ),
                               ),
                             ),
-                          ),
-                          Card(
-                            child: InkWell(
-                              splashColor: Colors.blue.withAlpha(30),
-                              onTap: () {
-                                debugPrint('Card tapped.');
-                              },
-                              child: const SizedBox(
-                                width: 300,
-                                height: 100,
-                                child: Text('A card that can be tapped'),
+                            Card(
+                              child: InkWell(
+                                splashColor: Colors.blue.withAlpha(30),
+                                onTap: () {
+                                  debugPrint('Card tapped.');
+                                },
+                                child: SizedBox(
+                                    height: 100,
+                                    child: Text('A card that can be tapped')
+                                ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ]
+                            ]
+                          )
                       )
-                    )
-                  )
+                   )
                 ],
               )
             ],
