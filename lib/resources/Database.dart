@@ -61,7 +61,7 @@ class Database{
     }
   }
   
-  Future<UserDomain?> getUser(String username) async{
+  Future<UserDomain> getUser(String username) async{
     String tableName_ = "Uzivatelia";
 
     String filterExpression_ = 'Meno_login = :m';
@@ -85,8 +85,48 @@ class Database{
 
       return userDomain;
     }
-    else{
-      return null;
+    else {
+      return UserDomain("", "", "", "", "");
+    }
+  }
+
+  Future<bool> createNewGroup(String id_, String adminID_, String inviteCode_, String groupName_) async{
+    String tableName_ = "SKUPINY";
+
+    Map<String, AttributeValue> item = {};
+    item.addEntries([MapEntry("ID", AttributeValue(s: id_))]);
+    item.addEntries([MapEntry("AdminID", AttributeValue(s: adminID_))]);
+    item.addEntries([MapEntry("InviteCode", AttributeValue(s: inviteCode_))]);
+    item.addEntries([MapEntry("Názov", AttributeValue(s: groupName_))]);
+
+    try{
+      PutItemOutput output = await service.putItem(item: item, tableName: tableName_);
+
+      return true;
+    }
+    on SocketException {
+      return false;
+    }
+  }
+
+  Future<bool> addUserToGroup(String userID_, String invitationCode_) async {
+    String tableName_ = "Uzivatelia";
+
+    List<String> groups = [invitationCode_];
+
+    Map<String, AttributeValue> key_ = {"ID": AttributeValue(s: userID_)};
+
+    Map<String, AttributeValue> item = {"Skupiny": AttributeValue(ss: groups)};
+
+    // TODO - GET GROUP ID BASED ON INVITATION CODE AND REPLACE item above with group id
+
+    try{
+      UpdateItemOutput output = await service.updateItem(tableName: tableName_, key: key_, expressionAttributeValues: item);
+
+      return true;
+    }
+    on SocketException {
+      return false;
     }
   }
 }

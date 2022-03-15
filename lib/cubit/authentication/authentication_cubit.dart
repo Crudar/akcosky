@@ -1,3 +1,4 @@
+import 'package:akcosky/models/User.dart';
 import 'package:akcosky/resources/AuthenticationRepository.dart';
 import 'package:akcosky/resources/UserRepository.dart';
 import 'package:bloc/bloc.dart';
@@ -27,6 +28,10 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
         userDomain?.passwordHash ?? "", userDomain?.passwordSalt ?? "", 10101, 24);*/
 
     if(passHash_input == passHash_fromDb){
+      if(userDomain != null) {
+        userRepository.setUser(User(userDomain.id, userDomain.login, userDomain.email));
+      }
+
       emit(AuthenticationAuthenticated());
     }
     else{

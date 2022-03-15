@@ -1,6 +1,10 @@
+import 'package:akcosky/cubit/groups/groups_cubit.dart';
+import 'package:akcosky/resources/GroupsRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../cubit/authentication/authentication_cubit.dart';
 import '../theme.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Groups extends StatefulWidget {
   const Groups({Key? key}) : super(key: key);
@@ -11,25 +15,48 @@ class Groups extends StatefulWidget {
 
 class _Groups extends State<Groups>{
   final groups = <String>['Skupina 244', 'Rakeťáci 2', 'Test']; // Creates growable list.
-  var group = TextEditingController();
+  var addToGroup = TextEditingController();
+  var newGroup = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    var _userRepository = BlocProvider.of<AuthenticationCubit>(context).userRepository;
 
-    return Scaffold(
+    return BlocProvider(
+      create: (context) => GroupsCubit(GroupsRepository(), _userRepository),
+      child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(
           decoration: const BoxDecoration(
           gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: <Color>[
-                Color(0xff240b36),
-                Color(0xffc31432)
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: <Color>[
+              Color(0xff240b36),
+              Color(0xffc31432)
               ]
             )
           ),
-          child: Column(
+          child: BlocConsumer<GroupsCubit, GroupsState>(
+            listener: (context, state){
+              if (state is GroupsStatusMessage){
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(state.message),
+                  )
+                );
+              }
+            },
+            builder: (context, state){
+              return initialGroupsPage();
+            }
+          ),
+        )
+      )
+    );
+  }
+
+  Widget initialGroupsPage(){
+    return Column(
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.only(top: 30),
@@ -49,11 +76,11 @@ class _Groups extends State<Groups>{
               Text(
                 'Pridaj sa do skupiny',
                 style: Theme_.lightTextTheme.headline2,
-                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: TextField(
-                  controller: group,
+                  controller: addToGroup,
                   decoration: const InputDecoration(
                       hintText: 'Zadaj invitačný kód',
                       prefixIcon: Icon(FontAwesomeIcons.solidEnvelope, color: Colors.white)
@@ -86,7 +113,7 @@ class _Groups extends State<Groups>{
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: TextField(
-                  controller: group,
+                  controller: newGroup,
                   decoration: const InputDecoration(
                       hintText: 'Zadaj názov novej skupiny',
                       prefixIcon: Icon(FontAwesomeIcons.userFriends, color: Colors.white)
@@ -95,24 +122,23 @@ class _Groups extends State<Groups>{
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: ElevatedButton(
-                    onPressed: () {
-                      //BlocProvider.of<AuthenticationCubit>(context).login(login.text, password.text);
-                    },
-                    child: const Icon(FontAwesomeIcons.arrowRight),
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(20),
-                      primary: Color(0xff000428), // <-- Button color
-                      onPrimary: Colors.white, // <-- Splash color
-                    )
-                ),
+                  padding: EdgeInsets.only(top: 10),
+                  child: Builder(builder: (context) => ElevatedButton(
+                      onPressed: () {
+                        BlocProvider.of<GroupsCubit>(context).createNewGroup(newGroup.text);
+                      },
+                      child: const Icon(FontAwesomeIcons.arrowRight),
+                      style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(20),
+                        primary: Color(0xff000428), // <-- Button color
+                        onPrimary: Colors.white, // <-- Splash color
+                      )
+                  ),
+                  )
               ),
             ]
-          )
-        )
-    );
+          );
   }
 
   Widget listOfGroups(List groups){

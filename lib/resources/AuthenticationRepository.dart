@@ -9,7 +9,7 @@ class AuthenticationRepository{
   })async{
     Database db = await Database.create();
 
-    UserDomain? response = await db.getUser(username);
+    UserDomain response = await db.getUser(username);
 
     return response;
   }
