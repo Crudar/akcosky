@@ -43,30 +43,37 @@ class _MainUI extends State<MainUI>{
                     children:[
                       Visibility(
                           visible: !menuVisible,
-                          child: Center(
-                              child: IconButton(
-                                onPressed: () {
-                                  showMenu();
-                                },
-                                icon: Icon(FontAwesomeIcons.ellipsisH, color: Colors.white, size: 30)
+                          child: Expanded(
+                            flex: 2,
+                              child: Center(
+                                child: IconButton(
+                                  onPressed: () {
+                                    showMenu();
+                                  },
+                                  icon: Icon(FontAwesomeIcons.ellipsisH, color: Colors.white, size: 30)
+                              )
                             )
                           )
                       ),
                       Visibility(
                           visible: menuVisible,
-                          child: Center(
+                          child: Expanded(
+                              flex: 2,
+                              child: Center(
                               child: IconButton(
                               onPressed: () {
                                 showMenu();
                               },
                               icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.white, size: 30)
+                              )
                             )
                           )
                       ),
-                      SizedBox(width: 15),
-                      Text(
-                          "Akcošky",
-                          style: Theme_.lightTextTheme.headline2)
+                      Expanded(
+                        flex: 8,
+                        child: Text("Akcošky",
+                            style: Theme_.lightTextTheme.headline2)
+                      )
                     ],
                   )
                 ),
@@ -76,87 +83,96 @@ class _MainUI extends State<MainUI>{
                 children: <Widget>[
                      Visibility(
                       visible: menuVisible,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 15),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                             IconButton(
-                                icon: const Icon(FontAwesomeIcons.solidCalendarPlus, color: Colors.white, size: 50),
-                              onPressed: () {  },
-                              )
-                              ,
-                              const SizedBox(height: 15)
-                              ,
-                              IconButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(context, '/groups');
-                                  },
-                                  icon: const Icon(FontAwesomeIcons.userFriends, color: Colors.white, size: 50,)
-                              )
-                            ],
-                        ),
+                        child: Expanded(
+                            flex: 2,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                              ),
+                              //color: Color(0xff0b3236),
+                              child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                     IconButton(
+                                       padding: EdgeInsets.zero,
+                                        icon: const Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40),
+                                      onPressed: () {  },
+                                      )
+                                      ,
+                                      const SizedBox(height: 15)
+                                      ,
+                                      IconButton(
+                                          onPressed: () {
+                                            Navigator.pushNamed(context, '/groups');
+                                          },
+                                          padding: EdgeInsets.zero,
+                                          icon: const Icon(FontAwesomeIcons.userFriends, color: Colors.white, size: 40)
+                                      )
+                                    ],
+                                ),
+                           )
                       ),
                   ),
-                const SizedBox(width: 20),
-                     Expanded(child:
-                       Padding(
-                        padding: const EdgeInsets.only(left: 15),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[//TODO - FIX OVERFLOW + LEFT COLUMN SHOULD STAY ON THE TOP
-                            Card(
-                              child: InkWell(
-                                splashColor: Colors.blue.withAlpha(30),
-                                onTap: () {
-                                  debugPrint('Card tapped.');
-                                },
-                                child: SizedBox(
+                   Expanded(flex: 8,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[//TODO - FIX OVERFLOW + LEFT COLUMN SHOULD STAY ON THE TOP
+                          Card(
+                            child: InkWell(
+                              splashColor: Colors.blue.withAlpha(30),
+                              onTap: () {
+                                debugPrint('Card tapped.');
+                              },
+                              child: SizedBox(
+                                height: 100,
+                                child: Text('A card that can be tapped')
+                              ),
+                            ),
+                          ),
+                          Card(
+                            child: InkWell(
+                              splashColor: Colors.blue.withAlpha(30),
+                              onTap: () {
+                                debugPrint('Card tapped.');
+                              },
+                              child: SizedBox(
                                   height: 100,
                                   child: Text('A card that can be tapped')
-                                ),
                               ),
                             ),
-                            Card(
-                              child: InkWell(
-                                splashColor: Colors.blue.withAlpha(30),
-                                onTap: () {
-                                  debugPrint('Card tapped.');
-                                },
-                                child: SizedBox(
-                                    height: 100,
-                                    child: Text('A card that can be tapped')
-                                ),
+                          ),
+                          Card(
+                            child: InkWell(
+                              splashColor: Colors.blue.withAlpha(30),
+                              onTap: () {
+                                debugPrint('Card tapped.');
+                              },
+                              child: SizedBox(
+                                  height: 100,
+                                  child: Text('A card that can be tapped')
                               ),
                             ),
-                            Card(
-                              child: InkWell(
-                                splashColor: Colors.blue.withAlpha(30),
-                                onTap: () {
-                                  debugPrint('Card tapped.');
-                                },
-                                child: SizedBox(
-                                    height: 100,
-                                    child: Text('A card that can be tapped')
-                                ),
+                          ),
+                          Card(
+                            child: InkWell(
+                              splashColor: Colors.blue.withAlpha(30),
+                              onTap: () {
+                                debugPrint('Card tapped.');
+                              },
+                              child: SizedBox(
+                                  height: 100,
+                                  child: Text('A card that can be tapped')
+                              ),
                               ),
                             ),
-                            Card(
-                              child: InkWell(
-                                splashColor: Colors.blue.withAlpha(30),
-                                onTap: () {
-                                  debugPrint('Card tapped.');
-                                },
-                                child: SizedBox(
-                                    height: 100,
-                                    child: Text('A card that can be tapped')
-                                ),
-                                ),
-                              ),
-                            ]
-                          )
-                      )
+                          ]
+                        )
                    )
                 ],
               )
