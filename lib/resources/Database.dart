@@ -1,9 +1,13 @@
+import 'dart:core';
 import 'dart:io';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/Domain/UserDomain.dart';
 import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
 import 'package:akcosky/AppSettings.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
+
+import '../models/Group.dart';
 
 class Database{
   static final Database _database = Database._internal();
@@ -80,13 +84,63 @@ class Database{
       String? passwordHash = response.entries.firstWhere((element) => element.key == "Hash_HESLA").value.s;
       String? passwordSalt = response.entries.firstWhere((element) => element.key == "Salt").value.s;
       String? email = response.entries.firstWhere((element) => element.key == "Email").value.s;
+      List<String> groupIDs = List.empty(growable: true);
 
-      UserDomain userDomain = UserDomain(id.toString(), username ?? "", email ?? "", passwordHash ?? "", passwordSalt ?? "");
+      response.entries.firstWhereOrNull((element) => element.key == "Skupiny")?.value.l?.forEach((element) {
+        groupIDs.add(element.s ?? "");
+      });
+
+      UserDomain userDomain = UserDomain(id.toString(), username ?? "", email ?? "", passwordHash ?? "", passwordSalt ?? "", groupIDs);
 
       return userDomain;
     }
     else {
-      return UserDomain("", "", "", "", "");
+      return UserDomain("", "", "", "", "", List.empty());
+    }
+  }
+
+  Future<List<Group>> getGroupsByID(List<String> groupIDs) async{
+    if(groupIDs.isNotEmpty){
+
+      String tableName_ = "SKUPINY";
+
+      Map<String, KeysAndAttributes> request = {};
+      KeysAndAttributes? keys_ = KeysAndAttributes(keys: List.empty(growable: true));
+
+      if(groupIDs != List.empty()){
+
+        for (var element in groupIDs) {
+          keys_?.keys.add({"ID": AttributeValue(s: element)});
+        }
+
+        if(keys_ != null){
+          request = {tableName_: keys_};
+        }
+      }
+
+      BatchGetItemOutput output = await service.batchGetItem(requestItems: request);
+
+      List<Group> groups = List.empty(growable: true);
+
+      if(output.responses?.isEmpty != true){
+
+        output.responses?.entries.firstWhere((element) => element.key == "SKUPINY").value.forEach((element) {
+          String id = element.entries.firstWhereOrNull((element) => element.key == "ID")?.value.s ?? "";
+          String adminID = element.entries.firstWhereOrNull((element) => element.key == "AdminID")?.value.s ?? "";
+          String inviteCode = element.entries.firstWhereOrNull((element) => element.key == "InviteCode")?.value.s ?? "";
+          String title = element.entries.firstWhereOrNull((element) => element.key == "Názov")?.value.s ?? "";
+
+          groups.add(Group(id, adminID, inviteCode, title));
+        });
+
+        return groups;
+      }
+      else {
+        return groups;
+      }
+    }
+    else{
+      return List.empty();
     }
   }
 

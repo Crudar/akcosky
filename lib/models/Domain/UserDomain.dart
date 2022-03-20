@@ -1,9 +1,13 @@
+import '../Group.dart';
+
 class UserDomain{
   final String id;
   final String login;
   final String email;
   final String passwordHash;
   final String passwordSalt;
+  final List<String> groupIDs;
+  List<Group> groups = List.empty(growable: true);
 
   @override
   bool operator ==(Object other) =>
@@ -15,5 +19,5 @@ class UserDomain{
   @override
   int get hashCode => passwordHash.hashCode;
 
-  UserDomain(this.id, this.login, this.email, this.passwordHash, this.passwordSalt);
+  UserDomain(this.id, this.login, this.email, this.passwordHash, this.passwordSalt, this.groupIDs);
 }

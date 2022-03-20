@@ -1,4 +1,5 @@
 import '../models/Domain/UserDomain.dart';
+import '../models/Group.dart';
 import 'Database.dart';
 
 class AuthenticationRepository{
@@ -10,6 +11,8 @@ class AuthenticationRepository{
     Database db = await Database.create();
 
     UserDomain response = await db.getUser(username);
+
+    response.groups = await db.getGroupsByID(response.groupIDs);
 
     return response;
   }

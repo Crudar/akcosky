@@ -9,6 +9,7 @@ class UserRepository{
     if(_user != null){
       return _user;
     }
+    return null;
   }
 
   void setUser(User user){

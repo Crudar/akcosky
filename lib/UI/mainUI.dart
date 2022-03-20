@@ -99,20 +99,29 @@ class _MainUI extends State<MainUI>{
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: <Widget>[
                                      IconButton(
-                                       padding: EdgeInsets.zero,
-                                        icon: const Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40),
+                                       padding: EdgeInsets.all(0),
+                                       icon: const Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40),
                                       onPressed: () {  },
-                                      )
+                                     )
+                                      //Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40)
                                       ,
-                                      const SizedBox(height: 15)
+                                      Text("Vytvor akciu",
+                                        textAlign: TextAlign.center,
+                                        style: Theme_.lightTextTheme.headline3)
                                       ,
                                       IconButton(
-                                          onPressed: () {
-                                            Navigator.pushNamed(context, '/groups');
-                                          },
-                                          padding: EdgeInsets.zero,
-                                          icon: const Icon(FontAwesomeIcons.userFriends, color: Colors.white, size: 40)
+                                        padding: EdgeInsets.all(0),
+                                        icon: const Icon(FontAwesomeIcons.userFriends, color: Colors.white, size: 40),
+                                        onPressed: () {
+                                          Navigator.pushNamed(context, '/groups');
+                                        },
                                       )
+                                      //Icon(FontAwesomeIcons.userFriends, color: Colors.white, size: 40)
+                                      ,
+                                      Text("Skupiny",
+                                        style: Theme_.lightTextTheme.headline3)
+                                      ,
+                                      const SizedBox(height: 15)
                                     ],
                                 ),
                            )

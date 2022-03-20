@@ -29,7 +29,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
 
     if(passHash_input == passHash_fromDb){
       if(userDomain != null) {
-        userRepository.setUser(User(userDomain.id, userDomain.login, userDomain.email));
+        userRepository.setUser(User(userDomain.id, userDomain.login, userDomain.email, userDomain.groups));
       }
 
       emit(AuthenticationAuthenticated());
