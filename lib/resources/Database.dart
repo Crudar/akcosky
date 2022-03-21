@@ -6,6 +6,7 @@ import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
 import 'package:akcosky/AppSettings.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:tuple/tuple.dart';
 
 import '../models/Group.dart';
 
@@ -86,8 +87,8 @@ class Database{
       String? email = response.entries.firstWhere((element) => element.key == "Email").value.s;
       List<String> groupIDs = List.empty(growable: true);
 
-      response.entries.firstWhereOrNull((element) => element.key == "Skupiny")?.value.l?.forEach((element) {
-        groupIDs.add(element.s ?? "");
+      response.entries.firstWhereOrNull((element) => element.key == "Skupiny")?.value.ss?.forEach((element) {
+        groupIDs.add(element);
       });
 
       UserDomain userDomain = UserDomain(id.toString(), username ?? "", email ?? "", passwordHash ?? "", passwordSalt ?? "", groupIDs);
@@ -107,13 +108,13 @@ class Database{
       Map<String, KeysAndAttributes> request = {};
       KeysAndAttributes? keys_ = KeysAndAttributes(keys: List.empty(growable: true));
 
-      if(groupIDs != List.empty()){
+      if(groupIDs.isNotEmpty){
 
         for (var element in groupIDs) {
-          keys_?.keys.add({"ID": AttributeValue(s: element)});
+          keys_.keys.add({"ID": AttributeValue(s: element)});
         }
 
-        if(keys_ != null){
+        if(keys_.keys.isNotEmpty){
           request = {tableName_: keys_};
         }
       }
@@ -163,24 +164,53 @@ class Database{
     }
   }
 
-  Future<bool> addUserToGroup(String userID_, String invitationCode_) async {
+  Future<Tuple2<bool, String>> addUserToGroup(String userID_, String inviteCode_) async {
     String tableName_ = "Uzivatelia";
 
-    List<String> groups = [invitationCode_];
+    Group gotGroup = await getGroupBasedOnInviteCode(inviteCode_);
 
-    Map<String, AttributeValue> key_ = {"ID": AttributeValue(s: userID_)};
+    if(gotGroup.id != ""){
+      List<String> groupIDs = [gotGroup.id];
 
-    Map<String, AttributeValue> item = {"Skupiny": AttributeValue(ss: groups)};
+      Map<String, AttributeValue> key_ = {"ID": AttributeValue(s: userID_)};
 
-    // TODO - GET GROUP ID BASED ON INVITATION CODE AND REPLACE item above with group id
+      Map<String, AttributeValue> item = {":s": AttributeValue(ss: groupIDs)};
 
-    try{
-      UpdateItemOutput output = await service.updateItem(tableName: tableName_, key: key_, expressionAttributeValues: item);
+      try{
+        UpdateItemOutput output = await service.updateItem(tableName: tableName_, key: key_, updateExpression: "ADD Skupiny :s", expressionAttributeValues: item);
 
-      return true;
+        return const Tuple2<bool, String>(true, "");
+      }
+      on SocketException {
+        return const Tuple2<bool, String>(false, "Socket");
+      }
+    }else{
+      return const Tuple2<bool, String>(false, "NotExist");
     }
-    on SocketException {
-      return false;
+  }
+
+  Future<Group> getGroupBasedOnInviteCode(String inviteCode) async {
+    String tableName_ = "SKUPINY";
+
+    String filterExpression_ = 'InviteCode = :i';
+
+    Map<String, AttributeValue> request = {};
+    request.addEntries([MapEntry(":i", AttributeValue(s: inviteCode))]);
+
+    ScanOutput output = await service.scan(tableName: tableName_, filterExpression: filterExpression_, expressionAttributeValues: request);
+
+    if(output.count != 0) {
+      Map<String, AttributeValue> response = output.items![0];
+
+      String? id = response.entries.firstWhere((element) => element.key == "ID").value.s;
+      String? adminID = response.entries.firstWhere((element) => element.key == "AdminID").value.s;
+      String? inviteCode = response.entries.firstWhere((element) => element.key == "InviteCode").value.s;
+      String? title = response.entries.firstWhere((element) => element.key == "Názov").value.s;
+
+      return Group(id.toString(), adminID ?? "", inviteCode ?? "", title ?? "");
+    }
+    else{
+      return Group("", "", "", "");
     }
   }
 }

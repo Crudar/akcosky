@@ -1,7 +1,9 @@
 import 'package:akcosky/resources/GroupsRepository.dart';
 import 'package:akcosky/resources/UserRepository.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
+import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:math';
 
@@ -39,13 +41,22 @@ class GroupsCubit extends Cubit<GroupsState> {
   }
 
   Future<void> addUserToGroup(String invitationCode_) async{
-    bool response = await _groupsRepository.addUserToGroup(_userRepository.getUser()?.id ?? "", invitationCode_);
+    Tuple2<bool, String> response = await _groupsRepository.addUserToGroup(_userRepository.getUser().id, invitationCode_);
 
-    if (response) {
+    if (response.item1) {
       emit(GroupsStatusMessage("Bol si úspešne pridaný do skupiny!"));
-    } else {
-      emit(GroupsStatusMessage("Nemožno pripojiť ta do skupiny. Si pripojený na internet?"));
-      //TODO VYRIEŠIŤ AJ TAKY ERROR, KEDY SA SKUPINY S INVITACNYM KODOM V DATABAZE NENACHADZA
     }
+    else if (response.item1 == false && response.item2 == "Socket") {
+      emit(GroupsStatusMessage("Nemožno pripojiť ta do skupiny. Si pripojený na internet?"));
+    }
+    else if(response.item1 == false && response.item2 == "NotExist"){
+      emit(GroupsStatusMessage("Skupina so zadaným invite kódom neexistuje"));
+    }
+  }
+
+  void copyInviteCodeToClipboard(String inviteCode){
+    Clipboard.setData(ClipboardData(text: inviteCode));
+
+    emit(GroupsStatusMessage("Invite kód bol skopírovaný!"));
   }
 }

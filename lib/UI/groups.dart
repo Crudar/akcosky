@@ -3,8 +3,10 @@ import 'package:akcosky/resources/GroupsRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../cubit/authentication/authentication_cubit.dart';
+import '../models/Group.dart';
 import '../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 
 class Groups extends StatefulWidget {
   const Groups({Key? key}) : super(key: key);
@@ -14,7 +16,7 @@ class Groups extends StatefulWidget {
 }
 
 class _Groups extends State<Groups>{
-  final groups = <String>['Skupina 244', 'Rakeťáci 2', 'Test']; // Creates growable list.
+  //final groups = <String>['Skupina 244', 'Rakeťáci 2', 'Test']; // Creates growable list.
   var addToGroup = TextEditingController();
   var newGroup = TextEditingController();
 
@@ -47,7 +49,7 @@ class _Groups extends State<Groups>{
               }
             },
             builder: (context, state){
-              return initialGroupsPage();
+              return initialGroupsPage(_userRepository.getUser().groups);
             }
           ),
         )
@@ -55,7 +57,7 @@ class _Groups extends State<Groups>{
     );
   }
 
-  Widget initialGroupsPage(){
+  Widget initialGroupsPage(List<Group> groups){
     return Column(
             children: <Widget>[
               Padding(
@@ -72,7 +74,14 @@ class _Groups extends State<Groups>{
                   style: Theme_.lightTextTheme.headline2,
                 ),
               ),
-              listOfGroups(groups),
+              if(groups.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Text("Nie si v žiadnej skupine. Pridaj sa do nejakej!",
+                    style: Theme_.lightTextTheme.headline3)
+                )
+              else
+                listOfGroups(groups),
               Text(
                 'Pridaj sa do skupiny',
                 style: Theme_.lightTextTheme.headline2,
@@ -81,6 +90,7 @@ class _Groups extends State<Groups>{
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: TextField(
                   controller: addToGroup,
+                  keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                       hintText: 'Zadaj invitačný kód',
                       prefixIcon: Icon(FontAwesomeIcons.solidEnvelope, color: Colors.white)
@@ -90,9 +100,9 @@ class _Groups extends State<Groups>{
               ),
               Padding(
                 padding: EdgeInsets.only(top: 10),
-                child: ElevatedButton(
+                child: Builder(builder: (context) => ElevatedButton(
                     onPressed: () {
-                      //BlocProvider.of<AuthenticationCubit>(context).login(login.text, password.text);
+                      BlocProvider.of<GroupsCubit>(context).addUserToGroup(addToGroup.text);
                     },
                     child: const Icon(FontAwesomeIcons.arrowRight),
                     style: ElevatedButton.styleFrom(
@@ -102,6 +112,7 @@ class _Groups extends State<Groups>{
                       onPrimary: Colors.white, // <-- Splash color
                     )
                 ),
+                )
               ),
               Padding(
                 padding: EdgeInsets.only(top: 10),
@@ -144,6 +155,8 @@ class _Groups extends State<Groups>{
   Widget listOfGroups(List groups){
     return ListView.builder(
       itemBuilder: (BuildContext, index){
+        final Group currentItem = groups[index];
+
         return Container(
             margin: const EdgeInsets.all(15.0),
             padding: const EdgeInsets.all(3.0),
@@ -156,17 +169,23 @@ class _Groups extends State<Groups>{
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Text(groups[index],
+                Text(currentItem.title,
                   style: Theme_.lightTextTheme.headline6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      const Icon(FontAwesomeIcons.solidEnvelope, color: Colors.white),
-                      SizedBox(width: 10),
-                      Text("Invitačný kód",
-                          style: Theme_.lightTextTheme.headline3)
-                  ],
+                    Builder(builder: (context) => GestureDetector(
+                    onTap: (){
+                      BlocProvider.of<GroupsCubit>(context).copyInviteCodeToClipboard(currentItem.inviteCode);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        const Icon(FontAwesomeIcons.solidEnvelope, color: Colors.white),
+                        SizedBox(width: 10),
+                        Text(currentItem.inviteCode,
+                            style: Theme_.lightTextTheme.headline3)
+                    ],
+                    )
+                  )
                 )
               ]
           )
