@@ -38,6 +38,8 @@ class GroupsCubit extends Cubit<GroupsState> {
     } else {
       emit(GroupsStatusMessage("Nemožno vytvoriť skupinu. Si pripojený na internet?"));
     }
+
+    //TODO - REFRESH GROUPS
   }
 
   Future<void> addUserToGroup(String invitationCode_) async{
@@ -52,6 +54,8 @@ class GroupsCubit extends Cubit<GroupsState> {
     else if(response.item1 == false && response.item2 == "NotExist"){
       emit(GroupsStatusMessage("Skupina so zadaným invite kódom neexistuje"));
     }
+
+    //TODO - REFRESH GROUPS
   }
 
   void copyInviteCodeToClipboard(String inviteCode){

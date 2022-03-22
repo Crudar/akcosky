@@ -101,7 +101,9 @@ class _MainUI extends State<MainUI>{
                                      IconButton(
                                        padding: EdgeInsets.all(0),
                                        icon: const Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40),
-                                      onPressed: () {  },
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/newevent');
+                                      },
                                      )
                                       //Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40)
                                       ,

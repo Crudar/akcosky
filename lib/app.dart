@@ -1,4 +1,5 @@
 import 'package:akcosky/UI/groups.dart';
+import 'package:akcosky/UI/new_event.dart';
 import 'package:akcosky/resources/AuthenticationRepository.dart';
 import 'package:akcosky/resources/RegisterRepository.dart';
 import 'package:akcosky/resources/UserRepository.dart';
@@ -78,6 +79,12 @@ class _AppViewState extends State<AppView> {
                   return Groups();
                 }
             );
+          case '/newevent':
+            return MaterialPageRoute(
+                builder: (context){
+              return NewEvent();
+            }
+          );
           default:
             return null;
         }
