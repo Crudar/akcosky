@@ -104,6 +104,132 @@ class _NewEvent extends State<NewEvent>{
           /*
             TU BUDE PRESMEROVANIE NA POPUP KDE SA VYBERIE IKONA
              */
+          Container(margin: EdgeInsets.only(top: 10),
+            height: 50,
+            child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              const SizedBox(width: 15),
+              ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Image.asset("assets/icons/bowling.png"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: const EdgeInsets.all(7),
+                    primary: Colors.white, // <-- Button color
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              ),
+              const SizedBox(width: 15),
+              ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Image.asset("assets/icons/bowling.png"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: const EdgeInsets.all(7),
+                    primary: Colors.white, // <-- Button color
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              ),
+              const SizedBox(width: 15),
+              ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Image.asset("assets/icons/bowling.png"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: const EdgeInsets.all(7),
+                    primary: Colors.white, // <-- Button color
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              ),
+              const SizedBox(width: 15),
+              ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Image.asset("assets/icons/bowling.png"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: const EdgeInsets.all(7),
+                    primary: Colors.white, // <-- Button color
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              ),
+              const SizedBox(width: 15),
+              ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Image.asset("assets/icons/bowling.png"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: const EdgeInsets.all(7),
+                    primary: Colors.white, // <-- Button color
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              ),
+              const SizedBox(width: 15),
+              ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Image.asset("assets/icons/bowling.png"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: const EdgeInsets.all(7),
+                    primary: Colors.white, // <-- Button color
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              ),
+              const SizedBox(width: 15),
+              ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Image.asset("assets/icons/bowling.png"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: const EdgeInsets.all(7),
+                    primary: Colors.white, // <-- Button color
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              ),
+              const SizedBox(width: 15),
+              ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Image.asset("assets/icons/bowling.png"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: const EdgeInsets.all(7),
+                    primary: Colors.white, // <-- Button color
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              ),
+              const SizedBox(width: 15),
+              ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Image.asset("assets/icons/bowling.png"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    padding: const EdgeInsets.all(7),
+                    primary: Colors.white, // <-- Button color
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              ),
+              const SizedBox(width: 15),
+            ],
+          ),
+          ),
           Padding(
             padding: EdgeInsets.only(top: 10),
             child: Text(

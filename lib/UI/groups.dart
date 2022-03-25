@@ -146,7 +146,7 @@ class _Groups extends State<Groups>{
                         onPrimary: Colors.white, // <-- Splash color
                       )
                   ),
-                  )
+                )
               ),
             ]
           );
