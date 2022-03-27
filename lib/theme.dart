@@ -73,6 +73,7 @@ class Theme_ {
           },
         ),
       ),
+      colorScheme: const ColorScheme.light(primary: Color(0xff000428)),
       appBarTheme: const AppBarTheme(
         foregroundColor: Colors.black,
         backgroundColor: Colors.white,
