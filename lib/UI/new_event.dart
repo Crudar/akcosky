@@ -1,8 +1,14 @@
+import 'dart:convert';
+
+import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
 import 'package:akcosky/cubit/newevent/newevent_cubit.dart';
+import 'package:akcosky/models/UserChip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../models/Group.dart';
 import '../theme.dart';
 
 class NewEvent extends StatefulWidget {
@@ -19,12 +25,13 @@ class _NewEvent extends State<NewEvent>{
   //var eventType =
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return BlocProvider(
         create: (context) => NewEventCubit(),
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             body: Container(
+              key: UniqueKey(),
               decoration: const BoxDecoration(
                   gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -39,7 +46,7 @@ class _NewEvent extends State<NewEvent>{
                   listener: (context, state){
 
                   },
-                  builder: (context, state){
+                  builder: (context, state) {
                      return initialNewEventPage(context);
                   }
               ),
@@ -51,11 +58,10 @@ class _NewEvent extends State<NewEvent>{
   Widget initialNewEventPage(BuildContext context){
     int currentStep_ = BlocProvider.of<NewEventCubit>(context).stepperState;
 
-    final actionTypes = <String>["assets/icons/bowling.png", "assets/icons/bowling.png", "assets/icons/bowling.png", "assets/icons/bowling.png"
-    ,"assets/icons/bowling.png","assets/icons/bowling.png","assets/icons/bowling.png","assets/icons/bowling.png","assets/icons/bowling.png"
-    ,"assets/icons/bowling.png"];
-
-    return SafeArea(
+    return FutureBuilder(
+        future: _initImages(),
+        builder: (BuildContext context, AsyncSnapshot<List<String>> actionTypes){
+      return SafeArea(
       left: false,
       right: false,
         child: Stepper(
@@ -109,7 +115,7 @@ class _NewEvent extends State<NewEvent>{
               title: const Text('Základné \ninformácie'),
               content: Container(
                 alignment: Alignment.centerLeft,
-                child: basicInformation(context, actionTypes),
+                child: basicInformation(context, actionTypes.data ?? List.empty()),
               ),
             ),
             Step(
@@ -118,7 +124,10 @@ class _NewEvent extends State<NewEvent>{
               title: const Text('Účastníci'),
               content: Container(
                   alignment: Alignment.centerLeft,
-                  child: const Text('Content for Step 1')
+                  child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 2000),
+                      child: participants(context)
+                  )
               ),
             ),
             Step(
@@ -131,11 +140,12 @@ class _NewEvent extends State<NewEvent>{
             )
         ],
       )
+      );
+    }
     );
   }
 
   Widget basicInformation(context, List<String> actionTypes){
-
     return Column(
         children: <Widget>[
           Text(
@@ -253,15 +263,14 @@ class _NewEvent extends State<NewEvent>{
     );
   }
 
-  Widget listOfActivityTypes(context, List types){
-    int currentSelectedActivityType = BlocProvider.of<NewEventCubit>(context).selectedActivityTypeIndex;
+  Widget listOfActivityTypes(context, List<String> types){
     String currentSelectedActivityTypeIcon = BlocProvider.of<NewEventCubit>(context).selectedActivityTypeIcon;
 
     return ListView.separated(
       itemBuilder: (BuildContext, index){
         final String currentItem = types[index];
 
-        if(index != currentSelectedActivityType) {
+        if(currentItem != currentSelectedActivityTypeIcon) {
           return ElevatedButton(
             onPressed: () {
               BlocProvider.of<NewEventCubit>(context).updateSelectedActivityType(index, currentItem);
@@ -298,6 +307,157 @@ class _NewEvent extends State<NewEvent>{
           width: 15,
         )
     );
+  }
+
+  Widget participants(BuildContext context){
+    List<Group> groups = BlocProvider.of<AuthenticationCubit>(context).userRepository.getUser().groups;
+    Group selectedGroup = BlocProvider.of<NewEventCubit>(context).selectedGroup;
+    List<UserChip> usersFromSelectedGroup = BlocProvider.of<NewEventCubit>(context).usersFromSelectedGroup;
+    bool chooseAll_ = BlocProvider.of<NewEventCubit>(context).chooseAll;
+
+    return Column(mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Vyber skupinu", style: Theme_.lightTextTheme.headline3)
+        ,
+        Wrap(direction: Axis.horizontal,
+            children: [for (var i in groups)
+              groupChip(context, i, selectedGroup),
+            ]
+          )
+        ,
+        if(selectedGroup.id != "")
+          Text("Vyber účastníkov", style: Theme_.lightTextTheme.headline3)
+        ,
+        selectAll(context, chooseAll_, selectedGroup.id)
+        ,
+        Wrap(direction: Axis.horizontal,
+            children: [for (var i in usersFromSelectedGroup)
+              userChip(context, i),
+            ]
+        ),
+      ],
+    );
+  }
+
+  Widget userChip(BuildContext context, UserChip userChip){
+    if(userChip.selected){
+      return Padding(
+          child: ActionChip(
+              label: Text(
+                userChip.user.login,
+                style: const TextStyle(color: Colors.white)
+                ,
+              ),
+              backgroundColor: const Color(0xff000428),
+              onPressed: () {
+                BlocProvider.of<NewEventCubit>(context).updateSelectedUser(userChip.user);
+              }
+          )
+          ,
+          padding: const EdgeInsets.only(left: 3, right: 3)
+      );
+    }
+    else{
+      return Padding(
+          child: ActionChip(
+              label: Text(
+                userChip.user.login,
+                style: const TextStyle(color: Colors.black)
+                ,
+              ),
+              backgroundColor: Colors.white,
+              onPressed: () {
+                BlocProvider.of<NewEventCubit>(context).updateSelectedUser(userChip.user);
+              }
+          )
+          ,
+          padding: const EdgeInsets.only(left: 3, right: 3)
+      );
+    }
+  }
+
+  Widget groupChip(BuildContext context, Group group, Group selectedGroup){
+    if(group.id == selectedGroup.id){
+      return Padding(child: ActionChip(
+          label: Text(
+            group.title,
+            style: const TextStyle(color: Colors.white)
+            ,
+          ),
+          backgroundColor: const Color(0xff000428),
+          onPressed: () {
+            BlocProvider.of<NewEventCubit>(context).updateSelectedGroup(group, group.users);
+          })
+        ,
+        padding: const EdgeInsets.only(left: 3, right: 3)
+      );
+    }
+    else{
+      return Padding(child: ActionChip(
+          label: Text(
+            group.title,
+            style: TextStyle(color: Colors.black)
+            ,
+          ),
+          backgroundColor: Colors.white,
+          onPressed: () {
+            BlocProvider.of<NewEventCubit>(context).updateSelectedGroup(group, group.users);
+          })
+          ,
+          padding: const EdgeInsets.only(left: 3, right: 3)
+      );
+    }
+  }
+
+  Widget selectAll(BuildContext context, chooseAll_, String selectedGroup){
+    if(selectedGroup != ""){
+      if(chooseAll_) {
+        return ActionChip(
+          avatar: const Icon(Icons.check, color: Colors.white,),
+          label: const Text(
+            "Vyber všetkých",
+            style: TextStyle(color: Colors.white)
+            ,
+          ),
+          backgroundColor: const Color(0xff000428),
+          onPressed: () {
+            BlocProvider.of<NewEventCubit>(context).updateAllUsersInSelectedGroup();
+          }
+        );
+      }
+      else{
+        return ActionChip(
+            avatar: const Icon(Icons.check, color: Colors.black,),
+            label: const Text(
+              "Vyber všetkých",
+              style: TextStyle(color: Colors.black)
+              ,
+            ),
+            backgroundColor: Colors.white,
+            onPressed: () {
+              BlocProvider.of<NewEventCubit>(context).updateAllUsersInSelectedGroup();
+            }
+        );
+      }
+    }
+    else{
+      return const SizedBox.shrink();
+    }
+  }
+
+  Future<List<String>> _initImages()async{
+
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    // >> To get paths you need these 2 lines
+
+    final imagePaths = manifestMap.keys
+        .where((String key) => key.contains('activityTypes/'))
+        .toList();
+
+    return imagePaths;
   }
 
   _selectDate(BuildContext context) async {

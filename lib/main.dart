@@ -11,6 +11,8 @@ import 'dart:async';
 
 import 'resources/Database.dart';
 
+bool debugProfileBuildsEnabled = true;
+
 void main() async{
   runApp(App(authenticationRepository: AuthenticationRepository(), userRepository: UserRepository()));
   //runApp(const Login());
