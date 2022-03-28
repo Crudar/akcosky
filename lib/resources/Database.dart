@@ -2,6 +2,7 @@ import 'dart:core';
 import 'dart:io';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/Domain/UserDomain.dart';
+import 'package:akcosky/models/UserIdentifier.dart';
 import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
 import 'package:akcosky/AppSettings.dart';
 import 'package:collection/collection.dart';
@@ -213,4 +214,55 @@ class Database{
       return Group("", "", "", "");
     }
   }
+
+  Future<void> getUsersForGroups(List<Group> groups) async{
+    String tableName_ = "Uzivatelia";
+
+    String filterExpression_ = '';
+    Map<String, AttributeValue> request = {};
+
+    int incr = 0;
+    for(var element in groups){
+      String group_ =  ":group" + incr.toString();
+
+      if(filterExpression_.isEmpty){
+        filterExpression_ += "contains (Skupiny, " + group_ + ")";
+      }
+      else{
+        filterExpression_ += " OR contains (Skupiny, " + group_ + ")";
+      }
+      incr++;
+
+      request.addEntries([MapEntry(group_, AttributeValue(s: element.id))]);
+    }
+
+    ScanOutput output = await service.scan(tableName: tableName_,
+        filterExpression: filterExpression_,
+        expressionAttributeValues: request);
+
+    if(output.count != 0) {
+      output.items?.forEach((element) {
+        String id = element.entries.firstWhereOrNull((element) => element.key == "ID")?.value.s ?? "";
+        String login = element.entries.firstWhereOrNull((element) => element.key == "Meno_login")?.value.s ?? "";
+        List<String> groupsGetted = element.entries.firstWhereOrNull((element) => element.key == "Skupiny")?.value.ss ?? List.empty();
+
+        UserIdentifier identifier = UserIdentifier(id, login);
+
+        for(Group group in groups){
+          if(groupsGetted.contains(group.id)){
+            group.users.add(identifier);
+          }
+        }
+      });
+    }
+  }
 }
+
+
+
+
+
+
+
+
+
