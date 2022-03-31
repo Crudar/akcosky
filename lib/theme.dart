@@ -76,7 +76,7 @@ class Theme_ {
       colorScheme: const ColorScheme.light(primary: Color(0xff000428)),
       appBarTheme: const AppBarTheme(
         foregroundColor: Colors.black,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xff000428),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         foregroundColor: Colors.white,

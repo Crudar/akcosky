@@ -1,4 +1,6 @@
 import 'dart:core';
+import 'package:akcosky/Helpers/EventInvitedToMap.dart';
+import 'package:akcosky/models/EventDomain_.dart';
 import 'dart:io';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/Domain/UserDomain.dart';
@@ -254,6 +256,34 @@ class Database{
           }
         }
       });
+    }
+  }
+
+  Future<bool> createEvent(Event_ event) async{
+    String tableName_ = "AKCIE";
+
+    Map<String, AttributeValue> item = {};
+    item.addEntries([MapEntry("ID", AttributeValue(s: event.ID))]);
+    item.addEntries([MapEntry("Názov", AttributeValue(s: event.name))]);
+    item.addEntries([MapEntry("Popis", AttributeValue(s: event.description))]);
+    item.addEntries([MapEntry("Miesto", AttributeValue(s: event.place))]);
+    item.addEntries([MapEntry("DátumZačiatok", AttributeValue(s: event.startDate))]);
+    item.addEntries([MapEntry("DátumKoniec", AttributeValue(s: event.endDate))]);
+    item.addEntries([MapEntry("Transport", AttributeValue(s: event.transport))]);
+    item.addEntries([MapEntry("Ubytovanie", AttributeValue(s: event.accommodation))]);
+    item.addEntries([MapEntry("OdhadovanáCena", AttributeValue(n: event.estimatedAmount.toString()))]);
+
+    Map<String, AttributeValue> mapped = EventInvitedToMap.map(event.invited);
+
+    item.addEntries([MapEntry("Účastníci", AttributeValue(m: mapped))]);
+
+    try{
+      PutItemOutput output = await service.putItem(item: item, tableName: tableName_);
+
+      return true;
+    }
+    on SocketException {
+      return false;
     }
   }
 }

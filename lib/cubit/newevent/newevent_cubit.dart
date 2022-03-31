@@ -1,24 +1,38 @@
+import 'package:akcosky/models/EventDomain_.dart';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/UserChip.dart';
 import 'package:akcosky/models/UserIdentifier.dart';
+import 'package:akcosky/resources/EventRepository.dart';
+import 'package:aws_dynamodb_api/dynamodb-2011-12-05.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
-
+import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 import '../../models/Group.dart';
 
 part 'newevent_state.dart';
 
 class NewEventCubit extends Cubit<NewEventState> {
+  final EventRepository eventRepository;
+
   int stepperState = 0;
   String selectedActivityTypeIcon = "";
+  bool moreDayAction = false;
+  String dateText = 'Vyber dátum konania akcie';
+  String timeText = "";
+
+  late DateTime date;
+  late TimeOfDay? time_;
+  late DateTimeRange dateRange;
 
   Group selectedGroup = Group("", "", "", "");
   List<UserChip> usersFromSelectedGroup = List.empty(growable: true);
 
   bool chooseAll = false;
 
-  NewEventCubit() : super(NewEventInitial());
+  NewEventCubit(this.eventRepository) : super(NewEventInitial());
 
   updateStepperState(int state){
     stepperState = state;
@@ -37,10 +51,9 @@ class NewEventCubit extends Cubit<NewEventState> {
 
     usersFromSelectedGroup.clear();
 
-    /*for (var element in selectedUsers) {
+    for (var element in selectedUsers) {
       usersFromSelectedGroup.add(UserChip(false, element));
-    }*/
-    usersFromSelectedGroup.add(UserChip(false, UserIdentifier(login: 'test', id: 'aspidojaspoid')));
+    }
 
     emit(NewEventInitial());
   }
@@ -66,5 +79,111 @@ class NewEventCubit extends Cubit<NewEventState> {
     }
 
     emit(NewEventInitial());
+  }
+
+  updateMoreDayCheckbox(){
+    moreDayAction = !moreDayAction;
+
+    emit(NewEventInitial());
+  }
+
+  updateDate(DateTime? date){
+    var formatter = DateFormat('dd.MM.yyyy');
+
+    if(date != null){
+      dateText = formatter.format(date);
+    }
+    else{
+      dateText = "Vyber dátum a čas akcie";
+    }
+
+    date = date?.toLocal();
+
+    emit(NewEventInitial());
+  }
+
+  updateDateRange(DateTimeRange? range){
+    var formatter = DateFormat('dd.MM.yyyy');
+
+    if(range != null){
+      String dateStart = formatter.format(range.start);
+      String dateEnd = formatter.format(range.end);
+
+      dateText = dateStart + " - " + dateEnd;
+    }
+    else{
+      dateText = "Vyber dátum a čas akcie";
+    }
+
+    dateRange = range!;
+
+    timeText = "";
+
+    emit(NewEventInitial());
+  }
+
+  updateTime(TimeOfDay? time){
+    int hour = time?.hour ?? 0;
+    int minute = time?.minute ?? 0;
+
+    String hour_ = "";
+    String minute_ = "";
+
+      if(minute.toString().length == 1){
+        minute_ = "0" + minute.toString();
+      }
+      else{
+        minute_ = minute.toString();
+      }
+
+    if(hour.toString().length == 1){
+      hour_ = "0" + hour.toString();
+    }
+    else{
+      hour_ = hour.toString();
+    }
+
+      timeText = hour_ + ":" + minute_;
+
+    time_ = time;
+
+    emit(NewEventInitial());
+
+  }
+
+  finishCreation(String title, String description, String place, String transport, String accommodation, String estimatedPrice,
+      String createdBy) async {
+    double estimatedPriceDouble = 0;
+    late Event_ event_;
+
+    if(estimatedPrice != ""){
+      var estimatedPriceDouble_ = double.parse(estimatedPrice);
+      assert(estimatedPriceDouble_ is double);
+
+      estimatedPriceDouble = estimatedPriceDouble_;
+    }
+
+    Map<String,bool> users = {};
+
+    usersFromSelectedGroup.map((user) =>
+        [
+          users.addEntries([MapEntry(user.user.id, false)])
+        ]
+      );
+
+    var uuid = const Uuid();
+    var id_ = uuid.v4();
+
+    if(!moreDayAction){
+      event_ = Event_(id_, title, description, selectedActivityTypeIcon, place,
+        date.toIso8601String(), "", users, transport, accommodation, estimatedPriceDouble, createdBy);
+    }
+    else{
+      event_ = Event_(id_, title, description, selectedActivityTypeIcon, place,
+          dateRange.start.toIso8601String(), dateRange.end.toIso8601String(), users, transport, accommodation,
+          estimatedPriceDouble, createdBy);
+    }
+
+    await eventRepository.createNewEvent(event_);
   }
 }

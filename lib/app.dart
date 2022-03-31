@@ -1,6 +1,7 @@
 import 'package:akcosky/UI/groups.dart';
 import 'package:akcosky/UI/new_event.dart';
 import 'package:akcosky/resources/AuthenticationRepository.dart';
+import 'package:akcosky/resources/EventRepository.dart';
 import 'package:akcosky/resources/RegisterRepository.dart';
 import 'package:akcosky/resources/UserRepository.dart';
 import 'package:akcosky/theme.dart';
@@ -11,6 +12,7 @@ import 'UI/login.dart';
 import 'UI/mainUI.dart';
 import 'UI/register.dart';
 import 'cubit/authentication/authentication_cubit.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class App extends StatelessWidget{
   const App({Key? key, required this.authenticationRepository,required this.userRepository}) : super(key: key);
@@ -45,6 +47,13 @@ class _AppViewState extends State<AppView> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: Theme_.light(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('sk')
+      ],
       navigatorKey: _navigatorKey,
       onGenerateRoute: (settings) {
         final arguments = settings.arguments;

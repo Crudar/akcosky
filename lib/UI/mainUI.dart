@@ -1,16 +1,34 @@
+import 'package:akcosky/resources/EventRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/events/events_cubit.dart';
 import '../theme.dart';
 
-class MainUI extends StatefulWidget {
-  const MainUI({Key? key}) : super(key: key);
+class MainUI extends StatelessWidget{
+  EventRepository eventRepository = EventRepository();
 
   @override
-  State<MainUI> createState() => _MainUI();
+  Widget build(BuildContext context) {
+    return RepositoryProvider.value(
+        value: eventRepository,
+        child: BlocProvider(
+          create: (context) => EventsCubit(eventRepository: eventRepository),
+          child: MainUIView(),
+        )
+    );
+  }
+
 }
 
-class _MainUI extends State<MainUI>{
+class MainUIView extends StatefulWidget {
+  const MainUIView({Key? key}) : super(key: key);
+
+  @override
+  State<MainUIView> createState() => MainUIState();
+}
+
+class MainUIState extends State<MainUIView>{
   bool menuVisible = false;
 
   showMenu(){
