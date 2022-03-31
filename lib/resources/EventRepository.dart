@@ -1,4 +1,4 @@
-import '../models/EventDomain_.dart';
+import '../models/Event_.dart';
 import 'Database.dart';
 
 class EventRepository{

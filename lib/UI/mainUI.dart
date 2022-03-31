@@ -120,7 +120,7 @@ class MainUIState extends State<MainUIView>{
                                        padding: EdgeInsets.all(0),
                                        icon: const Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40),
                                       onPressed: () {
-                                        Navigator.pushNamed(context, '/newevent');
+                                        Navigator.pushNamed(context, '/newevent', arguments: BlocProvider.of<EventsCubit>(context).eventRepository);
                                       },
                                      )
                                       //Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40)

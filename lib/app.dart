@@ -91,7 +91,7 @@ class _AppViewState extends State<AppView> {
           case '/newevent':
             return MaterialPageRoute(
                 builder: (context){
-              return NewEvent();
+              return NewEvent(eventRepository: arguments as EventRepository);
             }
           );
           default:

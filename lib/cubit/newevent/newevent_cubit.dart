@@ -1,4 +1,4 @@
-import 'package:akcosky/models/EventDomain_.dart';
+import 'package:akcosky/models/Event_.dart';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/UserChip.dart';
 import 'package:akcosky/models/UserIdentifier.dart';
@@ -21,10 +21,8 @@ class NewEventCubit extends Cubit<NewEventState> {
   String selectedActivityTypeIcon = "";
   bool moreDayAction = false;
   String dateText = 'Vyber dátum konania akcie';
-  String timeText = "";
 
-  late DateTime date;
-  late TimeOfDay? time_;
+  late DateTime? date_;
   late DateTimeRange dateRange;
 
   Group selectedGroup = Group("", "", "", "");
@@ -97,7 +95,7 @@ class NewEventCubit extends Cubit<NewEventState> {
       dateText = "Vyber dátum a čas akcie";
     }
 
-    date = date?.toLocal();
+    date_ = date?.toLocal();
 
     emit(NewEventInitial());
   }
@@ -117,8 +115,6 @@ class NewEventCubit extends Cubit<NewEventState> {
 
     dateRange = range!;
 
-    timeText = "";
-
     emit(NewEventInitial());
   }
 
@@ -126,26 +122,17 @@ class NewEventCubit extends Cubit<NewEventState> {
     int hour = time?.hour ?? 0;
     int minute = time?.minute ?? 0;
 
-    String hour_ = "";
-    String minute_ = "";
+    var formatterDate = DateFormat('dd.MM.yyyy');
+    var formatterTime = DateFormat.Hm();
 
-      if(minute.toString().length == 1){
-        minute_ = "0" + minute.toString();
-      }
-      else{
-        minute_ = minute.toString();
-      }
+    date_ = date_?.add(Duration(hours: hour, minutes: minute));
 
-    if(hour.toString().length == 1){
-      hour_ = "0" + hour.toString();
+    if(date_ != null){
+      dateText = formatterDate.format(date_!) + " " + formatterTime.format(date_!);
     }
     else{
-      hour_ = hour.toString();
+      dateText = "Vyber dátum a čas akcie";
     }
-
-      timeText = hour_ + ":" + minute_;
-
-    time_ = time;
 
     emit(NewEventInitial());
 
@@ -165,18 +152,18 @@ class NewEventCubit extends Cubit<NewEventState> {
 
     Map<String,bool> users = {};
 
-    usersFromSelectedGroup.map((user) =>
-        [
-          users.addEntries([MapEntry(user.user.id, false)])
-        ]
-      );
+    for (var user in usersFromSelectedGroup) {
+      if(user.selected == true){
+        users.addEntries([MapEntry(user.user.id, false)]);
+      }
+    }
 
     var uuid = const Uuid();
     var id_ = uuid.v4();
 
     if(!moreDayAction){
       event_ = Event_(id_, title, description, selectedActivityTypeIcon, place,
-        date.toIso8601String(), "", users, transport, accommodation, estimatedPriceDouble, createdBy);
+        date_?.toIso8601String() ?? "", "", users, transport, accommodation, estimatedPriceDouble, createdBy);
     }
     else{
       event_ = Event_(id_, title, description, selectedActivityTypeIcon, place,

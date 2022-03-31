@@ -1,6 +1,6 @@
 import 'dart:core';
 import 'package:akcosky/Helpers/EventInvitedToMap.dart';
-import 'package:akcosky/models/EventDomain_.dart';
+import 'package:akcosky/models/Event_.dart';
 import 'dart:io';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/Domain/UserDomain.dart';

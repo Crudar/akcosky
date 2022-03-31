@@ -15,7 +15,8 @@ import '../models/Group.dart';
 import '../theme.dart';
 
 class NewEvent extends StatefulWidget {
-  const NewEvent({Key? key}) : super(key: key);
+  final EventRepository eventRepository;
+  const NewEvent({Key? key, required this.eventRepository}) : super(key: key);
 
   @override
   State<NewEvent> createState() => _NewEvent();
@@ -31,7 +32,7 @@ class _NewEvent extends State<NewEvent> {
 
   @override
   Widget build(BuildContext context) {
-    EventRepository eventRepository = BlocProvider.of<EventsCubit>(context).eventRepository;
+    EventRepository eventRepository = widget.eventRepository;
 
     return BlocProvider(
         create: (context) => NewEventCubit(eventRepository),
@@ -164,12 +165,9 @@ class _NewEvent extends State<NewEvent> {
     bool isChecked = BlocProvider
         .of<NewEventCubit>(context)
         .moreDayAction;
-    String date = BlocProvider
+    String dateAndTime = BlocProvider
         .of<NewEventCubit>(context)
         .dateText;
-    String time = BlocProvider
-        .of<NewEventCubit>(context)
-        .timeText;
 
     return Column(children: <Widget>[
       Text(
@@ -304,7 +302,7 @@ class _NewEvent extends State<NewEvent> {
                     child: Icon(FontAwesomeIcons.calendar, color: Colors.white),
                   ),
                   Text(
-                    date + " " + time,
+                    dateAndTime,
                     style: Theme_.lightTextTheme.headline3,
                   ),
                 ]))), //TODO - DatePicker
