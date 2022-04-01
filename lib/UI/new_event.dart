@@ -46,7 +46,14 @@ class _NewEvent extends State<NewEvent> {
                       end: Alignment.bottomCenter,
                       colors: <Color>[Color(0xff240b36), Color(0xffc31432)])),
               child: BlocConsumer<NewEventCubit, NewEventState>(
-                  listener: (context, state) {},
+                  listener: (context, state) {
+                    if (state is NewEventFinish) {
+                      Navigator.pop(context, true);
+                    }
+                    else if (state is NewEventError) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+                    }
+                  },
                   builder: (context, state) {
                     return initialNewEventPage(context);
                   }),

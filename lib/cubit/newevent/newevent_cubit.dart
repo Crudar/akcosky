@@ -171,6 +171,12 @@ class NewEventCubit extends Cubit<NewEventState> {
           estimatedPriceDouble, createdBy);
     }
 
-    await eventRepository.createNewEvent(event_);
+    bool response = await eventRepository.createNewEvent(event_);
+
+    if(response){
+      emit(NewEventFinish());
+    }else{
+      emit(NewEventError("Nemožno vytvoriť akciu. Si pripojený na internet?"));
+    }
   }
 }

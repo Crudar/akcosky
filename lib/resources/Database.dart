@@ -266,12 +266,14 @@ class Database{
     item.addEntries([MapEntry("ID", AttributeValue(s: event.ID))]);
     item.addEntries([MapEntry("Názov", AttributeValue(s: event.name))]);
     item.addEntries([MapEntry("Popis", AttributeValue(s: event.description))]);
+    item.addEntries([MapEntry("Typ", AttributeValue(s: event.type))]);
     item.addEntries([MapEntry("Miesto", AttributeValue(s: event.place))]);
     item.addEntries([MapEntry("DátumZačiatok", AttributeValue(s: event.startDate))]);
     item.addEntries([MapEntry("DátumKoniec", AttributeValue(s: event.endDate))]);
     item.addEntries([MapEntry("Transport", AttributeValue(s: event.transport))]);
     item.addEntries([MapEntry("Ubytovanie", AttributeValue(s: event.accommodation))]);
     item.addEntries([MapEntry("OdhadovanáCena", AttributeValue(n: event.estimatedAmount.toString()))]);
+    item.addEntries([MapEntry("Vytvoril", AttributeValue(s: event.createdBy))]);
 
     Map<String, AttributeValue> mapped = EventInvitedToMap.map(event.invited);
 

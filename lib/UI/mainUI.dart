@@ -40,7 +40,7 @@ class MainUIState extends State<MainUIView>{
   @override
   Widget build(context) {
     return Scaffold(
-        resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -119,8 +119,16 @@ class MainUIState extends State<MainUIView>{
                                      IconButton(
                                        padding: EdgeInsets.all(0),
                                        icon: const Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40),
-                                      onPressed: () {
-                                        Navigator.pushNamed(context, '/newevent', arguments: BlocProvider.of<EventsCubit>(context).eventRepository);
+                                      onPressed: () async {
+                                        Navigator.pushNamed(context, '/newevent', arguments: BlocProvider.of<EventsCubit>(context).eventRepository).then((value) {
+                                            if(value != null){
+                                              bool success = value as bool;
+
+                                              if(success){
+                                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Akcia bola úspešne vytvorená!")));
+                                              }
+                                          }
+                                        });
                                       },
                                      )
                                       //Icon(FontAwesomeIcons.calendarPlus, color: Colors.white, size: 40)
