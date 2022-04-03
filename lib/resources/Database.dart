@@ -264,20 +264,20 @@ class Database{
 
     Map<String, AttributeValue> item = {};
     item.addEntries([MapEntry("ID", AttributeValue(s: event.ID))]);
-    item.addEntries([MapEntry("Názov", AttributeValue(s: event.name))]);
+    item.addEntries([MapEntry("Nazov", AttributeValue(s: event.name))]);
     item.addEntries([MapEntry("Popis", AttributeValue(s: event.description))]);
     item.addEntries([MapEntry("Typ", AttributeValue(s: event.type))]);
     item.addEntries([MapEntry("Miesto", AttributeValue(s: event.place))]);
-    item.addEntries([MapEntry("DátumZačiatok", AttributeValue(s: event.startDate))]);
-    item.addEntries([MapEntry("DátumKoniec", AttributeValue(s: event.endDate))]);
+    item.addEntries([MapEntry("DatumZaciatok", AttributeValue(s: event.startDate))]);
+    item.addEntries([MapEntry("DatumKoniec", AttributeValue(s: event.endDate))]);
     item.addEntries([MapEntry("Transport", AttributeValue(s: event.transport))]);
     item.addEntries([MapEntry("Ubytovanie", AttributeValue(s: event.accommodation))]);
-    item.addEntries([MapEntry("OdhadovanáCena", AttributeValue(n: event.estimatedAmount.toString()))]);
+    item.addEntries([MapEntry("OdhadovanaCena", AttributeValue(n: event.estimatedAmount.toString()))]);
     item.addEntries([MapEntry("Vytvoril", AttributeValue(s: event.createdBy))]);
 
     Map<String, AttributeValue> mapped = EventInvitedToMap.map(event.invited);
 
-    item.addEntries([MapEntry("Účastníci", AttributeValue(m: mapped))]);
+    item.addEntries([MapEntry("Ucastnici", AttributeValue(m: mapped))]);
 
     try{
       PutItemOutput output = await service.putItem(item: item, tableName: tableName_);
@@ -288,6 +288,24 @@ class Database{
       return false;
     }
   }
+
+  Future<List<Event_>> getEventsForUser(String userID) async {
+    String tableName_ = "AKCIE";
+
+    String user_ =  ":user";
+    String filterExpression_ = "attribute_exists(Ucastnici.M., " + user_ + ")";
+
+    Map<String, AttributeValue> request = {};
+
+    request.addEntries([MapEntry(user_, AttributeValue(s: userID))]);
+
+    ScanOutput output = await service.scan(tableName: tableName_,
+        filterExpression: filterExpression_,
+        expressionAttributeValues: request);
+
+    return List.empty();
+  }
+
 }
 
 
