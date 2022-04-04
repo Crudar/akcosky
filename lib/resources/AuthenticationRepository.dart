@@ -16,8 +16,6 @@ class AuthenticationRepository{
 
     await db.getUsersForGroups(response.groups);
 
-    await db.getEventsForUser(response.id);
-
     return response;
   }
 }

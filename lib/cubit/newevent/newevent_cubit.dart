@@ -2,6 +2,7 @@ import 'package:akcosky/models/Event_.dart';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/UserChip.dart';
 import 'package:akcosky/models/UserIdentifier.dart';
+import 'package:akcosky/models/VoteEnum.dart';
 import 'package:akcosky/resources/EventRepository.dart';
 import 'package:aws_dynamodb_api/dynamodb-2011-12-05.dart';
 import 'package:bloc/bloc.dart';
@@ -11,6 +12,7 @@ import 'package:tuple/tuple.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/Group.dart';
+import '../../models/Vote.dart';
 
 part 'newevent_state.dart';
 
@@ -150,28 +152,33 @@ class NewEventCubit extends Cubit<NewEventState> {
       estimatedPriceDouble = estimatedPriceDouble_;
     }
 
-    Map<String,bool> users = {};
+    List<Vote> votes = List.empty(growable: true);
+    List<String> votesReference = List.empty(growable: true);
 
-    for (var user in usersFromSelectedGroup) {
-      if(user.selected == true){
-        users.addEntries([MapEntry(user.user.id, false)]);
+    var uuid = const Uuid();
+
+    for (var element in usersFromSelectedGroup) {
+      if(element.selected == true) {
+        var reference = uuid.v4();
+
+        votesReference.add(reference);
+        votes.add(Vote(reference, element.user.id, VoteEnum.undefined));
       }
     }
 
-    var uuid = const Uuid();
     var id_ = uuid.v4();
 
     if(!moreDayAction){
       event_ = Event_(id_, title, description, selectedActivityTypeIcon, place,
-        date_?.toIso8601String() ?? "", "", users, transport, accommodation, estimatedPriceDouble, createdBy);
+        date_?.toIso8601String() ?? "", "", votesReference, transport, accommodation, estimatedPriceDouble, createdBy);
     }
     else{
       event_ = Event_(id_, title, description, selectedActivityTypeIcon, place,
-          dateRange.start.toIso8601String(), dateRange.end.toIso8601String(), users, transport, accommodation,
+          dateRange.start.toIso8601String(), dateRange.end.toIso8601String(), votesReference, transport, accommodation,
           estimatedPriceDouble, createdBy);
     }
 
-    bool response = await eventRepository.createNewEvent(event_);
+    bool response = await eventRepository.createNewEvent(event_, votes);
 
     if(response){
       emit(NewEventFinish());
