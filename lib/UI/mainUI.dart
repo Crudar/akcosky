@@ -1,10 +1,11 @@
 import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
+import 'package:akcosky/models/Event_.dart';
 import 'package:akcosky/resources/EventRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/events/events_cubit.dart';
-import '../models/Event_.dart';
+import '../models/Domain/EventDomain.dart';
 import '../theme.dart';
 
 class MainUI extends StatelessWidget {

@@ -1,9 +1,11 @@
+import 'dart:collection';
 import 'dart:core';
-import 'package:akcosky/models/Event_.dart';
+import 'package:akcosky/models/Domain/EventDomain.dart';
 import 'dart:io';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/Domain/UserDomain.dart';
 import 'package:akcosky/models/UserIdentifier.dart';
+import 'package:akcosky/models/VoteEnum.dart';
 import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
 import 'package:akcosky/AppSettings.dart';
 import 'package:collection/collection.dart';
@@ -198,14 +200,15 @@ class Database{
 
     List<WriteRequest> requests = List.empty(growable: true);
 
-    for(Vote element in votes){
+    votes.forEach((value){
       Map<String, AttributeValue> item = {};
-      item.addEntries([MapEntry("ID", AttributeValue(s: element.ID))]);
-      item.addEntries([MapEntry("UserID", AttributeValue(s: element.userID))]);
-      item.addEntries([MapEntry("VoteResult", AttributeValue(n: element.vote.index.toString()))]);
+      item.addEntries([MapEntry("ID", AttributeValue(s: value.voteID))]);
+      item.addEntries([MapEntry("UserID", AttributeValue(s: value.userID))]);
+      item.addEntries([MapEntry("EventID", AttributeValue(s: value.eventID))]);
+      item.addEntries([MapEntry("VoteResult", AttributeValue(n: value.vote.index.toString()))]);
 
       requests.add(WriteRequest(putRequest: PutRequest(item: item)));
-    }
+    });
 
     Map<String, List<WriteRequest>> mapRequest = {tableName_: requests};
 
@@ -286,7 +289,7 @@ class Database{
     }
   }
 
-  Future<bool> createEvent(Event_ event) async{
+  Future<bool> createEvent(EventDomain event) async{
     String tableName_ = "AKCIE";
 
     Map<String, AttributeValue> item = {};
@@ -302,7 +305,7 @@ class Database{
     item.addEntries([MapEntry("OdhadovanaCena", AttributeValue(n: event.estimatedAmount.toString()))]);
     item.addEntries([MapEntry("Vytvoril", AttributeValue(s: event.createdBy))]);
 
-    item.addEntries([MapEntry("Hlasovania", AttributeValue(ss: event.votesReference))]);
+    item.addEntries([MapEntry("Ucastnici", AttributeValue(ss: event.participantIDs))]);
 
     try{
       PutItemOutput output = await service.putItem(item: item, tableName: tableName_);
@@ -314,22 +317,61 @@ class Database{
     }
   }
 
-  Future<List<Event_>> getEventsForUser(String userID) async {
+  Future<List<Vote>> getVotesForEvents(List<EventDomain> events) async {
     String tableName_ = "AKCIEHLASOVANIE";
 
     String user_ =  ":UserID";
+    String event_ =  ":EventID";
 
-    String filterExpression_ = "contains (UserID, " + user_ + ")";
+    String filterExpressionUser = "";
+    String filterExpressionEvent = "";
 
     Map<String, AttributeValue> request = {};
 
-    request.addEntries([MapEntry(user_, AttributeValue(s: userID))]);
+    int incrParticipants = 0;
+    int incrEvents = 0;
+
+    for (var event in events) {
+
+      for (var participant in event.participantIDs) {
+        String actualUser = user_ + incrParticipants.toString();
+
+        if(filterExpressionUser.isEmpty){
+
+          filterExpressionUser += "(UserID = " + actualUser;
+        }
+        else{
+          filterExpressionUser += " OR UserID = " + actualUser;
+        }
+
+        request.addEntries([MapEntry(actualUser, AttributeValue(s: participant))]);
+
+        incrParticipants++;
+      }
+
+      String actualEvent = event_ + incrEvents.toString();
+
+      if(filterExpressionEvent.isEmpty){
+        filterExpressionEvent += "(EventID = " + actualEvent;
+      }
+      else{
+        filterExpressionEvent += " OR EventID = " + actualEvent;
+      }
+
+      request.addEntries([MapEntry(actualEvent, AttributeValue(s: event.ID))]);
+
+      incrEvents++;
+    }
+    filterExpressionUser += ")";
+    filterExpressionEvent += ")";
+
+    String filterExpression_ = filterExpressionUser + " AND " + filterExpressionEvent;
 
     ScanOutput output = await service.scan(tableName: tableName_,
         filterExpression: filterExpression_,
         expressionAttributeValues: request);
 
-    List<String> votesIDs = List.empty(growable: true);
+    List<Vote> votes = List.empty(growable: true);
 
     if(output.count != 0) {
       output.items?.forEach((element) {
@@ -337,30 +379,42 @@ class Database{
             .firstWhereOrNull((element) => element.key == "ID")
             ?.value
             .s ?? "";
-        votesIDs.add(id);
+
+        String userID = element.entries
+            .firstWhereOrNull((element) => element.key == "UserID")
+            ?.value
+            .s ?? "";
+
+        String eventID = element.entries
+            .firstWhereOrNull((element) => element.key == "EventID")
+            ?.value
+            .s ?? "";
+
+        int vote = int.parse(element.entries
+        .firstWhereOrNull((element) => element.key == "VoteResult")
+        ?.value
+        .n ?? "0");
+
+        votes.add(Vote(id, userID, eventID, VoteEnum.values[vote]));
       });
     }
 
-    if(votesIDs.isNotEmpty){
-      List<Event_> events =  await getEventByVote(votesIDs);
-
-      return events;
-    }
-    else {
-      return List.empty();
-    }
+    return votes;
   }
 
-  Future<List<Event_>> getEventByVote(List<String> votesIDs) async {
+  Future<List<EventDomain>> getEventsForUser(String userID) async {
     String tableName_ = "AKCIE";
 
-    String filterExpression_ = '';
+    String user_ =  ":UserID";
+
+    String filterExpression_ = "contains (Ucastnici, " + user_ + ")";
 
     Map<String, AttributeValue> request = {};
+    request.addEntries([MapEntry(user_, AttributeValue(s: userID))]);
 
-    int incr = 0;
+    /*int incr = 0;
 
-    for(var element in votesIDs){
+    votes.forEach((key, value){
       String votes_ =  ":vote" + incr.toString();
 
       if(filterExpression_.isEmpty){
@@ -371,14 +425,14 @@ class Database{
       }
       incr++;
 
-      request.addEntries([MapEntry(votes_, AttributeValue(s: element))]);
-    }
+      request.addEntries([MapEntry(votes_, AttributeValue(s: key))]);
+    });*/
 
     ScanOutput output = await service.scan(tableName: tableName_,
         filterExpression: filterExpression_,
         expressionAttributeValues: request);
 
-    List<Event_> events = List.empty(growable: true);
+    List<EventDomain> events = List.empty(growable: true);
 
     if(output.count != 0) {
       output.items?.forEach((element) {
@@ -389,7 +443,7 @@ class Database{
         String place = element.entries.firstWhereOrNull((element) => element.key == "Miesto")?.value.s ?? "";
         String startDate = element.entries.firstWhereOrNull((element) => element.key == "DatumZaciatok")?.value.s ?? "";
         String endDate = element.entries.firstWhereOrNull((element) => element.key == "DatumKoniec")?.value.s ?? "";
-        List<String> votesReference = element.entries.firstWhereOrNull((element) => element.key == "Hlasovania")?.value.ss ?? List.empty();
+        List<String> participants = element.entries.firstWhereOrNull((element) => element.key == "Ucastnici")?.value.ss ?? List.empty();
         String transport = element.entries.firstWhereOrNull((element) => element.key == "Transport")?.value.s ?? "";
         String accommodation = element.entries.firstWhereOrNull((element) => element.key == "Ubytovanie")?.value.s ?? "";
         String estimatedAmount = element.entries.firstWhereOrNull((element) => element.key == "OdhadovanaCena")?.value.n ?? "";
@@ -398,7 +452,7 @@ class Database{
         var estimatedAmountDouble = double.parse(estimatedAmount);
         assert(estimatedAmountDouble is double);
 
-        Event_ event = Event_(id, name, description, type, place, startDate, endDate, votesReference, transport, accommodation, estimatedAmountDouble, createdBy);
+        EventDomain event = EventDomain(id, name, description, type, place, startDate, endDate, participants, transport, accommodation, estimatedAmountDouble, createdBy);
 
         events.add(event);
       });

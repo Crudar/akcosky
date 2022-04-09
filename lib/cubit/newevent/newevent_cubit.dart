@@ -1,4 +1,4 @@
-import 'package:akcosky/models/Event_.dart';
+import 'package:akcosky/models/Domain/EventDomain.dart';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/UserChip.dart';
 import 'package:akcosky/models/UserIdentifier.dart';
@@ -143,7 +143,7 @@ class NewEventCubit extends Cubit<NewEventState> {
   finishCreation(String title, String description, String place, String transport, String accommodation, String estimatedPrice,
       String createdBy) async {
     double estimatedPriceDouble = 0;
-    late Event_ event_;
+    late EventDomain event_;
 
     if(estimatedPrice != ""){
       var estimatedPriceDouble_ = double.parse(estimatedPrice);
@@ -152,29 +152,29 @@ class NewEventCubit extends Cubit<NewEventState> {
       estimatedPriceDouble = estimatedPriceDouble_;
     }
 
+    List<String> participantIDs = List.empty(growable: true);
     List<Vote> votes = List.empty(growable: true);
-    List<String> votesReference = List.empty(growable: true);
 
     var uuid = const Uuid();
+
+    var eventID_ = uuid.v4();
 
     for (var element in usersFromSelectedGroup) {
       if(element.selected == true) {
         var reference = uuid.v4();
 
-        votesReference.add(reference);
-        votes.add(Vote(reference, element.user.id, VoteEnum.undefined));
+        participantIDs.add(element.user.id);
+        votes.add(Vote(reference, element.user.id, eventID_, VoteEnum.undefined));
       }
     }
 
-    var id_ = uuid.v4();
-
     if(!moreDayAction){
-      event_ = Event_(id_, title, description, selectedActivityTypeIcon, place,
-        date_?.toIso8601String() ?? "", "", votesReference, transport, accommodation, estimatedPriceDouble, createdBy);
+      event_ = EventDomain(eventID_, title, description, selectedActivityTypeIcon, place,
+        date_?.toIso8601String() ?? "", "", participantIDs, transport, accommodation, estimatedPriceDouble, createdBy);
     }
     else{
-      event_ = Event_(id_, title, description, selectedActivityTypeIcon, place,
-          dateRange.start.toIso8601String(), dateRange.end.toIso8601String(), votesReference, transport, accommodation,
+      event_ = EventDomain(eventID_, title, description, selectedActivityTypeIcon, place,
+          dateRange.start.toIso8601String(), dateRange.end.toIso8601String(), participantIDs, transport, accommodation,
           estimatedPriceDouble, createdBy);
     }
 
