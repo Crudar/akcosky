@@ -1,3 +1,7 @@
+import 'package:akcosky/models/VoteEnum.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
+
 import 'Vote.dart';
 
 class Event_{
@@ -6,8 +10,8 @@ class Event_{
   String description;
   String type;
   String place;
-  String startDate;
-  String endDate;
+  DateTime? startDate;
+  DateTime? endDate;
   List<Vote> votes;
   String transport;
   String accommodation;
@@ -17,4 +21,29 @@ class Event_{
   Event_(this.ID, this.name, this.description, this.type, this.place, this.startDate, this.endDate, this.votes,
       this.transport, this.accommodation, this.estimatedAmount, this.createdBy);
 
+  int comingParticipants(){
+    int coming = 0;
+
+    for (var vote in votes) {
+      if(vote.vote == VoteEnum.yes){
+        coming++;
+      }
+    }
+    return coming;
+  }
+
+  String getDate(){
+    if(endDate == null && startDate != null){
+      var formatterDate = DateFormat('dd');
+      var formatterMonth = DateFormat('MMMM');
+      var formatterTime = DateFormat.Hm();
+
+      return formatterDate.format(startDate!) + "\n" + formatterMonth.format(startDate!).substring(0, 3) + "\n" + formatterTime.format(startDate!);
+    }
+    else{
+      var formatterDate = DateFormat('dd.MM.');
+
+      return formatterDate.format(startDate!) + "\n-\n" + formatterDate.format(endDate!);
+    }
+  }
 }

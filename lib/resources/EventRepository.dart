@@ -5,7 +5,7 @@ import 'Database.dart';
 import "package:collection/collection.dart";
 
 class EventRepository{
-  List<Event_> events = List.empty(growable: true);
+  Map<int?, List<Event_>> events = {};
 
   Future<bool> createNewEvent(EventDomain event, List<Vote> votes) async{
     Database db = await Database.create();
@@ -19,7 +19,7 @@ class EventRepository{
     return response;
   }
 
-  Future<List<Event_>> getEventsForUser(String userID) async{
+  Future<Map<int?, List<Event_>>> getEventsForUser(String userID) async{
     if(events.isEmpty){
       Database db = await Database.create();
 
@@ -29,7 +29,7 @@ class EventRepository{
 
       Map<String, List<Vote>> votesGroupedByGroup = groupBy(votes, (Vote vote) => vote.eventID);
 
-      List<Event_> events_ = groupEventsAndVotes(eventsOfUser, votesGroupedByGroup);
+      Map<int?, List<Event_>> events_ = groupEventsAndVotes(eventsOfUser, votesGroupedByGroup);
 
       events = events_;
 
@@ -40,17 +40,30 @@ class EventRepository{
     }
   }
 
-  List<Event_> groupEventsAndVotes(List<EventDomain> eventsOfUser, Map<String, List<Vote>> votes){
-    List<Event_> events = List.empty(growable: true);
+  Map<int?, List<Event_>> groupEventsAndVotes(List<EventDomain> eventsOfUser, Map<String, List<Vote>> votes){
+    List<Event_> eventsList = List.empty(growable: true);
 
     for (var element in eventsOfUser) {
       List<Vote>? votesForEvent = votes[element.ID];
 
-      Event_ event_ = Event_(element.ID, element.name, element.description, element.type, element.place,
-        element.startDate, element.endDate, votesForEvent ?? List.empty(), element.transport, element.accommodation, element.estimatedAmount, element.createdBy);
+      DateTime? startDate;
+      DateTime? endDate;
 
-      events.add(event_);
+      if(element.startDate != "") {
+        startDate = DateTime.parse(element.startDate);
+      }
+
+      if(element.endDate != ""){
+        endDate = DateTime.parse(element.endDate);
+      }
+
+      Event_ event_ = Event_(element.ID, element.name, element.description, element.type, element.place,
+          startDate, endDate, votesForEvent ?? List.empty(), element.transport, element.accommodation, element.estimatedAmount, element.createdBy);
+
+      eventsList.add(event_);
     }
-    return events;
+    Map<int?, List<Event_>> eventsGroupedByYear = groupBy(eventsList, (Event_ event_) => event_.startDate?.year);
+
+    return eventsGroupedByYear;
   }
 }

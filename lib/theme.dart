@@ -28,6 +28,11 @@ class Theme_ {
       fontWeight: FontWeight.w600,
       color: Colors.white,
     ),
+    headline5: GoogleFonts.openSans(
+      fontSize: 17.0,
+      fontWeight: FontWeight.w600,
+      color: Colors.black,
+    ),
     headline6: GoogleFonts.openSans(
       fontSize: 20.0,
       fontWeight: FontWeight.w600,
@@ -53,6 +58,11 @@ class Theme_ {
     ),
     headline3: GoogleFonts.openSans(
       fontSize: 16.0,
+      fontWeight: FontWeight.w600,
+      color: Colors.white,
+    ),
+    headline4: GoogleFonts.openSans(
+      fontSize: 21.0,
       fontWeight: FontWeight.w600,
       color: Colors.white,
     ),
