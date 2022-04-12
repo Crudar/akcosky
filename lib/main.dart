@@ -4,6 +4,7 @@ import 'package:akcosky/UI/register.dart';
 import 'package:akcosky/app.dart';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/resources/AuthenticationRepository.dart';
+import 'package:akcosky/resources/EventRepository.dart';
 import 'package:akcosky/resources/UserRepository.dart';
 import 'package:flutter/material.dart';
 import 'AppSettings.dart';
@@ -14,7 +15,8 @@ import 'resources/Database.dart';
 bool debugProfileBuildsEnabled = true;
 
 void main() async{
-  runApp(App(authenticationRepository: AuthenticationRepository(), userRepository: UserRepository()));
+  runApp(App(authenticationRepository: AuthenticationRepository(), userRepository: UserRepository(),
+  eventRepository: EventRepository()));
   //runApp(const Login());
   //runApp(const MyApp());
   //runApp(const Register());
