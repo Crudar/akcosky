@@ -278,11 +278,9 @@ class Database{
         String login = element.entries.firstWhereOrNull((element) => element.key == "Meno_login")?.value.s ?? "";
         List<String> groupsGetted = element.entries.firstWhereOrNull((element) => element.key == "Skupiny")?.value.ss ?? List.empty();
 
-        UserIdentifier identifier = UserIdentifier(id: id,login: login);
-
         for(Group group in groups){
           if(groupsGetted.contains(group.id)){
-            group.users.add(identifier);
+            group.users[id] = login;
           }
         }
       });

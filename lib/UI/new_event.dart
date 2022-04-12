@@ -356,8 +356,7 @@ class _NewEvent extends State<NewEvent> {
         .getUser()
         .groups;
     Group selectedGroup = BlocProvider.of<NewEventCubit>(context).selectedGroup;
-    List<UserChip> usersFromSelectedGroup =
-        BlocProvider.of<NewEventCubit>(context).usersFromSelectedGroup;
+    Map<String, UserChip> participants = BlocProvider.of<NewEventCubit>(context).usersFromSelectedGroup;
     bool chooseAll_ = BlocProvider.of<NewEventCubit>(context).chooseAll;
 
     return Column(
@@ -375,9 +374,10 @@ class _NewEvent extends State<NewEvent> {
               child: Text("Vyber účastníkov",
                   style: Theme_.lightTextTheme.headline2)),
         selectAll(context, chooseAll_, selectedGroup.id),
-        Wrap(direction: Axis.horizontal, children: [
-          for (var i in usersFromSelectedGroup) userChip(context, i),
-        ]),
+        Wrap(direction: Axis.horizontal, children: List<Widget>.generate(participants.length, (index)
+        {
+          return userChip(context, participants.values.elementAt(index));
+        }) ),
       ],
     );
   }
@@ -393,7 +393,7 @@ class _NewEvent extends State<NewEvent> {
               backgroundColor: const Color(0xff000428),
               onPressed: () {
                 BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedUser(userChip.user);
+                    .updateSelectedUser(userChip.user.id);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     } else {
@@ -406,7 +406,7 @@ class _NewEvent extends State<NewEvent> {
               backgroundColor: Colors.white,
               onPressed: () {
                 BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedUser(userChip.user);
+                    .updateSelectedUser(userChip.user.id);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     }
@@ -423,7 +423,7 @@ class _NewEvent extends State<NewEvent> {
               backgroundColor: const Color(0xff000428),
               onPressed: () {
                 BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedGroup(group, group.users);
+                    .updateSelectedGroup(group);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     } else {
@@ -436,7 +436,7 @@ class _NewEvent extends State<NewEvent> {
               backgroundColor: Colors.white,
               onPressed: () {
                 BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedGroup(group, group.users);
+                    .updateSelectedGroup(group);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     }

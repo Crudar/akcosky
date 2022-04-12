@@ -28,7 +28,7 @@ class NewEventCubit extends Cubit<NewEventState> {
   late DateTimeRange dateRange;
 
   Group selectedGroup = Group("", "", "", "");
-  List<UserChip> usersFromSelectedGroup = List.empty(growable: true);
+  Map<String, UserChip> usersFromSelectedGroup = {};
 
   bool chooseAll = false;
 
@@ -46,37 +46,34 @@ class NewEventCubit extends Cubit<NewEventState> {
     emit(NewEventInitial());
   }
 
-  updateSelectedGroup(Group group, List<UserIdentifier> selectedUsers){
+  updateSelectedGroup(Group group){
     selectedGroup = group;
 
-    usersFromSelectedGroup.clear();
-
-    for (var element in selectedUsers) {
-      usersFromSelectedGroup.add(UserChip(false, element));
-    }
+    usersFromSelectedGroup = group.users.map((key, value) => MapEntry(key, UserChip(false, UserIdentifier(id: key, login: value))));
 
     emit(NewEventInitial());
   }
 
-  updateSelectedUser(UserIdentifier user){
-    for (var value in usersFromSelectedGroup) {
-      if(user == value.user){
-        value.selected = !value.selected;
-      }
+  updateSelectedUser(String userID){
+    UserChip? user = usersFromSelectedGroup[userID];
+
+    if(user != null) {
+      user.selected = !user.selected;
     }
+
     emit(NewEventInitial());
   }
 
   updateAllUsersInSelectedGroup(){
     chooseAll = !chooseAll;
-    for (var value in usersFromSelectedGroup) {
+    usersFromSelectedGroup.forEach((key, value) {
       if(chooseAll) {
         value.selected = true;
       }
       else{
         value.selected = false;
       }
-    }
+    });
 
     emit(NewEventInitial());
   }
@@ -159,14 +156,14 @@ class NewEventCubit extends Cubit<NewEventState> {
 
     var eventID_ = uuid.v4();
 
-    for (var element in usersFromSelectedGroup) {
-      if(element.selected == true) {
+    usersFromSelectedGroup.forEach((key, value) {
+      if(value.selected == true) {
         var reference = uuid.v4();
 
-        participantIDs.add(element.user.id);
-        votes.add(Vote(reference, element.user.id, eventID_, VoteEnum.undefined));
+        participantIDs.add(value.user.id);
+        votes.add(Vote(reference, value.user.id, eventID_, VoteEnum.undefined));
       }
-    }
+    });
 
     if(!moreDayAction){
       event_ = EventDomain(eventID_, title, description, selectedActivityTypeIcon, place,

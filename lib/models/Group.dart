@@ -5,7 +5,7 @@ class Group{
   String adminID;
   String inviteCode;
   String title;
-  late List<UserIdentifier> users = List.empty(growable: true);
+  late Map<String, String> users = {};
 
   Group(this.id, this.adminID, this.inviteCode, this.title);
 }
