@@ -1,5 +1,7 @@
+import 'package:akcosky/UI/event_detail.dart';
 import 'package:akcosky/UI/groups.dart';
 import 'package:akcosky/UI/new_event.dart';
+import 'package:akcosky/models/Event_.dart';
 import 'package:akcosky/resources/AuthenticationRepository.dart';
 import 'package:akcosky/resources/EventRepository.dart';
 import 'package:akcosky/resources/RegisterRepository.dart';
@@ -91,8 +93,13 @@ class _AppViewState extends State<AppView> {
           case '/newevent':
             return MaterialPageRoute(
                 builder: (context){
-
               return NewEvent(eventRepository: arguments as EventRepository);
+            }
+          );
+          case '/detail':
+            return MaterialPageRoute(
+                builder: (context){
+              return EventDetail(event: arguments as Event_);
             }
           );
           default:

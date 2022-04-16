@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/events/events_cubit.dart';
-import '../models/Domain/EventDomain.dart';
 import '../theme.dart';
 import 'package:timelines/timelines.dart';
 
@@ -216,97 +215,6 @@ class MainUIState extends State<MainUIView> {
   }
 
   Widget listOfEvents(Map<int?, List<Event_>>? events) {
-    /*return ListView.builder(
-      itemBuilder: (BuildContext context, index) {
-        final Event_ currentEvent = events[index];
-
-        return Card(
-              color: const Color(0xff000000),
-              child: InkWell(
-                splashColor: const Color(0xff000000),
-                onTap: () {
-                  debugPrint('Card tapped.');
-                },
-                child: Wrap(children: [
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                      children: [
-                        Container(
-                          //child: Image.asset(currentEvent.type)
-                          height: 70,
-                          width: 70,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage(currentEvent.type),
-                            ),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(8.0)),
-                            color: Colors.white,
-                          ),
-                        ),
-                        Padding(
-                            padding: const EdgeInsets.only(left: 10, top: 5),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(currentEvent.name,
-                                    style: Theme_.lightTextTheme.headline6),
-                                const SizedBox(height: 10),
-                                Row(children: [
-                                  const Icon(FontAwesomeIcons.mapMarkerAlt,
-                                      color: Colors.white),
-                                  const SizedBox(width: 5),
-                                  Text(currentEvent.place,
-                                      style: Theme_.lightTextTheme.headline3),
-                                  const SizedBox(width: 5),
-                                  const Icon(FontAwesomeIcons.userAlt,
-                                      color: Colors.white),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                      currentEvent
-                                              .comingParticipants()
-                                              .toString() +
-                                          "/" +
-                                          currentEvent.votes.length.toString(),
-                                      style: Theme_.lightTextTheme.headline3)
-                                ]),
-                              ],
-                            )),
-                        Spacer(),
-                        Container(
-                          //child: Image.asset(currentEvent.type)
-                          height: 70,
-                          width: 70,
-                          decoration: const BoxDecoration(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(8.0)),
-                            color: Colors.white,
-                          ),
-                          child: Column(
-                            children: [
-                              Text(currentEvent.startDate?.day.toString() ?? "",
-                                  style: Theme_.lightTextTheme.headline5),
-                              Text(currentEvent.getMonth3Letters(),
-                                  style: Theme_.lightTextTheme.headline5),
-                              Text(currentEvent.getTime(),
-                                  style: Theme_.lightTextTheme.headline5),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ]),
-              ),
-            ));
-      },
-      itemCount: events.length,
-      shrinkWrap: true,
-      padding: EdgeInsets.all(5),
-      scrollDirection: Axis.vertical,
-    );*/
     List<Widget> list = List.empty(growable: true);
 
     if (events != null) {
@@ -339,7 +247,8 @@ class MainUIState extends State<MainUIView> {
             child: InkWell(
               splashColor: const Color(0xff000000),
               onTap: () {
-                debugPrint('Card tapped.');
+                Navigator.pushNamed(
+                    context, '/detail', arguments: currentEvent);
               },
               child: Column(children: [
                 Padding(
@@ -350,14 +259,16 @@ class MainUIState extends State<MainUIView> {
                         //child: Image.asset(currentEvent.type)
                         height: 70,
                         width: 70,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage(currentEvent.type),
-                          ),
+                        decoration: const BoxDecoration(
                           borderRadius:
-                              const BorderRadius.all(Radius.circular(8.0)),
+                              BorderRadius.all(Radius.circular(8.0)),
                           color: Colors.white,
                         ),
+                        child: Center(
+                          child: Image.asset("assets/icons/activityTypes/" + currentEvent.type + ".png",
+                              width: 55,
+                              height: 55),
+                        )
                       ),
                       Expanded(child: Padding(
                           padding: const EdgeInsets.only(left: 10, top: 5),

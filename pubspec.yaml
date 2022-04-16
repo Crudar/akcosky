@@ -88,6 +88,18 @@ flutter:
     - assets/icons/activityTypes/game-controller.png
     - assets/icons/activityTypes/hiking.png
     - assets/icons/activityTypes/track-bicycle.png
+
+    - assets/icons/activityHeaders/airplane.jpg
+    - assets/icons/activityHeaders/badminton.jpg
+    - assets/icons/activityHeaders/beer.jpg
+    - assets/icons/activityHeaders/billiard.jpg
+    - assets/icons/activityHeaders/bowling.jpg
+    - assets/icons/activityHeaders/burger.jpg
+    - assets/icons/activityHeaders/clapperboard.jpg
+    - assets/icons/activityHeaders/dumbbell.jpg
+    - assets/icons/activityHeaders/game-controller.jpg
+    - assets/icons/activityHeaders/hiking.jpg
+    - assets/icons/activityHeaders/track-bicycle.jpg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
