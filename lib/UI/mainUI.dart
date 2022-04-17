@@ -1,59 +1,36 @@
-import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
-import 'package:akcosky/models/Event_.dart';
-import 'package:akcosky/resources/EventRepository.dart';
+import 'package:akcosky/UI/events_list.dart';
+import 'package:akcosky/UI/new_event.dart';
+import 'package:akcosky/cubit/mainUI/main_ui_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+<<<<<<< HEAD
 import '../cubit/events/events_cubit.dart';
 import '../theme.dart';
 import 'package:timelines/timelines.dart';
+=======
+>>>>>>> 4cfecff8aa4e62e2f4e54259a7a9f977608afe93
 
-class MainUI extends StatelessWidget {
-  EventRepository eventRepository = EventRepository();
+import 'groups.dart';
 
-  @override
-  Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-        value: eventRepository,
-        child: BlocProvider(
-          create: (context) => EventsCubit(eventRepository: eventRepository),
-          child: MainUIView(),
-        ));
-  }
-}
-
-class MainUIView extends StatefulWidget {
-  const MainUIView({Key? key}) : super(key: key);
+class MainUI extends StatefulWidget {
+  const MainUI({Key? key}) : super(key: key);
 
   @override
-  State<MainUIView> createState() => MainUIState();
+  State<MainUI> createState() => _MainUI();
 }
 
-class MainUIState extends State<MainUIView> {
-  bool menuVisible = false;
-
-  showMenu() {
-    setState(() {
-      menuVisible = !menuVisible;
-    });
-  }
-
+class _MainUI extends State<MainUI> {
   @override
   Widget build(context) {
-    EventRepository eventRepository =
-        BlocProvider.of<EventsCubit>(context).eventRepository;
-    String userID = BlocProvider.of<AuthenticationCubit>(context)
-        .userRepository
-        .getUser()
-        .id;
+    return Scaffold(
+        resizeToAvoidBottomInset: false,
+        bottomNavigationBar:
+            BlocBuilder<MainUiCubit, MainUiState>(builder: (context, state) {
+          state as MainUiStateNavigate;
 
-    return FutureBuilder(
-      future: _getEventForUser(eventRepository, userID),
-      builder: (BuildContext context,
-          AsyncSnapshot<Map<int?, List<Event_>>> events) {
-        return Scaffold(
-            resizeToAvoidBottomInset: false,
-            bottomNavigationBar: BottomNavigationBar(
+          return BottomNavigationBar(
+              currentIndex: state.index,
               backgroundColor: Colors.black,
               selectedItemColor: Colors.greenAccent,
               unselectedItemColor: Colors.grey,
@@ -72,14 +49,26 @@ class MainUIState extends State<MainUIView> {
                   label: 'Skupiny',
                 ),
               ],
-            ),
-            body: SingleChildScrollView(
-              child: Container(
+              onTap: (index) {
+                if (index == 0) {
+                  BlocProvider.of<MainUiCubit>(context)
+                      .getNavBarItem(NavbarItem.akcie);
+                } else if (index == 1) {
+                  BlocProvider.of<MainUiCubit>(context)
+                      .getNavBarItem(NavbarItem.vytvor_akciu);
+                } else if (index == 2) {
+                  BlocProvider.of<MainUiCubit>(context)
+                      .getNavBarItem(NavbarItem.skupiny);
+                }
+              });
+        }),
+        body: Container(
                 decoration: const BoxDecoration(
                     gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: <Color>[Color(0xff240b36), Color(0xffc31432)])),
+<<<<<<< HEAD
                 child: SafeArea(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -332,5 +321,20 @@ class MainUIState extends State<MainUIView> {
         await eventRepository.getEventsForUser(userID);
 
     return events;
+=======
+                child: BlocBuilder<MainUiCubit, MainUiState>(
+                    builder: (context, state) {
+                  state as MainUiStateNavigate;
+
+                  if (state.navbarItem == NavbarItem.akcie) {
+                    return EventsList();
+                  } else if (state.navbarItem == NavbarItem.vytvor_akciu) {
+                    return const NewEvent();
+                  } else if (state.navbarItem == NavbarItem.skupiny) {
+                    return const Groups();
+                  }
+                  return Container();
+                })));
+>>>>>>> 4cfecff8aa4e62e2f4e54259a7a9f977608afe93
   }
 }

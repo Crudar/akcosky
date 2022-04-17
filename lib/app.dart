@@ -16,19 +16,34 @@ import 'UI/register.dart';
 import 'cubit/authentication/authentication_cubit.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'cubit/mainUI/main_ui_cubit.dart';
+
 class App extends StatelessWidget{
-  const App({Key? key, required this.authenticationRepository,required this.userRepository}) : super(key: key);
+  const App({Key? key, required this.authenticationRepository,required this.userRepository,
+    required this.eventRepository}) : super(key: key);
 
   final AuthenticationRepository authenticationRepository;
   final UserRepository userRepository;
+  final EventRepository eventRepository;
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-        value: authenticationRepository,
-        child: BlocProvider(
-          create: (context) => AuthenticationCubit(authenticationRepository: authenticationRepository,
-            userRepository: userRepository,),
+    return MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider.value(value: authenticationRepository),
+          RepositoryProvider.value(value: eventRepository),
+        ],
+        child: MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => AuthenticationCubit(authenticationRepository: authenticationRepository,
+            userRepository: userRepository)
+              )
+              ,
+              BlocProvider(
+                create: (context) => MainUiCubit(),
+              )
+              ],
           child: AppView(),
       )
     );
@@ -93,7 +108,12 @@ class _AppViewState extends State<AppView> {
           case '/newevent':
             return MaterialPageRoute(
                 builder: (context){
+<<<<<<< HEAD
               return NewEvent(eventRepository: arguments as EventRepository);
+=======
+
+              return NewEvent();
+>>>>>>> 4cfecff8aa4e62e2f4e54259a7a9f977608afe93
             }
           );
           case '/detail':

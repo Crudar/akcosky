@@ -26,20 +26,7 @@ class _Groups extends State<Groups>{
 
     return BlocProvider(
       create: (context) => GroupsCubit(GroupsRepository(), _userRepository),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Container(
-          decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: <Color>[
-              Color(0xff240b36),
-              Color(0xffc31432)
-              ]
-            )
-          ),
-          child: BlocConsumer<GroupsCubit, GroupsState>(
+      child: BlocConsumer<GroupsCubit, GroupsState>(
             listener: (context, state){
               if (state is GroupsStatusMessage){
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -52,8 +39,6 @@ class _Groups extends State<Groups>{
               return initialGroupsPage(_userRepository.getUser().groups);
             }
           ),
-        )
-      )
     );
   }
 

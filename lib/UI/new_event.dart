@@ -15,8 +15,7 @@ import '../models/Group.dart';
 import '../theme.dart';
 
 class NewEvent extends StatefulWidget {
-  final EventRepository eventRepository;
-  const NewEvent({Key? key, required this.eventRepository}) : super(key: key);
+  const NewEvent({Key? key}) : super(key: key);
 
   @override
   State<NewEvent> createState() => _NewEvent();
@@ -32,38 +31,26 @@ class _NewEvent extends State<NewEvent> {
 
   @override
   Widget build(BuildContext context) {
-    EventRepository eventRepository = widget.eventRepository;
+    EventRepository eventRepository = RepositoryProvider.of<EventRepository>(context);
 
     return BlocProvider(
-        create: (context) => NewEventCubit(eventRepository),
-        child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            body: Container(
-              key: UniqueKey(),
-              decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[Color(0xff240b36), Color(0xffc31432)])),
-              child: BlocConsumer<NewEventCubit, NewEventState>(
-                  listener: (context, state) {
-                    if (state is NewEventFinish) {
-                      Navigator.pop(context, true);
-                    }
-                    else if (state is NewEventError) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
-                    }
-                  },
-                  builder: (context, state) {
-                    return initialNewEventPage(context);
-                  }),
-            )));
+      create: (context) => NewEventCubit(eventRepository),
+      child: BlocConsumer<NewEventCubit, NewEventState>(
+          listener: (context, state) {
+        if (state is NewEventFinish) {
+          Navigator.pop(context, true);
+        } else if (state is NewEventError) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(state.message)));
+        }
+      }, builder: (context, state) {
+        return initialNewEventPage(context);
+      }),
+    );
   }
 
   Widget initialNewEventPage(BuildContext context) {
-    int currentStep_ = BlocProvider
-        .of<NewEventCubit>(context)
-        .stepperState;
+    int currentStep_ = BlocProvider.of<NewEventCubit>(context).stepperState;
 
     return FutureBuilder(
         future: _initImages(),
@@ -91,7 +78,7 @@ class _NewEvent extends State<NewEvent> {
                                   padding: const EdgeInsets.all(7),
                                   primary: Colors.white, // <-- Button color
                                   onPrimary:
-                                  Color(0xff36454F), // <-- Splash color
+                                      Color(0xff36454F), // <-- Splash color
                                 )),
                           ),
                         const SizedBox(width: 15),
@@ -106,7 +93,7 @@ class _NewEvent extends State<NewEvent> {
                                       borderRadius: BorderRadius.circular(5)),
                                   padding: const EdgeInsets.all(7),
                                   primary:
-                                  Color(0xff000428), // <-- Button color
+                                      Color(0xff000428), // <-- Button color
                                   onPrimary: Colors.white, // <-- Splash color
                                 ))),
                       ],
@@ -114,15 +101,21 @@ class _NewEvent extends State<NewEvent> {
                   );
                 },
                 onStepContinue: () {
-                  if(currentStep_ != 2){
+                  if (currentStep_ != 2) {
                     BlocProvider.of<NewEventCubit>(context)
                         .updateStepperState(currentStep_ += 1);
-                  }
-                  else{
-                    BlocProvider.of<NewEventCubit>(context)
-                        .finishCreation(eventTitle.text, eventDescription.text, eventPlace.text, eventTransport.text,
-                        eventAccommodation.text, eventEstimatedPrice.text, BlocProvider.of<AuthenticationCubit>(context)
-                            .userRepository.getUser().id);
+                  } else {
+                    BlocProvider.of<NewEventCubit>(context).finishCreation(
+                        eventTitle.text,
+                        eventDescription.text,
+                        eventPlace.text,
+                        eventTransport.text,
+                        eventAccommodation.text,
+                        eventEstimatedPrice.text,
+                        BlocProvider.of<AuthenticationCubit>(context)
+                            .userRepository
+                            .getUser()
+                            .id);
                   }
                 },
                 onStepCancel: () {
@@ -167,16 +160,15 @@ class _NewEvent extends State<NewEvent> {
         });
   }
 
-  Widget basicInformation(context,
-      List<String> actionTypes,) {
-    bool isChecked = BlocProvider
-        .of<NewEventCubit>(context)
-        .moreDayAction;
-    String dateAndTime = BlocProvider
-        .of<NewEventCubit>(context)
-        .dateText;
+  Widget basicInformation(
+    context,
+    List<String> actionTypes,
+  ) {
+    bool isChecked = BlocProvider.of<NewEventCubit>(context).moreDayAction;
+    String dateAndTime = BlocProvider.of<NewEventCubit>(context).dateText;
 
-    return Column(children: <Widget>[
+    return Column(
+        children: <Widget>[
       Text(
         'Názov akcie',
         style: Theme_.lightTextTheme.headline2,
@@ -238,7 +230,7 @@ class _NewEvent extends State<NewEvent> {
           decoration: const InputDecoration(
               hintText: 'Zadaj miesto konania akcie',
               prefixIcon:
-              Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.white)),
+                  Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.white)),
           //TODO - miesto na výber z google máp
           style: Theme_.lightTextTheme.headline3,
         ),
@@ -270,32 +262,29 @@ class _NewEvent extends State<NewEvent> {
             onTap: () async {
               if (!isChecked) {
                 await showDatePicker(
-                    context: context,
-                    locale: const Locale("sk", "SK"),
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2025),
-                    helpText: 'Vyber dátum a čas')
-                    .then((value) =>
-                    BlocProvider.of<NewEventCubit>(context)
+                        context: context,
+                        locale: const Locale("sk", "SK"),
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2025),
+                        helpText: 'Vyber dátum a čas')
+                    .then((value) => BlocProvider.of<NewEventCubit>(context)
                         .updateDate(value));
 
                 await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.now(),
-                    initialEntryMode: TimePickerEntryMode.dial)
-                    .then((value) =>
-                    BlocProvider.of<NewEventCubit>(context)
+                        context: context,
+                        initialTime: TimeOfDay.now(),
+                        initialEntryMode: TimePickerEntryMode.dial)
+                    .then((value) => BlocProvider.of<NewEventCubit>(context)
                         .updateTime(value));
               } else {
                 await showDateRangePicker(
-                    context: context,
-                    locale: const Locale("sk", "SK"),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2025),
-                    helpText: 'Vyber dátum a čas')
-                    .then((value) =>
-                    BlocProvider.of<NewEventCubit>(context)
+                        context: context,
+                        locale: const Locale("sk", "SK"),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2025),
+                        helpText: 'Vyber dátum a čas')
+                    .then((value) => BlocProvider.of<NewEventCubit>(context)
                         .updateDateRange(value));
               }
             },
@@ -319,9 +308,7 @@ class _NewEvent extends State<NewEvent> {
 
   Widget listOfActivityTypes(context, List<String> types) {
     String currentSelectedActivityTypeIcon =
-        BlocProvider
-            .of<NewEventCubit>(context)
-            .selectedActivityTypeIcon;
+        BlocProvider.of<NewEventCubit>(context).selectedActivityTypeIcon;
 
     return ListView.separated(
         itemBuilder: (BuildContext context, index) {
@@ -358,45 +345,39 @@ class _NewEvent extends State<NewEvent> {
         shrinkWrap: true,
         padding: EdgeInsets.all(5),
         scrollDirection: Axis.horizontal,
-        separatorBuilder: (context, index) =>
-        const SizedBox(
-          width: 15,
-        ));
+        separatorBuilder: (context, index) => const SizedBox(
+              width: 15,
+            ));
   }
 
   Widget participants(BuildContext context) {
-    List<Group> groups = BlocProvider
-        .of<AuthenticationCubit>(context)
+    List<Group> groups = BlocProvider.of<AuthenticationCubit>(context)
         .userRepository
         .getUser()
         .groups;
-    Group selectedGroup = BlocProvider
-        .of<NewEventCubit>(context)
-        .selectedGroup;
-    List<UserChip> usersFromSelectedGroup =
-        BlocProvider
-            .of<NewEventCubit>(context)
-            .usersFromSelectedGroup;
-    bool chooseAll_ = BlocProvider
-        .of<NewEventCubit>(context)
-        .chooseAll;
+    Group selectedGroup = BlocProvider.of<NewEventCubit>(context).selectedGroup;
+    Map<String, UserChip> participants = BlocProvider.of<NewEventCubit>(context).usersFromSelectedGroup;
+    bool chooseAll_ = BlocProvider.of<NewEventCubit>(context).chooseAll;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Center(child: Text(
-            "Vyber skupinu", style: Theme_.lightTextTheme.headline2)),
+        Center(
+            child:
+                Text("Vyber skupinu", style: Theme_.lightTextTheme.headline2)),
         Wrap(direction: Axis.horizontal, children: [
           for (var i in groups) groupChip(context, i, selectedGroup),
         ]),
         if (selectedGroup.id != "")
-          Center(child: Text(
-              "Vyber účastníkov", style: Theme_.lightTextTheme.headline2)),
+          Center(
+              child: Text("Vyber účastníkov",
+                  style: Theme_.lightTextTheme.headline2)),
         selectAll(context, chooseAll_, selectedGroup.id),
-        Wrap(direction: Axis.horizontal, children: [
-          for (var i in usersFromSelectedGroup) userChip(context, i),
-        ]),
+        Wrap(direction: Axis.horizontal, children: List<Widget>.generate(participants.length, (index)
+        {
+          return userChip(context, participants.values.elementAt(index));
+        }) ),
       ],
     );
   }
@@ -412,7 +393,7 @@ class _NewEvent extends State<NewEvent> {
               backgroundColor: const Color(0xff000428),
               onPressed: () {
                 BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedUser(userChip.user);
+                    .updateSelectedUser(userChip.user.id);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     } else {
@@ -425,7 +406,7 @@ class _NewEvent extends State<NewEvent> {
               backgroundColor: Colors.white,
               onPressed: () {
                 BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedUser(userChip.user);
+                    .updateSelectedUser(userChip.user.id);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     }
@@ -442,7 +423,7 @@ class _NewEvent extends State<NewEvent> {
               backgroundColor: const Color(0xff000428),
               onPressed: () {
                 BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedGroup(group, group.users);
+                    .updateSelectedGroup(group);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     } else {
@@ -455,7 +436,7 @@ class _NewEvent extends State<NewEvent> {
               backgroundColor: Colors.white,
               onPressed: () {
                 BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedGroup(group, group.users);
+                    .updateSelectedGroup(group);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     }
@@ -502,60 +483,59 @@ class _NewEvent extends State<NewEvent> {
   Widget additionalInformation() {
     return Column(children: <Widget>[
       Text(
-      'Doprava',
-      style: Theme_.lightTextTheme.headline2,
-    ),
-    Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: TextField(
-      controller: eventTransport,
-      keyboardType: TextInputType.text,
-      decoration: const InputDecoration(
-      hintText: 'Vlož link na dopravu',
-      prefixIcon: Icon(FontAwesomeIcons.plane, color: Colors.white)),
-      style: Theme_.lightTextTheme.headline3,
-      ),
-    ),
-    Padding(
-      padding: EdgeInsets.only(top: 5),
-      child: Text(
-      'Ubytovanie',
+        'Doprava',
         style: Theme_.lightTextTheme.headline2,
       ),
-    ),
-    Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: TextField(
-      controller: eventAccommodation,
-      keyboardType: TextInputType.multiline,
-      maxLines: null,
-      decoration: const InputDecoration(
-      hintText: 'Vlož link na ubytovanie',
-      prefixIcon: Icon(FontAwesomeIcons.hotel, color: Colors.white)),
-      style: Theme_.lightTextTheme.headline3,
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        child: TextField(
+          controller: eventTransport,
+          keyboardType: TextInputType.text,
+          decoration: const InputDecoration(
+              hintText: 'Vlož link na dopravu',
+              prefixIcon: Icon(FontAwesomeIcons.plane, color: Colors.white)),
+          style: Theme_.lightTextTheme.headline3,
+        ),
       ),
-    ),
-    Padding(
-      padding: EdgeInsets.only(top: 5),
-      child: Text(
-        'Odhadovaná cena',
-        style: Theme_.lightTextTheme.headline2,
+      Padding(
+        padding: EdgeInsets.only(top: 5),
+        child: Text(
+          'Ubytovanie',
+          style: Theme_.lightTextTheme.headline2,
         ),
       ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
         child: TextField(
-        controller: eventEstimatedPrice,
-        keyboardType: TextInputType.multiline,
-        maxLines: null,
-        decoration: const InputDecoration(
-        hintText: 'Zadaj odhadovanú cenu',
-        prefixIcon: Icon(FontAwesomeIcons.euroSign, color: Colors.white)),
-        style: Theme_.lightTextTheme.headline3,
+          controller: eventAccommodation,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          decoration: const InputDecoration(
+              hintText: 'Vlož link na ubytovanie',
+              prefixIcon: Icon(FontAwesomeIcons.hotel, color: Colors.white)),
+          style: Theme_.lightTextTheme.headline3,
+        ),
       ),
-    ),
-    ]
-  );
+      Padding(
+        padding: EdgeInsets.only(top: 5),
+        child: Text(
+          'Odhadovaná cena',
+          style: Theme_.lightTextTheme.headline2,
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        child: TextField(
+          controller: eventEstimatedPrice,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          decoration: const InputDecoration(
+              hintText: 'Zadaj odhadovanú cenu',
+              prefixIcon: Icon(FontAwesomeIcons.euroSign, color: Colors.white)),
+          style: Theme_.lightTextTheme.headline3,
+        ),
+      ),
+    ]);
   }
 
   Future<List<String>> _initImages() async {
