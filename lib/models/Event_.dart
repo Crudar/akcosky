@@ -32,6 +32,16 @@ class Event_{
     return coming;
   }
 
+  List<int> participantsVotes(){
+    List<int> counts = List.empty(growable: true);
+    
+    counts.add(votes.where((element) => element.vote == VoteEnum.yes).toList().length);
+    counts.add(votes.where((element) => element.vote == VoteEnum.no).toList().length);
+    counts.add(votes.where((element) => element.vote == VoteEnum.undefined).toList().length);
+
+    return counts;
+  }
+
   String getDate(){
     if(endDate == null && startDate != null){
       var formatterDate = DateFormat('dd');

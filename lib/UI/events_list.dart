@@ -308,7 +308,9 @@ class EventsListState extends State<EventsListView> {
             child: InkWell(
                 splashColor: const Color(0xff000000),
                 onTap: () {
-                  debugPrint('Card tapped.');
+                  Navigator.pushNamed(
+                      context, '/detail',
+                      arguments: currentEvent);
                 },
                 child: Column(children: [
                   Padding(
@@ -316,16 +318,16 @@ class EventsListState extends State<EventsListView> {
                     child: Row(
                       children: [
                         Container(
-                          //child: Image.asset(currentEvent.type)
                           height: 70,
                           width: 70,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage(currentEvent.type),
-                            ),
+                          decoration: const BoxDecoration(
                             borderRadius:
-                            const BorderRadius.all(Radius.circular(8.0)),
+                            BorderRadius.all(Radius.circular(8.0)),
                             color: Colors.white,
+                          ),
+                          child: Center(child: Image.asset("assets/icons/activityTypes/" + currentEvent.type + ".png",
+                            width: 55,
+                            height: 55)
                           ),
                         ),
                         Expanded(child: Padding(
@@ -368,7 +370,9 @@ class EventsListState extends State<EventsListView> {
                             ),
                             child: Center(
                                 child: Text(currentEvent.getDate(),
-                                    style: Theme_.lightTextTheme.headline5,
+                                    style: Theme_.lightTextTheme.headline5?.copyWith(
+                                      color: Colors.black
+                                    ),
                                     textAlign: TextAlign.center))),
                       ],
                     ),

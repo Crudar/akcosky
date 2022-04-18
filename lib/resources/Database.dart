@@ -445,7 +445,7 @@ class Database{
         String transport = element.entries.firstWhereOrNull((element) => element.key == "Transport")?.value.s ?? "";
         String accommodation = element.entries.firstWhereOrNull((element) => element.key == "Ubytovanie")?.value.s ?? "";
         String estimatedAmount = element.entries.firstWhereOrNull((element) => element.key == "OdhadovanaCena")?.value.n ?? "";
-        String createdBy = element.entries.firstWhereOrNull((element) => element.key == "Vytvoril")?.value.n ?? "";
+        String createdBy = element.entries.firstWhereOrNull((element) => element.key == "Vytvoril")?.value.s ?? "";
 
         var estimatedAmountDouble = double.parse(estimatedAmount);
         assert(estimatedAmountDouble is double);
