@@ -44,11 +44,15 @@ class Event_{
 
   String getDate(){
     if(endDate == null && startDate != null){
+      List months = ['Január','Február','Marec','Apríl','Máj','Jún','Júl','August','September','Október','November','December'];
+
       var formatterDate = DateFormat('dd');
-      var formatterMonth = DateFormat('MMMM');
       var formatterTime = DateFormat.Hm();
 
-      return formatterDate.format(startDate!) + "\n" + formatterMonth.format(startDate!).substring(0, 3) + "\n" + formatterTime.format(startDate!);
+      int? month = startDate?.month;
+      month = month! - 1;
+
+      return formatterDate.format(startDate!) + "\n" + months[month].substring(0, 3) + "\n" + formatterTime.format(startDate!);
     }
     else{
       var formatterDate = DateFormat('dd.MM.');

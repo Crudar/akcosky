@@ -36,6 +36,7 @@ dependencies:
     sdk: flutter
   timelines: ^0.1.0
   equatable: ^2.0.0
+  url_launcher: ^6.0.20
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -81,9 +82,15 @@ flutter:
     - assets/icons/calendar.png
     - assets/icons/map-marker.png
     - assets/icons/user-solid.png
+    - assets/icons/plane.png
+    - assets/icons/hotel.png
+    - assets/icons/euro-sign.png
+
     - assets/icons/correct.png
     - assets/icons/failed.png
     - assets/icons/question.png
+
+
     - assets/icons/activityTypes/airplane.png
     - assets/icons/activityTypes/badminton.png
     - assets/icons/activityTypes/beer.png

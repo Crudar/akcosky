@@ -7,11 +7,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../models/Vote.dart';
 import '../models/VoteEnum.dart';
-import '../models/VoteEnum.dart';
-import '../models/VoteEnum.dart';
 import '../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:akcosky/models/VoteEnum.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EventDetail extends StatefulWidget {
   const EventDetail({Key? key, required this.event}) : super(key: key);
@@ -52,13 +50,15 @@ class EventDetailState extends State<EventDetail> {
               Positioned(
                 left: 15,
                 top: 15,
-                child: IconButton(onPressed: () {}, icon: const Icon(FontAwesomeIcons.arrowLeft, color: Colors.white, size: 30)),
+                child: IconButton(onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(FontAwesomeIcons.arrowLeft, color: Colors.white, size: 30)),
               ),
               Positioned.fill(
                   top: 270,
                   child: Container(
                       width: MediaQuery.of(context).size.width,
-                      height: 500,
                       decoration: const BoxDecoration(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(30),
@@ -67,9 +67,11 @@ class EventDetailState extends State<EventDetail> {
                           gradient: LinearGradient(
                               begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: <Color>[Color(0xff4f0c2f), Color(0xffc31432)])),
                       child: Padding(
-                        padding: const EdgeInsets.all(15),
+                        padding: const EdgeInsets.only(left: 15, right: 15, top: 15, bottom: 85),
                         child: SingleChildScrollView(child: eventInfo(context, selectedEvent)),
-                      ))),
+                      )
+                  )
+              ),
               Positioned(bottom: 0, child: voting(context))
             ],
           ))),
@@ -88,11 +90,11 @@ Widget eventInfo(BuildContext context, Event_ _selectedEvent) {
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Expanded(
             child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(selectedEvent.name, style: Theme_.lightTextTheme.headline2),
-            Text("Vytvoril: " + selectedEvent.createdBy, style: Theme_.lightTextTheme.headline3),
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(selectedEvent.name, style: Theme_.lightTextTheme.headline2),
+                Text("Vytvoril: " + selectedEvent.createdBy, style: Theme_.lightTextTheme.headline3),
           ],
         )),
         Container(
@@ -136,8 +138,20 @@ Widget eventInfo(BuildContext context, Event_ _selectedEvent) {
           Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: dateInfo(context, selectedEvent))
         ],
       ),
-      const SizedBox(height: 15),
-      Row(
+      oneRow("assets/icons/map-marker.png", selectedEvent.place),
+      selectedEvent.transport != "" ? oneRow("assets/icons/plane.png", selectedEvent.transport) : const SizedBox.shrink(),
+      selectedEvent.accommodation != "" ? oneRow("assets/icons/hotel.png", selectedEvent.accommodation) : const SizedBox.shrink(),
+      selectedEvent.estimatedAmount != 0.0 ? oneRow("assets/icons/euro-sign.png", selectedEvent.estimatedAmount.toString()) : const SizedBox.shrink(),
+    ],
+  );
+}
+
+Widget oneRow(String icon, String input){
+  bool isUrl = Uri.parse(input).host == '' ? false : true;
+
+  if(isUrl) {
+    return Padding(padding: const EdgeInsets.only(top: 15),
+      child: Row(
         children: [
           Container(
               height: 50,
@@ -147,14 +161,52 @@ Widget eventInfo(BuildContext context, Event_ _selectedEvent) {
                 color: Colors.white,
               ),
               child: Center(
-                child: Image.asset("assets/icons/map-marker.png", width: 35, height: 35),
+                child: Image.asset(icon, width: 35, height: 35),
               )),
           const SizedBox(width: 15),
-          Text(selectedEvent.place, style: Theme_.lightTextTheme.headline5)
+          Expanded(child: RichText(
+              text: TextSpan(
+                  text: Uri.parse(input).host,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: Theme_.lightTextTheme.headline5?.fontSize,
+                    fontWeight: Theme_.lightTextTheme.headline5?.fontWeight,
+                    decoration: TextDecoration.underline
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      _launchURL(input);
+                    }
+              )
+          ))
         ],
       )
-    ],
-  );
+    );
+  }
+  else{
+    return Padding(padding: const EdgeInsets.only(top: 15),
+        child: Row(
+          children: [
+            Container(
+                height: 50,
+                width: 50,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                  color: Colors.white,
+                ),
+                child: Center(
+                  child: Image.asset(icon, width: 35, height: 35),
+                )),
+            const SizedBox(width: 15),
+            Expanded(child: Text(input, style: Theme_.lightTextTheme.headline5))
+          ],
+        )
+    );
+  }
+}
+
+void _launchURL(String _url) async {
+  if (!await launch(_url)) {}
 }
 
 Widget participantsInitial(BuildContext context, Event_ selectedEvent){
