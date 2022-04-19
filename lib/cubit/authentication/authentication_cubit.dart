@@ -4,7 +4,7 @@ import 'package:akcosky/resources/UserRepository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:conduit_password_hash/pbkdf2.dart';
-import '../../models/Domain/UserDomain.dart';
+import '../../models/Database/UserDatabase.dart';
 
 part 'authentication_state.dart';
 
@@ -15,7 +15,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
   final UserRepository userRepository;
 
   void login(String username, String password) async{
-    UserDomain? userDomain = await authenticationRepository.logIn(username: username, password: password);
+    UserDatabase? userDomain = await authenticationRepository.logIn(username: username, password: password);
 
     var generator = PBKDF2();
 

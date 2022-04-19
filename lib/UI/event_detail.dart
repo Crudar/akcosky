@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import '../models/Database/VoteDatabase.dart';
 import '../models/Vote.dart';
 import '../models/VoteEnum.dart';
 import '../theme.dart';
@@ -231,7 +232,7 @@ Widget userChip(BuildContext context, Vote vote) {
         label: Wrap(alignment: WrapAlignment.center,
             children: [
               Text(
-                vote.userID,
+                vote.username,
                 style: const TextStyle(color: Colors.black),
               ),
               const Text(" "),

@@ -1,4 +1,4 @@
-import 'package:akcosky/models/Domain/EventDomain.dart';
+import 'package:akcosky/models/Database/EventDatabase.dart';
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/UserChip.dart';
 import 'package:akcosky/models/UserIdentifier.dart';
@@ -12,7 +12,7 @@ import 'package:tuple/tuple.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/Group.dart';
-import '../../models/Vote.dart';
+import '../../models/Database/VoteDatabase.dart';
 
 part 'newevent_state.dart';
 
@@ -140,7 +140,7 @@ class NewEventCubit extends Cubit<NewEventState> {
   finishCreation(String title, String description, String place, String transport, String accommodation, String estimatedPrice,
       String createdBy) async {
     double estimatedPriceDouble = 0;
-    late EventDomain event_;
+    late EventDatabase event_;
 
     if(estimatedPrice != ""){
       var estimatedPriceDouble_ = double.parse(estimatedPrice);
@@ -150,7 +150,7 @@ class NewEventCubit extends Cubit<NewEventState> {
     }
 
     List<String> participantIDs = List.empty(growable: true);
-    List<Vote> votes = List.empty(growable: true);
+    List<VoteDatabase> votes = List.empty(growable: true);
 
     var uuid = const Uuid();
 
@@ -161,18 +161,18 @@ class NewEventCubit extends Cubit<NewEventState> {
         var reference = uuid.v4();
 
         participantIDs.add(value.user.id);
-        votes.add(Vote(reference, value.user.id, eventID_, VoteEnum.undefined));
+        votes.add(VoteDatabase(reference, value.user.id, eventID_, VoteEnum.undefined));
       }
     });
 
     if(!moreDayAction){
-      event_ = EventDomain(eventID_, title, description, selectedActivityTypeIcon, place,
-        date_?.toIso8601String() ?? "", "", participantIDs, transport, accommodation, estimatedPriceDouble, createdBy);
+      event_ = EventDatabase(eventID_, title, description, selectedActivityTypeIcon, place,
+        date_?.toIso8601String() ?? "", "", participantIDs, transport, accommodation, estimatedPriceDouble, createdBy, selectedGroup.id);
     }
     else{
-      event_ = EventDomain(eventID_, title, description, selectedActivityTypeIcon, place,
+      event_ = EventDatabase(eventID_, title, description, selectedActivityTypeIcon, place,
           dateRange.start.toIso8601String(), dateRange.end.toIso8601String(), participantIDs, transport, accommodation,
-          estimatedPriceDouble, createdBy);
+          estimatedPriceDouble, createdBy, selectedGroup.id);
     }
 
     bool response = await eventRepository.createNewEvent(event_, votes);

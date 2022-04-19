@@ -1,5 +1,9 @@
-import '../models/Domain/EventDomain.dart';
+import '../Helpers/AsModel.dart';
+import '../models/Database/EventDatabase.dart';
 import '../models/Event_.dart';
+import '../models/Database/VoteDatabase.dart';
+import '../models/Group.dart';
+import '../models/User.dart';
 import '../models/Vote.dart';
 import 'Database.dart';
 import "package:collection/collection.dart";
@@ -7,7 +11,7 @@ import "package:collection/collection.dart";
 class EventRepository{
   Map<int?, List<Event_>> events = {};
 
-  Future<bool> createNewEvent(EventDomain event, List<Vote> votes) async{
+  Future<bool> createNewEvent(EventDatabase event, List<VoteDatabase> votes) async{
     Database db = await Database.create();
 
     bool response = await db.createEvent(event);
@@ -19,17 +23,17 @@ class EventRepository{
     return response;
   }
 
-  Future<Map<int?, List<Event_>>> getEventsForUser(String userID) async{
+  Future<Map<int?, List<Event_>>> getEventsForUser(User user) async{
     if(events.isEmpty){
       Database db = await Database.create();
 
-      List<EventDomain> eventsOfUser = await db.getEventsForUser(userID);
+      List<EventDatabase> eventsOfUser = await db.getEventsForUser(user.id);
 
-      List<Vote> votes =  await db.getVotesForEvents(eventsOfUser);
+      List<VoteDatabase> votesDatabase =  await db.getVotesForEvents(eventsOfUser);
 
-      Map<String, List<Vote>> votesGroupedByGroup = groupBy(votes, (Vote vote) => vote.eventID);
+      Map<String, List<VoteDatabase>> votesGroupedByGroup = groupBy(votesDatabase, (VoteDatabase vote) => vote.eventID);
 
-      Map<int?, List<Event_>> events_ = groupEventsAndVotes(eventsOfUser, votesGroupedByGroup);
+      Map<int?, List<Event_>> events_ = groupEventsAndVotes(eventsOfUser, votesGroupedByGroup, user.groups);
 
       events = events_;
 
@@ -40,11 +44,11 @@ class EventRepository{
     }
   }
 
-  Map<int?, List<Event_>> groupEventsAndVotes(List<EventDomain> eventsOfUser, Map<String, List<Vote>> votes){
+  Map<int?, List<Event_>> groupEventsAndVotes(List<EventDatabase> eventsOfUser, Map<String, List<VoteDatabase>> votes, Map<String, Group> groups){
     List<Event_> eventsList = List.empty(growable: true);
 
     for (var element in eventsOfUser) {
-      List<Vote>? votesForEvent = votes[element.ID];
+      List<VoteDatabase>? votesDatabaseForEvent = votes[element.ID];
 
       DateTime? startDate;
       DateTime? endDate;
@@ -57,8 +61,11 @@ class EventRepository{
         endDate = DateTime.parse(element.endDate);
       }
 
+      //TODO - toto mi pride velmi komplikovane - skust prist na nieco jednoduchsie
+      List<Vote> votesForEvent = voteDatabaseAsModel(votesDatabaseForEvent ?? List.empty(), groups, element.group);
+
       Event_ event_ = Event_(element.ID, element.name, element.description, element.type, element.place,
-          startDate, endDate, votesForEvent ?? List.empty(), element.transport, element.accommodation, element.estimatedAmount, element.createdBy);
+          startDate, endDate, votesForEvent, element.transport, element.accommodation, element.estimatedAmount, element.createdBy, element.group);
 
       eventsList.add(event_);
     }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/events/events_cubit.dart';
+import '../models/User.dart';
 import '../theme.dart';
 import 'package:timelines/timelines.dart';
 
@@ -41,13 +42,12 @@ class EventsListState extends State<EventsListView> {
   Widget build(context) {
     EventRepository eventRepository =
         BlocProvider.of<EventsCubit>(context).eventRepository;
-    String userID = BlocProvider.of<AuthenticationCubit>(context)
+    User user = BlocProvider.of<AuthenticationCubit>(context)
         .userRepository
-        .getUser()
-        .id;
+        .getUser();
 
     return FutureBuilder(
-      future: _getEventForUser(eventRepository, userID),
+      future: _getEventForUser(eventRepository, user),
       builder: (BuildContext context,
           AsyncSnapshot<Map<int?, List<Event_>>> events) {
         return SingleChildScrollView(
@@ -185,9 +185,9 @@ class EventsListState extends State<EventsListView> {
   }
 
   Future<Map<int?, List<Event_>>> _getEventForUser(
-      EventRepository eventRepository, String userID) async {
+      EventRepository eventRepository, User user) async {
     Map<int?, List<Event_>> events =
-    await eventRepository.getEventsForUser(userID);
+    await eventRepository.getEventsForUser(user);
 
     return events;
   }

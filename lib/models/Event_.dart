@@ -1,7 +1,5 @@
 import 'package:akcosky/models/VoteEnum.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
-
 import 'Vote.dart';
 
 class Event_{
@@ -17,9 +15,10 @@ class Event_{
   String accommodation;
   double estimatedAmount;
   String createdBy;
+  String group;
 
   Event_(this.ID, this.name, this.description, this.type, this.place, this.startDate, this.endDate, this.votes,
-      this.transport, this.accommodation, this.estimatedAmount, this.createdBy);
+      this.transport, this.accommodation, this.estimatedAmount, this.createdBy, this.group);
 
   int comingParticipants(){
     int coming = 0;

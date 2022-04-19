@@ -351,7 +351,7 @@ class _NewEvent extends State<NewEvent> {
   }
 
   Widget participants(BuildContext context) {
-    List<Group> groups = BlocProvider.of<AuthenticationCubit>(context)
+    Map<String, Group> groups = BlocProvider.of<AuthenticationCubit>(context)
         .userRepository
         .getUser()
         .groups;
@@ -366,9 +366,7 @@ class _NewEvent extends State<NewEvent> {
         Center(
             child:
                 Text("Vyber skupinu", style: Theme_.lightTextTheme.headline2)),
-        Wrap(direction: Axis.horizontal, children: [
-          for (var i in groups) groupChip(context, i, selectedGroup),
-        ]),
+        Wrap(direction: Axis.horizontal, children: returnUserChips(context, groups, selectedGroup)),
         if (selectedGroup.id != "")
           Center(
               child: Text("Vyber účastníkov",
@@ -380,6 +378,13 @@ class _NewEvent extends State<NewEvent> {
         }) ),
       ],
     );
+  }
+
+  List<Widget> returnUserChips(BuildContext context, Map<String, Group> groups, Group selectedGroup){
+    List<Widget> widgets = List.empty(growable: true);
+    groups.forEach((key, value) => widgets.add(groupChip(context, value, selectedGroup)));
+
+    return widgets;
   }
 
   Widget userChip(BuildContext context, UserChip userChip) {

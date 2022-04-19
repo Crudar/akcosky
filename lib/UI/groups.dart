@@ -42,7 +42,7 @@ class _Groups extends State<Groups>{
     );
   }
 
-  Widget initialGroupsPage(List<Group> groups){
+  Widget initialGroupsPage(Map<String, Group> groups){
     return Column(
             children: <Widget>[
               Padding(
@@ -137,10 +137,10 @@ class _Groups extends State<Groups>{
           );
   }
 
-  Widget listOfGroups(List groups){
+  Widget listOfGroups(Map<String, Group> groups){
     return ListView.builder(
-      itemBuilder: (BuildContext, index){
-        final Group currentItem = groups[index];
+      itemBuilder: (BuildContext context, index){
+        final Group currentItem = groups.values.elementAt(index);
 
         return Container(
             margin: const EdgeInsets.all(15.0),

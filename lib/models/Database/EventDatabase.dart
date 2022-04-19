@@ -1,9 +1,9 @@
 import 'package:akcosky/models/UserIdentifier.dart';
 import 'package:aws_dynamodb_api/dynamodb-2011-12-05.dart';
 
-import '../Vote.dart';
+import 'VoteDatabase.dart';
 
-class EventDomain{
+class EventDatabase{
   String ID;
   String name;
   String description;
@@ -16,8 +16,9 @@ class EventDomain{
   String accommodation;
   double estimatedAmount;
   String createdBy;
+  String group;
 
-  EventDomain(this.ID, this.name, this.description, this.type, this.place, this.startDate, this.endDate, this.participantIDs,
-      this.transport, this.accommodation, this.estimatedAmount, this.createdBy);
+  EventDatabase(this.ID, this.name, this.description, this.type, this.place, this.startDate, this.endDate, this.participantIDs,
+      this.transport, this.accommodation, this.estimatedAmount, this.createdBy, this.group);
 
 }

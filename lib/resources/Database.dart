@@ -1,9 +1,9 @@
 import 'dart:collection';
 import 'dart:core';
-import 'package:akcosky/models/Domain/EventDomain.dart';
+import 'package:akcosky/models/Database/EventDatabase.dart';
 import 'dart:io';
 import 'package:akcosky/models/User.dart';
-import 'package:akcosky/models/Domain/UserDomain.dart';
+import 'package:akcosky/models/Database/UserDatabase.dart';
 import 'package:akcosky/models/UserIdentifier.dart';
 import 'package:akcosky/models/VoteEnum.dart';
 import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
 import '../models/Group.dart';
-import '../models/Vote.dart';
+import '../models/Database/VoteDatabase.dart';
 
 class Database{
   static final Database _database = Database._internal();
@@ -72,7 +72,7 @@ class Database{
     }
   }
   
-  Future<UserDomain> getUser(String username) async{
+  Future<UserDatabase> getUser(String username) async{
     String tableName_ = "Uzivatelia";
 
     String filterExpression_ = 'Meno_login = :m';
@@ -97,16 +97,16 @@ class Database{
         groupIDs.add(element);
       });
 
-      UserDomain userDomain = UserDomain(id.toString(), username ?? "", email ?? "", passwordHash ?? "", passwordSalt ?? "", groupIDs);
+      UserDatabase userDomain = UserDatabase(id.toString(), username ?? "", email ?? "", passwordHash ?? "", passwordSalt ?? "", groupIDs);
 
       return userDomain;
     }
     else {
-      return UserDomain("", "", "", "", "", List.empty());
+      return UserDatabase("", "", "", "", "", List.empty());
     }
   }
 
-  Future<List<Group>> getGroupsByID(List<String> groupIDs) async{
+  Future<Map<String, Group>> getGroupsByID(List<String> groupIDs) async{
     if(groupIDs.isNotEmpty){
 
       String tableName_ = "SKUPINY";
@@ -127,7 +127,7 @@ class Database{
 
       BatchGetItemOutput output = await service.batchGetItem(requestItems: request);
 
-      List<Group> groups = List.empty(growable: true);
+      Map<String, Group> groups = {};
 
       if(output.responses?.isEmpty != true){
 
@@ -137,7 +137,7 @@ class Database{
           String inviteCode = element.entries.firstWhereOrNull((element) => element.key == "InviteCode")?.value.s ?? "";
           String title = element.entries.firstWhereOrNull((element) => element.key == "Názov")?.value.s ?? "";
 
-          groups.add(Group(id, adminID, inviteCode, title));
+          groups[id] = Group(id, adminID, inviteCode, title);
         });
 
         return groups;
@@ -147,7 +147,7 @@ class Database{
       }
     }
     else{
-      return List.empty();
+      return {};
     }
   }
 
@@ -195,7 +195,7 @@ class Database{
     }
   }
 
-  Future<bool> createVotes(List<Vote> votes) async {
+  Future<bool> createVotes(List<VoteDatabase> votes) async {
     String tableName_ = "AKCIEHLASOVANIE";
 
     List<WriteRequest> requests = List.empty(growable: true);
@@ -247,14 +247,14 @@ class Database{
     }
   }
 
-  Future<void> getUsersForGroups(List<Group> groups) async{
+  Future<void> getUsersForGroups(Map<String, Group> groups) async{
     String tableName_ = "Uzivatelia";
 
     String filterExpression_ = '';
     Map<String, AttributeValue> request = {};
 
     int incr = 0;
-    for(var element in groups){
+    groups.forEach((key, value) {
       String group_ =  ":group" + incr.toString();
 
       if(filterExpression_.isEmpty){
@@ -265,8 +265,8 @@ class Database{
       }
       incr++;
 
-      request.addEntries([MapEntry(group_, AttributeValue(s: element.id))]);
-    }
+      request.addEntries([MapEntry(group_, AttributeValue(s: key))]);
+    });
 
     ScanOutput output = await service.scan(tableName: tableName_,
         filterExpression: filterExpression_,
@@ -278,16 +278,17 @@ class Database{
         String login = element.entries.firstWhereOrNull((element) => element.key == "Meno_login")?.value.s ?? "";
         List<String> groupsGetted = element.entries.firstWhereOrNull((element) => element.key == "Skupiny")?.value.ss ?? List.empty();
 
-        for(Group group in groups){
-          if(groupsGetted.contains(group.id)){
-            group.users[id] = login;
+        groups.forEach((key, value) {
+          if(groupsGetted.contains(key)){
+            groups[key]?.users[id] = login;
           }
-        }
+        });
+
       });
     }
   }
 
-  Future<bool> createEvent(EventDomain event) async{
+  Future<bool> createEvent(EventDatabase event) async{
     String tableName_ = "AKCIE";
 
     Map<String, AttributeValue> item = {};
@@ -302,6 +303,7 @@ class Database{
     item.addEntries([MapEntry("Ubytovanie", AttributeValue(s: event.accommodation))]);
     item.addEntries([MapEntry("OdhadovanaCena", AttributeValue(n: event.estimatedAmount.toString()))]);
     item.addEntries([MapEntry("Vytvoril", AttributeValue(s: event.createdBy))]);
+    item.addEntries([MapEntry("Skupina", AttributeValue(s: event.group))]);
 
     item.addEntries([MapEntry("Ucastnici", AttributeValue(ss: event.participantIDs))]);
 
@@ -315,7 +317,7 @@ class Database{
     }
   }
 
-  Future<List<Vote>> getVotesForEvents(List<EventDomain> events) async {
+  Future<List<VoteDatabase>> getVotesForEvents(List<EventDatabase> events) async {
     String tableName_ = "AKCIEHLASOVANIE";
 
     String user_ =  ":UserID";
@@ -369,7 +371,7 @@ class Database{
         filterExpression: filterExpression_,
         expressionAttributeValues: request);
 
-    List<Vote> votes = List.empty(growable: true);
+    List<VoteDatabase> votes = List.empty(growable: true);
 
     if(output.count != 0) {
       output.items?.forEach((element) {
@@ -393,14 +395,14 @@ class Database{
         ?.value
         .n ?? "0");
 
-        votes.add(Vote(id, userID, eventID, VoteEnum.values[vote]));
+        votes.add(VoteDatabase(id, userID, eventID, VoteEnum.values[vote]));
       });
     }
 
     return votes;
   }
 
-  Future<List<EventDomain>> getEventsForUser(String userID) async {
+  Future<List<EventDatabase>> getEventsForUser(String userID) async {
     String tableName_ = "AKCIE";
 
     String user_ =  ":UserID";
@@ -430,7 +432,7 @@ class Database{
         filterExpression: filterExpression_,
         expressionAttributeValues: request);
 
-    List<EventDomain> events = List.empty(growable: true);
+    List<EventDatabase> events = List.empty(growable: true);
 
     if(output.count != 0) {
       output.items?.forEach((element) {
@@ -446,11 +448,12 @@ class Database{
         String accommodation = element.entries.firstWhereOrNull((element) => element.key == "Ubytovanie")?.value.s ?? "";
         String estimatedAmount = element.entries.firstWhereOrNull((element) => element.key == "OdhadovanaCena")?.value.n ?? "";
         String createdBy = element.entries.firstWhereOrNull((element) => element.key == "Vytvoril")?.value.s ?? "";
+        String group = element.entries.firstWhereOrNull((element) => element.key == "Skupina")?.value.s ?? "";
 
         var estimatedAmountDouble = double.parse(estimatedAmount);
         assert(estimatedAmountDouble is double);
 
-        EventDomain event = EventDomain(id, name, description, type, place, startDate, endDate, participants, transport, accommodation, estimatedAmountDouble, createdBy);
+        EventDatabase event = EventDatabase(id, name, description, type, place, startDate, endDate, participants, transport, accommodation, estimatedAmountDouble, createdBy, group);
 
         events.add(event);
       });
