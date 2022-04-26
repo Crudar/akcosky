@@ -56,6 +56,10 @@ or selected individuals from specific group. Other users could make some adjustm
 * 11th week
   * Forget password UI + backend
 
+## Midterm review
+
+I would say, I'm following the plan well enough. I counted with the fact that I will not be able to make it in the 40 hours which will this lessons take because I chose technology I haven't worked with yet. Flutter uses state management system with I haven't work with either. The adaptation was more difficult than I expected. I have worked with the DynamoDB, but through library. This time I had to use low-level API with which I battled a few times too. I don't have to change my plan for now.
+
 ## How clean is my code
 
 * to manage widget states I use package named cubit which helps make the code more readable and dependencies are splitted between more cubits
