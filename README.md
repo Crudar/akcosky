@@ -61,3 +61,8 @@ or selected individuals from specific group. Other users could make some adjustm
 * to manage widget states I use package named cubit which helps make the code more readable and dependencies are splitted between more cubits
 * I would say it could be even better If I would split the dependencies of some selected cubits even more
 * I'm using extended repository pattern - presentation layer (UI), business layer (cubit), repository and data source (database)
+
+## Matej's clean code
+* I would say Matej's code is not clean. There is some structure which seems OK for me, but I would say there could be a lot of improvements.
+* For user who is not familiar with the technology it is hard to read and hard to understand the flow.
+
