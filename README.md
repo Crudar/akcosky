@@ -55,3 +55,9 @@ or selected individuals from specific group. Other users could make some adjustm
 
 * 11th week
   * Forget password UI + backend
+
+## How clean is my code
+
+* to manage widget states I use package named cubit which helps make the code more readable and dependencies are splitted between more cubits
+* I would say it could be even better If I would split the dependencies of some selected cubits even more
+* I'm using extended repository pattern - presentation layer (UI), business layer (cubit), repository and data source (database)
