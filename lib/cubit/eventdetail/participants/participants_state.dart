@@ -1,15 +1,17 @@
 part of 'participants_cubit.dart';
 
-abstract class ParticipantsState extends Equatable {
+abstract class ParticipantsState {
   const ParticipantsState();
 }
 
 class ParticipantsInitial extends ParticipantsState {
-  @override
-  List<Object> get props => [];
+  const ParticipantsInitial();
 }
 
 class ParticipantsShowMore extends ParticipantsState {
-  @override
-  List<Object> get props => [];
+  const ParticipantsShowMore();
+}
+
+class ParticipantsRefresh extends ParticipantsState {
+  const ParticipantsRefresh();
 }

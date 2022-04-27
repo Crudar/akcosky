@@ -91,8 +91,8 @@ class EventsListState extends State<EventsListView> {
     return FixedTimeline.tileBuilder(
       theme: TimelineThemeData(
         nodePosition: 0.01,
-        indicatorTheme: const IndicatorThemeData(color: Color(0xff000428)),
-        connectorTheme: const ConnectorThemeData(color: Color(0xff000428)),
+        indicatorTheme: const IndicatorThemeData(color: Colors.white),
+        connectorTheme: const ConnectorThemeData(color: Colors.white),
       ),
       builder: TimelineTileBuilder.connectedFromStyle(
         connectionDirection: ConnectionDirection.before,

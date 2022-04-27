@@ -21,4 +21,14 @@ class ParticipantsCubit extends Cubit<ParticipantsState> {
     }
 
   }
+
+  void refresh(){
+    if(showMore){
+      emit(ParticipantsInitial());
+    }
+    else{
+      emit(ParticipantsShowMore());
+    }
+  }
+
 }

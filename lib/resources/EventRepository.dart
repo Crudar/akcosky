@@ -1,3 +1,6 @@
+import 'package:akcosky/models/VoteEnum.dart';
+import 'package:tuple/tuple.dart';
+
 import '../Helpers/AsModel.dart';
 import '../models/Database/EventDatabase.dart';
 import '../models/Event_.dart';
@@ -72,5 +75,13 @@ class EventRepository{
     Map<int?, List<Event_>> eventsGroupedByYear = groupBy(eventsList, (Event_ event_) => event_.startDate?.year);
 
     return eventsGroupedByYear;
+  }
+
+  Future<Tuple2<bool, String>> updateUserVote(Vote vote) async {
+    Database db = await Database.create();
+
+    Tuple2<bool, String> response = await db.updateUserFoteForEvent(vote);
+
+    return response;
   }
 }

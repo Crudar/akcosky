@@ -15,6 +15,7 @@ import 'package:tuple/tuple.dart';
 
 import '../models/Group.dart';
 import '../models/Database/VoteDatabase.dart';
+import '../models/Vote.dart';
 
 class Database{
   static final Database _database = Database._internal();
@@ -460,6 +461,28 @@ class Database{
     }
 
     return events;
+  }
+
+  Future<Tuple2<bool, String>> updateUserFoteForEvent(Vote voteToUpdate) async{
+    String tableName_ = "AKCIEHLASOVANIE";
+
+    if(voteToUpdate.voteID != ""){
+
+      Map<String, AttributeValue> key_ = {"ID": AttributeValue(s: voteToUpdate.voteID)};
+
+      Map<String, AttributeValue> item = {":v": AttributeValue(n: voteToUpdate.vote.index.toString())};
+
+      try{
+        UpdateItemOutput output = await service.updateItem(tableName: tableName_, key: key_, updateExpression: "SET VoteResult = :v", expressionAttributeValues: item);
+
+        return const Tuple2<bool, String>(true, "");
+      }
+      on SocketException {
+        return const Tuple2<bool, String>(false, "Socket");
+      }
+    }else{
+      return const Tuple2<bool, String>(false, "NotExist");
+    }
   }
 
 }
