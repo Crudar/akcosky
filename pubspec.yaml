@@ -85,6 +85,7 @@ flutter:
     - assets/icons/plane.png
     - assets/icons/hotel.png
     - assets/icons/euro-sign.png
+    - assets/icons/edit.png
 
     - assets/icons/correct.png
     - assets/icons/failed.png

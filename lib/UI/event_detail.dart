@@ -7,11 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../cubit/authentication/authentication_cubit.dart';
-import '../cubit/events/events_cubit.dart';
-import '../models/Database/VoteDatabase.dart';
 import '../models/User.dart';
 import '../models/Vote.dart';
-import '../models/VoteEnum.dart';
 import '../models/VoteEnum.dart';
 import '../resources/EventRepository.dart';
 import '../theme.dart';
@@ -91,7 +88,7 @@ class EventDetailState extends State<EventDetail> {
                             color: Colors.white, size: 30)),
                   ),
                   Positioned.fill(
-                      top: 270,
+                      top: 230,
                       child: Container(
                           width: MediaQuery.of(context).size.width,
                           decoration: const BoxDecoration(
@@ -220,10 +217,25 @@ Widget eventInfo(BuildContext context, Event_ _selectedEvent) {
                     width: 35, height: 35),
               )),
           const SizedBox(width: 15),
-          Column(
+          Expanded(child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: dateInfo(context, selectedEvent))
+              children: dateInfo(context, selectedEvent)),
+          ),
+          Center(
+            child: Ink(
+              decoration: const ShapeDecoration(
+                color: Colors.lightBlue,
+                shape: CircleBorder(),
+              ),
+              child: IconButton(
+                icon: const Icon(FontAwesomeIcons.edit),
+                iconSize: 30,
+                color: Colors.white,
+                onPressed: () {},
+              ),
+            ),
+          )
         ],
       ),
       oneRow("assets/icons/map-marker.png", selectedEvent.place),
@@ -236,7 +248,7 @@ Widget eventInfo(BuildContext context, Event_ _selectedEvent) {
       selectedEvent.estimatedAmount != 0.0
           ? oneRow("assets/icons/euro-sign.png",
               selectedEvent.estimatedAmount.toString())
-          : const SizedBox.shrink(),
+          : const SizedBox.shrink()
     ],
   );
 }
@@ -273,7 +285,21 @@ Widget oneRow(String icon, String input) {
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             _launchURL(input);
-                          })))
+                          }))),
+            Center(
+              child: Ink(
+                decoration: const ShapeDecoration(
+                  color: Colors.lightBlue,
+                  shape: CircleBorder(),
+                ),
+                child: IconButton(
+                  icon: const Icon(FontAwesomeIcons.edit),
+                  iconSize: 30,
+                  color: Colors.white,
+                  onPressed: () {},
+                ),
+              ),
+            )
           ],
         ));
   } else {
@@ -292,9 +318,24 @@ Widget oneRow(String icon, String input) {
                   child: Image.asset(icon, width: 35, height: 35),
                 )),
             const SizedBox(width: 15),
-            Expanded(child: Text(input, style: Theme_.lightTextTheme.headline5))
-          ],
-        ));
+            Expanded(child: Text(input, style: Theme_.lightTextTheme.headline5)),
+          Center(
+            child: Ink(
+              decoration: const ShapeDecoration(
+                color: Colors.lightBlue,
+                shape: CircleBorder(),
+              ),
+              child: IconButton(
+                icon: const Icon(FontAwesomeIcons.edit),
+                iconSize: 30,
+                color: Colors.white,
+                onPressed: () {},
+              ),
+            ),
+          )
+      ],
+    )
+    );
   }
 }
 
@@ -385,7 +426,8 @@ Widget participants(BuildContext context, Event_ selectedEvent) {
               text: TextSpan(
                   text: showMore ? "Zobraziť viac" : "Zobraziť menej",
                   style: TextStyle(
-                    color: const Color(0xff000428),
+                    color: Colors.greenAccent,
+                    decoration: TextDecoration.underline,
                     fontSize: Theme_.lightTextTheme.headline3?.fontSize,
                     fontWeight: Theme_.lightTextTheme.headline3?.fontWeight,
                   ),
@@ -522,7 +564,7 @@ Widget alreadyVoted(BuildContext context, Vote actualUserVote) {
                     text: TextSpan(
                         text: 'Zmeniť',
                         style: TextStyle(
-                            color: Colors.white,
+                            color: Colors.greenAccent,
                             fontSize: Theme_.lightTextTheme.headline3?.fontSize,
                             fontWeight:
                                 Theme_.lightTextTheme.headline3?.fontWeight,

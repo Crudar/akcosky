@@ -164,7 +164,7 @@ class _Groups extends State<Groups>{
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        const Icon(FontAwesomeIcons.solidEnvelope, color: Colors.white),
+                        const Icon(FontAwesomeIcons.link, color: Colors.white),
                         SizedBox(width: 10),
                         Text(currentItem.inviteCode,
                             style: Theme_.lightTextTheme.headline3)

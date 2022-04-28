@@ -126,7 +126,8 @@ class _LoginState extends State<Login>{
                                       TextSpan(
                                         text: "Vytvor si ho",
                                         style: TextStyle(
-                                          color: const Color(0xff000428),
+                                          color: Colors.greenAccent,
+                                          decoration: TextDecoration.underline,
                                           fontSize: Theme_.lightTextTheme.headline3?.fontSize,
                                           fontWeight: Theme_.lightTextTheme.headline3?.fontWeight,
                                         ),
