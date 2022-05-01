@@ -1,3 +1,5 @@
+import 'package:akcosky/cubit/eventdetail/date/date_cubit.dart';
+import 'package:akcosky/cubit/eventdetail/info/info_cubit.dart';
 import 'package:akcosky/cubit/eventdetail/participants/participants_cubit.dart';
 import 'package:akcosky/cubit/eventdetail/voting/voting_cubit.dart';
 import 'package:akcosky/models/Event_.dart';
@@ -25,6 +27,7 @@ class EventDetail extends StatefulWidget {
 }
 
 class EventDetailState extends State<EventDetail> {
+
   @override
   Widget build(BuildContext context) {
     Event_ selectedEvent = widget.event;
@@ -203,7 +206,89 @@ Widget eventInfo(BuildContext context, Event_ _selectedEvent) {
         },
       ),
       const SizedBox(height: 15),
-      Row(
+      BlocProvider<DateCubit>(
+          create: (context) => DateCubit(),
+          child: BlocBuilder<DateCubit, DateState>(
+              builder: (context, state){
+                if(state is DateInitial){
+                  return dateRow(context, selectedEvent, false);
+                }
+                else if(state is DateEdit){
+                  return dateRow(context, selectedEvent, true);
+                }
+                else{
+                  return const SizedBox.shrink();
+                }
+              }
+          ),
+      ),
+      oneRowCubit(context, "assets/icons/map-marker.png", selectedEvent.place),
+      selectedEvent.transport != ""
+          ? oneRowCubit(context, "assets/icons/plane.png", selectedEvent.transport)
+          : const SizedBox.shrink(),
+      selectedEvent.accommodation != ""
+          ? oneRowCubit(context, "assets/icons/hotel.png", selectedEvent.accommodation)
+          : const SizedBox.shrink(),
+      selectedEvent.estimatedAmount != 0.0
+          ? oneRowCubit(context, "assets/icons/euro-sign.png",
+              selectedEvent.estimatedAmount.toString())
+          : const SizedBox.shrink()
+    ],
+  );
+}
+
+Widget dateRow(BuildContext context, Event_ selectedEvent, bool edit){
+  return Row(
+    children: [
+      Container(
+          height: 50,
+          width: 50,
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            color: Colors.white,
+          ),
+          child: Center(
+            child: Image.asset("assets/icons/calendar.png",
+                width: 35, height: 35),
+          )
+      ),
+      const SizedBox(width: 15),
+      Expanded(child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: edit ? dateEdit(context) : dateInfo(context, selectedEvent)
+      ),
+      ),
+      edit ? backFromEditIcon(context, true) : editIcon(context, true)
+    ],
+  );
+}
+
+Widget oneRowCubit(BuildContext context, String icon, String input){
+  return BlocProvider<InfoCubit>(
+    create: (context) => InfoCubit(),
+    child: BlocBuilder<InfoCubit, InfoState>(
+        builder: (context, state){
+          if(state is InfoInitial){
+            return oneRow(context, icon, input, false);
+          }
+          else if(state is InfoEdit){
+            return oneRow(context, icon, input, true);
+          }
+          else{
+            return const SizedBox.shrink();
+          }
+        }
+    ),
+  );
+}
+
+Widget oneRow(BuildContext context, String icon, String input, bool edit) {
+  bool isUrl = Uri.parse(input).host == '' ? false : true;
+
+  return Padding(
+      padding: const EdgeInsets.only(top: 13),
+      child: Row(
         children: [
           Container(
               height: 50,
@@ -213,130 +298,72 @@ Widget eventInfo(BuildContext context, Event_ _selectedEvent) {
                 color: Colors.white,
               ),
               child: Center(
-                child: Image.asset("assets/icons/calendar.png",
-                    width: 35, height: 35),
+                child: Image.asset(icon, width: 35, height: 35),
               )),
           const SizedBox(width: 15),
-          Expanded(child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: dateInfo(context, selectedEvent)),
-          ),
-          Center(
-            child: Ink(
-              decoration: const ShapeDecoration(
-                color: Colors.lightBlue,
-                shape: CircleBorder(),
-              ),
-              child: IconButton(
-                icon: const Icon(FontAwesomeIcons.edit),
-                iconSize: 30,
-                color: Colors.white,
-                onPressed: () {},
-              ),
-            ),
-          )
+          Expanded(child: !edit ? (!isUrl ? info(input) : infoURL(input)) : inputBasedOnType(context, icon)),
+          !edit ? editIcon(context, false) : backFromEditIcon(context, false)
         ],
-      ),
-      oneRow("assets/icons/map-marker.png", selectedEvent.place),
-      selectedEvent.transport != ""
-          ? oneRow("assets/icons/plane.png", selectedEvent.transport)
-          : const SizedBox.shrink(),
-      selectedEvent.accommodation != ""
-          ? oneRow("assets/icons/hotel.png", selectedEvent.accommodation)
-          : const SizedBox.shrink(),
-      selectedEvent.estimatedAmount != 0.0
-          ? oneRow("assets/icons/euro-sign.png",
-              selectedEvent.estimatedAmount.toString())
-          : const SizedBox.shrink()
-    ],
+      )
   );
 }
 
-Widget oneRow(String icon, String input) {
-  bool isUrl = Uri.parse(input).host == '' ? false : true;
+Widget inputBasedOnType(BuildContext context, String type){
+  //TODO VYTVORIT GLOBALNY CUBIT NA DETAIL PAGE - USCHOVAVAT V NOM INFO O CONTROLLEROCH A ASI AJ BUDE VHODNE POMOCOU TOHO VYKRESLIT TEN SAVE BUTTON
+  TextEditingController controller = TextEditingController();
 
-  if (isUrl) {
-    return Padding(
-        padding: const EdgeInsets.only(top: 15),
-        child: Row(
-          children: [
-            Container(
-                height: 50,
-                width: 50,
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.white,
-                ),
-                child: Center(
-                  child: Image.asset(icon, width: 35, height: 35),
-                )),
-            const SizedBox(width: 15),
-            Expanded(
-                child: RichText(
-                    text: TextSpan(
-                        text: Uri.parse(input).host,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: Theme_.lightTextTheme.headline5?.fontSize,
-                            fontWeight:
-                                Theme_.lightTextTheme.headline5?.fontWeight,
-                            decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            _launchURL(input);
-                          }))),
-            Center(
-              child: Ink(
-                decoration: const ShapeDecoration(
-                  color: Colors.lightBlue,
-                  shape: CircleBorder(),
-                ),
-                child: IconButton(
-                  icon: const Icon(FontAwesomeIcons.edit),
-                  iconSize: 30,
-                  color: Colors.white,
-                  onPressed: () {},
-                ),
-              ),
-            )
-          ],
-        ));
-  } else {
-    return Padding(
-        padding: const EdgeInsets.only(top: 15),
-        child: Row(
-          children: [
-            Container(
-                height: 50,
-                width: 50,
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Colors.white,
-                ),
-                child: Center(
-                  child: Image.asset(icon, width: 35, height: 35),
-                )),
-            const SizedBox(width: 15),
-            Expanded(child: Text(input, style: Theme_.lightTextTheme.headline5)),
-          Center(
-            child: Ink(
-              decoration: const ShapeDecoration(
-                color: Colors.lightBlue,
-                shape: CircleBorder(),
-              ),
-              child: IconButton(
-                icon: const Icon(FontAwesomeIcons.edit),
-                iconSize: 30,
-                color: Colors.white,
-                onPressed: () {},
-              ),
-            ),
-          )
-      ],
-    )
-    );
+  switch(type){
+    case "assets/icons/map-marker.png":{
+      return returnInputField(controller, "Zadaj miesto konania akcie");
+    }
+
+    case "assets/icons/plane.png":{
+      return returnInputField(controller, "Vlož link na dopravu");
+    }
+
+    case "assets/icons/hotel.png":{
+      return returnInputField(controller, "Vlož link na ubytovanie");
+    }
+
+    case "assets/icons/euro-sign.png":{
+      return returnInputField(controller, "Zadaj odhadovanú cenu");
+    }
+    default: {
+      return returnInputField(controller, "Zadaj hocičo");
+    }
   }
+}
+
+Widget returnInputField(TextEditingController controller, String placeholderText){
+  return TextField(
+    controller: controller,
+    keyboardType: TextInputType.text,
+    decoration: InputDecoration(
+        hintText: placeholderText,
+        contentPadding: const EdgeInsets.all(13)),
+    style: Theme_.lightTextTheme.headline3,
+  );
+}
+
+Widget info(String input){
+  return Text(input, style: Theme_.lightTextTheme.headline5);
+}
+
+Widget infoURL(String input){
+  return RichText(
+    text: TextSpan(
+        text: Uri.parse(input).host,
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: Theme_.lightTextTheme.headline5?.fontSize,
+            fontWeight:
+            Theme_.lightTextTheme.headline5?.fontWeight,
+            decoration: TextDecoration.underline),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () {
+            _launchURL(input);
+          })
+  );
 }
 
 void _launchURL(String _url) async {
@@ -587,4 +614,104 @@ TextSpan userVote(Vote actualUserVote){
         text: 'NIE',
         style: TextStyle(color: Color(0xffff6666)));
   }
+}
+
+List<Widget> dateEdit(BuildContext context) {
+  List<Widget> edit = List.empty(growable: true);
+
+  edit.add(GestureDetector(
+      onTap: () async {
+        if (/*!isChecked*/ true) {
+          await showDatePicker(
+              context: context,
+              locale: const Locale("sk", "SK"),
+              initialDate: DateTime.now(),
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2025),
+              helpText: 'Vyber dátum a čas')
+              .then((value) =>
+              BlocProvider.of<DateCubit>(context)
+                  .updateDate(value));
+
+          await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.now(),
+              initialEntryMode: TimePickerEntryMode.dial)
+              .then((value) =>
+              BlocProvider.of<DateCubit>(context)
+                  .updateTime(value));
+        } else {
+          await showDateRangePicker(
+              context: context,
+              locale: const Locale("sk", "SK"),
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2025),
+              helpText: 'Vyber dátum a čas')
+              .then((value) =>
+              BlocProvider.of<DateCubit>(context)
+                  .updateDateRange(value));
+        }
+      },
+      child: Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.white),
+              borderRadius: BorderRadius.circular(5)),
+          child: Row(children: [
+             Padding(
+              padding: EdgeInsets.all(13),
+              child: Text(
+                "Vyber nový dátum",
+                style: Theme_.lightTextTheme.headline3,
+              ),
+            ),
+          ])
+      )));
+
+  return edit;
+}
+
+Widget editIcon(BuildContext context, bool date){
+  return Center(
+    child: Ink(
+      decoration: const ShapeDecoration(
+        color: Colors.lightBlue,
+        shape: CircleBorder(),
+      ),
+      child: IconButton(
+        icon: const Icon(FontAwesomeIcons.edit),
+        iconSize: 30,
+        color: Colors.white,
+        onPressed: () {
+          if(!date) {
+            BlocProvider.of<InfoCubit>(context).showEditField();
+          } else{
+            BlocProvider.of<DateCubit>(context).showEditField();
+          }
+        },
+      ),
+    ),
+  );
+}
+
+Widget backFromEditIcon(BuildContext context, bool date){
+  return Center(
+    child: Ink(
+      decoration: const ShapeDecoration(
+        color: Colors.lightBlue,
+        shape: CircleBorder(),
+      ),
+      child: IconButton(
+        icon: const Icon(FontAwesomeIcons.arrowLeft),
+        iconSize: 30,
+        color: Colors.white,
+        onPressed: () {
+          if(!date) {
+            BlocProvider.of<InfoCubit>(context).showInitialField();
+          } else{
+            BlocProvider.of<DateCubit>(context).showInitialField();
+          }
+        },
+      ),
+    ),
+  );
 }
