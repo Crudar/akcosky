@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../Helpers/DatePickerColor.dart';
 import '../models/Group.dart';
 import '../theme.dart';
 
@@ -554,27 +555,5 @@ class _NewEvent extends State<NewEvent> {
         .toList();
 
     return imagePaths;
-  }
-
-  Color getColor(Set<MaterialState> states) {
-    const Set<MaterialState> interactiveStates = <MaterialState>{
-      MaterialState.pressed,
-      MaterialState.hovered,
-      MaterialState.focused,
-    };
-    if (states.any(interactiveStates.contains)) {
-      return const Color(0xffc31432);
-    }
-    return const Color(0xff000428);
-  }
-
-  _selectDate(BuildContext context) async {
-    final DateTime? selected = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2022),
-      lastDate: DateTime(2025),
-    );
-    if (selected != null && selected != DateTime.now()) {}
   }
 }

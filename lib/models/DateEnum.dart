@@ -1,0 +1,4 @@
+enum DateEnum{
+  startDate,
+  endDate
+}

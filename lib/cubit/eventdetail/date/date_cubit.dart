@@ -7,22 +7,12 @@ part 'date_state.dart';
 class DateCubit extends Cubit<DateState> {
   DateCubit() : super(DateInitial());
 
-  late DateTime? newDateTime;
-  late DateTimeRange? newDateTimeRange;
+  bool moreDayAction = false;
 
-  updateDate(DateTime? dateTime){
-    newDateTime = dateTime;
-  }
+  updateMoreDayCheckbox(){
+    moreDayAction = !moreDayAction;
 
-  updateTime(TimeOfDay? time){
-    int hour = time?.hour ?? 0;
-    int minute = time?.minute ?? 0;
-
-    newDateTime = newDateTime?.add(Duration(hours: hour, minutes: minute));
-  }
-
-  updateDateRange(DateTimeRange? dateTimeRange){
-    newDateTimeRange = dateTimeRange;
+    emit(DateEdit());
   }
 
   showEditField(){

@@ -1,3 +1,4 @@
+import 'package:akcosky/models/DateEnum.dart';
 import 'package:akcosky/models/VoteEnum.dart';
 import 'package:tuple/tuple.dart';
 
@@ -6,6 +7,8 @@ import '../models/Database/EventDatabase.dart';
 import '../models/Event_.dart';
 import '../models/Database/VoteDatabase.dart';
 import '../models/Group.dart';
+import '../models/Info.dart';
+import '../models/TypeEnum.dart';
 import '../models/User.dart';
 import '../models/Vote.dart';
 import 'Database.dart';
@@ -66,13 +69,33 @@ class EventRepository{
 
       //TODO - toto mi pride velmi komplikovane - skust prist na nieco jednoduchsie
       List<Vote> votesForEvent = voteDatabaseAsModel(votesDatabaseForEvent ?? List.empty(), groups, element.group);
+      Map<TypeEnum, Info> info = {};
 
-      Event_ event_ = Event_(element.ID, element.name, element.description, element.type, element.place,
-          startDate, endDate, votesForEvent, element.transport, element.accommodation, element.estimatedAmount, element.createdBy, element.group);
+      Map<DateEnum, DateTime?> dates = {};
+      dates[DateEnum.startDate] = startDate;
+      dates[DateEnum.endDate] = endDate;
+
+      info[TypeEnum.place] = Info(TypeEnum.place, element.place);
+      info[TypeEnum.dates] = Info(TypeEnum.dates, dates);
+
+      if(element.transport != "") {
+        info[TypeEnum.transport] = Info(TypeEnum.transport, element.transport);
+      }
+
+      if(element.accommodation != "") {
+        info[TypeEnum.accommodation] = Info(TypeEnum.accommodation, element.accommodation);
+      }
+
+      if(element.estimatedAmount != 0.0) {
+        info[TypeEnum.estimatedAmount] = Info(TypeEnum.estimatedAmount, element.estimatedAmount.toString());
+      }
+
+      Event_ event_ = Event_(element.ID, element.name, element.description, votesForEvent, element.createdBy, element.group, element.type, info);
 
       eventsList.add(event_);
     }
-    Map<int?, List<Event_>> eventsGroupedByYear = groupBy(eventsList, (Event_ event_) => event_.startDate?.year);
+
+    Map<int?, List<Event_>> eventsGroupedByYear = groupBy(eventsList, (Event_ event_) => event_.info[TypeEnum.dates]?.value[DateEnum.startDate].year as int);
 
     return eventsGroupedByYear;
   }

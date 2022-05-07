@@ -1,5 +1,6 @@
 import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
 import 'package:akcosky/models/Event_.dart';
+import 'package:akcosky/models/TypeEnum.dart';
 import 'package:akcosky/resources/EventRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -139,7 +140,7 @@ class EventsListState extends State<EventsListView> {
                                   const Icon(FontAwesomeIcons.mapMarkerAlt,
                                       color: Colors.white),
                                   const SizedBox(width: 5),
-                                  Flexible(child: Text(currentEvent.place,
+                                  Flexible(child: Text(currentEvent.info[TypeEnum.place]?.value,
                                       style: Theme_.lightTextTheme.headline3)),
                                   const SizedBox(width: 5),
                                   const Icon(FontAwesomeIcons.userAlt,

@@ -1,14 +1,19 @@
+import 'package:akcosky/cubit/eventdetail/changes/changes_cubit.dart';
 import 'package:akcosky/cubit/eventdetail/date/date_cubit.dart';
 import 'package:akcosky/cubit/eventdetail/info/info_cubit.dart';
 import 'package:akcosky/cubit/eventdetail/participants/participants_cubit.dart';
 import 'package:akcosky/cubit/eventdetail/voting/voting_cubit.dart';
 import 'package:akcosky/models/Event_.dart';
+import 'package:akcosky/models/TypeEnum.dart';
 import 'package:akcosky/models/VoteEnum.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import '../Helpers/DatePickerColor.dart';
 import '../cubit/authentication/authentication_cubit.dart';
+import '../models/DateEnum.dart';
+import '../models/Info.dart';
 import '../models/User.dart';
 import '../models/Vote.dart';
 import '../models/VoteEnum.dart';
@@ -18,7 +23,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EventDetail extends StatefulWidget {
-  const EventDetail({Key? key, required this.event}) : super(key: key);
+  EventDetail({Key? key, required this.event}) : super(key: key);
 
   final Event_ event;
 
@@ -27,6 +32,8 @@ class EventDetail extends StatefulWidget {
 }
 
 class EventDetailState extends State<EventDetail> {
+
+  Map<TypeEnum, TextEditingController> controllers = {};
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +56,7 @@ class EventDetailState extends State<EventDetail> {
         RepositoryProvider.of<EventRepository>(context);
 
     return Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         body: MultiBlocProvider(
           providers: [
             BlocProvider<ParticipantsCubit>(
@@ -57,6 +64,9 @@ class EventDetailState extends State<EventDetail> {
             ),
             BlocProvider<VotingCubit>(
               create: (context) => VotingCubit(eventRepository),
+            ),
+            BlocProvider<ChangesCubit>(
+              create: (context) => ChangesCubit(),
             )
           ],
           child: Container(
@@ -109,9 +119,28 @@ class EventDetailState extends State<EventDetail> {
                           child: Padding(
                             padding: const EdgeInsets.only(
                                 left: 15, right: 15, top: 15, bottom: 85),
-                            child: SingleChildScrollView(
-                                child: eventInfo(context, selectedEvent)),
-                          ))),
+                            child: BlocBuilder<ChangesCubit, ChangesState>(
+                              builder: (context, state) {
+                                if(state is ChangesInitial){
+                                  return SingleChildScrollView(
+                                      child: eventInfo(context, selectedEvent, controllers));
+                                }
+                                else if (state is ChangesSave){
+                                  return SingleChildScrollView(
+                                    child: Column(children:[
+                                        eventInfo(context, selectedEvent, controllers),
+                                        saveButtonChanges(context, selectedEvent)
+                                    ]
+                                    ),
+                                  );
+                                }
+                                else{
+                                  return SizedBox.shrink();
+                                }
+                              }
+                              ),
+                            )
+                          )),
                   Positioned(
                       bottom: 0, child: /*voted(context)*/ /*alreadyVoted(context)*/
                   BlocConsumer<VotingCubit, VotingState>(
@@ -161,7 +190,7 @@ class EventDetailState extends State<EventDetail> {
   }
 }
 
-Widget eventInfo(BuildContext context, Event_ _selectedEvent) {
+Widget eventInfo(BuildContext context, Event_ _selectedEvent, Map<TypeEnum, TextEditingController> controllers) {
   Event_ selectedEvent = _selectedEvent;
 
   return Column(
@@ -206,86 +235,94 @@ Widget eventInfo(BuildContext context, Event_ _selectedEvent) {
         },
       ),
       const SizedBox(height: 15),
-      BlocProvider<DateCubit>(
-          create: (context) => DateCubit(),
-          child: BlocBuilder<DateCubit, DateState>(
-              builder: (context, state){
-                if(state is DateInitial){
-                  return dateRow(context, selectedEvent, false);
-                }
-                else if(state is DateEdit){
-                  return dateRow(context, selectedEvent, true);
-                }
-                else{
-                  return const SizedBox.shrink();
-                }
+
+      Column(
+       children: infoRows(context, controllers, _selectedEvent.info),
+      )
+    ],
+  );
+}
+
+Widget saveButtonChanges(BuildContext context, Event_ selectedEvent){
+  User user = BlocProvider.of<AuthenticationCubit>(context)
+      .userRepository
+      .getUser();
+
+  return Center(child: Padding(padding: const EdgeInsets.only(top: 10, bottom: 10),
+      child: ElevatedButton(
+          onPressed: (() => BlocProvider.of<ChangesCubit>(context).saveChanges()),
+          child: Text(user.id == selectedEvent.createdBy ? "ULOŽ ZMENY" : "NAVRHNI ZMENY"),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5)),
+            padding: const EdgeInsets.all(7),
+            primary: Color(0xff000428), // <-- Button color
+            onPrimary: Colors.white, // <-- Splash color
+          )))
+  );
+}
+
+List<Widget> infoRows(BuildContext context, Map<TypeEnum, TextEditingController> controllers, Map<TypeEnum, Info> info){
+
+  List<Widget> rows = List.empty(growable: true);
+
+  for(Info oneInfo in info.values){
+    rows.add(oneInfoRow(context, oneInfo, controllers));
+  }
+
+  return rows;
+
+}
+
+Widget oneInfoRow(BuildContext context, Info info, Map<TypeEnum, TextEditingController> controllers) {
+
+  TextEditingController? controller = TextEditingController();
+  if(controllers.containsKey(info.type)){
+    controller = controllers[info.type];
+  }
+  else{
+    controllers[info.type] = TextEditingController();
+  }
+
+  if(info.type != TypeEnum.dates) {
+    return BlocProvider<InfoCubit>(
+        create: (context) => InfoCubit(),
+        child: BlocBuilder<InfoCubit, InfoState>(
+            builder: (context, state) {
+              if (state is InfoInitial) {
+                return oneInfoToShow(context, info, false, controller ?? TextEditingController());
               }
-          ),
-      ),
-      oneRowCubit(context, "assets/icons/map-marker.png", selectedEvent.place),
-      selectedEvent.transport != ""
-          ? oneRowCubit(context, "assets/icons/plane.png", selectedEvent.transport)
-          : const SizedBox.shrink(),
-      selectedEvent.accommodation != ""
-          ? oneRowCubit(context, "assets/icons/hotel.png", selectedEvent.accommodation)
-          : const SizedBox.shrink(),
-      selectedEvent.estimatedAmount != 0.0
-          ? oneRowCubit(context, "assets/icons/euro-sign.png",
-              selectedEvent.estimatedAmount.toString())
-          : const SizedBox.shrink()
-    ],
-  );
+              else if (state is InfoEdit) {
+                return oneInfoToShow(context, info, true, controller ?? TextEditingController());
+              }
+              else {
+                return const SizedBox.shrink();
+              }
+            }
+        )
+    );
+  }
+  else{
+    return BlocProvider<DateCubit>(
+        create: (context) => DateCubit(),
+        child: BlocBuilder<DateCubit, DateState>(
+            builder: (context, state) {
+              if (state is DateInitial) {
+                return dateToShow(context, info, false, controller ?? TextEditingController());
+              }
+              else if (state is DateEdit) {
+                return dateToShow(context, info, true, controller ?? TextEditingController());
+              }
+              else {
+                return const SizedBox.shrink();
+              }
+            }
+        )
+    );
+  }
 }
 
-Widget dateRow(BuildContext context, Event_ selectedEvent, bool edit){
-  return Row(
-    children: [
-      Container(
-          height: 50,
-          width: 50,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(8.0)),
-            color: Colors.white,
-          ),
-          child: Center(
-            child: Image.asset("assets/icons/calendar.png",
-                width: 35, height: 35),
-          )
-      ),
-      const SizedBox(width: 15),
-      Expanded(child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: edit ? dateEdit(context) : dateInfo(context, selectedEvent)
-      ),
-      ),
-      edit ? backFromEditIcon(context, true) : editIcon(context, true)
-    ],
-  );
-}
-
-Widget oneRowCubit(BuildContext context, String icon, String input){
-  return BlocProvider<InfoCubit>(
-    create: (context) => InfoCubit(),
-    child: BlocBuilder<InfoCubit, InfoState>(
-        builder: (context, state){
-          if(state is InfoInitial){
-            return oneRow(context, icon, input, false);
-          }
-          else if(state is InfoEdit){
-            return oneRow(context, icon, input, true);
-          }
-          else{
-            return const SizedBox.shrink();
-          }
-        }
-    ),
-  );
-}
-
-Widget oneRow(BuildContext context, String icon, String input, bool edit) {
-  bool isUrl = Uri.parse(input).host == '' ? false : true;
-
+Widget oneInfoToShow(BuildContext context, Info info, bool edit, TextEditingController controller){
   return Padding(
       padding: const EdgeInsets.only(top: 13),
       child: Row(
@@ -298,43 +335,101 @@ Widget oneRow(BuildContext context, String icon, String input, bool edit) {
                 color: Colors.white,
               ),
               child: Center(
-                child: Image.asset(icon, width: 35, height: 35),
+                child: Image.asset(iconBasedOnType(info.type), width: 35, height: 35),
               )),
           const SizedBox(width: 15),
-          Expanded(child: !edit ? (!isUrl ? info(input) : infoURL(input)) : inputBasedOnType(context, icon)),
-          !edit ? editIcon(context, false) : backFromEditIcon(context, false)
+          Expanded(child: !edit ? returnInfoToShow(info.value) : inputBasedOnType(context, info.type, controller)),
+          returnCorrectIcon(context, edit, info.type)
         ],
       )
   );
 }
 
-Widget inputBasedOnType(BuildContext context, String type){
-  //TODO VYTVORIT GLOBALNY CUBIT NA DETAIL PAGE - USCHOVAVAT V NOM INFO O CONTROLLEROCH A ASI AJ BUDE VHODNE POMOCOU TOHO VYKRESLIT TEN SAVE BUTTON
-  TextEditingController controller = TextEditingController();
+Widget dateToShow(BuildContext context, Info info, bool edit, TextEditingController controller){
+  return Padding(
+      padding: const EdgeInsets.only(top: 13),
+      child: Row(
+        children: [
+          Container(
+              height: 50,
+              width: 50,
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                color: Colors.white,
+              ),
+              child: Center(
+                child: Image.asset(iconBasedOnType(info.type), width: 35, height: 35),
+              )),
+          const SizedBox(width: 15),
+          Expanded(child: dateRow(context, info, edit)),
+          returnCorrectIcon(context, edit, info.type)
+        ],
+      )
+  );
+}
+
+Widget dateRow(BuildContext context, Info dates, bool edit){
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: edit ? dateEdit(context) : dateInfo(context, dates));
+}
+
+Widget returnInfoToShow(String input){
+  bool isUrl = Uri.parse(input).host == '' ? false : true;
+
+  if(!isUrl){
+    return info(input);
+  }
+  else{
+    return infoURL(input);
+  }
+}
+
+Widget returnCorrectIcon(BuildContext context, bool edit, TypeEnum type){
+  if(type == TypeEnum.dates && edit){
+    return backFromEditIcon(context, true);
+  }
+  else if(type == TypeEnum.dates && edit == false){
+    return editIcon(context, true);
+  }
+  else if(type != TypeEnum.dates && edit == false){
+    return editIcon(context, false);
+  }
+  else if (type != TypeEnum.dates && edit){
+    return backFromEditIcon(context, false);
+  }
+  else{
+    return const SizedBox.shrink();
+  }
+}
+
+Widget inputBasedOnType(BuildContext context, TypeEnum type, TextEditingController controller){
 
   switch(type){
-    case "assets/icons/map-marker.png":{
-      return returnInputField(controller, "Zadaj miesto konania akcie");
+    case TypeEnum.place:{
+      return returnInputField(context, controller, "Zadaj miesto konania akcie", "Location");
     }
 
-    case "assets/icons/plane.png":{
-      return returnInputField(controller, "Vlož link na dopravu");
+    case TypeEnum.transport:{
+      return returnInputField(context, controller, "Vlož link na dopravu", "Transport");
     }
 
-    case "assets/icons/hotel.png":{
-      return returnInputField(controller, "Vlož link na ubytovanie");
+    case TypeEnum.accommodation:{
+      return returnInputField(context, controller, "Vlož link na ubytovanie", "Accommodation");
     }
 
-    case "assets/icons/euro-sign.png":{
-      return returnInputField(controller, "Zadaj odhadovanú cenu");
+    case TypeEnum.estimatedAmount:{
+      return returnInputField(context, controller, "Zadaj odhadovanú cenu", "EstimatedPrice");
     }
     default: {
-      return returnInputField(controller, "Zadaj hocičo");
+      return returnInputField(context, controller, "Zadaj hocičo", "Something");
     }
   }
 }
 
-Widget returnInputField(TextEditingController controller, String placeholderText){
+Widget returnInputField(BuildContext context, TextEditingController controller, String placeholderText, String type){
+
   return TextField(
     controller: controller,
     keyboardType: TextInputType.text,
@@ -470,22 +565,25 @@ Widget participants(BuildContext context, Event_ selectedEvent) {
 }
 
 //TODO - zlepsit vracanie datumu z triedy Event_ a nahradit to formatovanie
-List<Widget> dateInfo(BuildContext context, Event_ selectedEvent) {
+List<Widget> dateInfo(BuildContext context, Info dates) {
   List<Widget> info = List.empty(growable: true);
+
+  DateTime? startDate = dates.value[DateEnum.startDate];
+  DateTime? endDate = dates.value[DateEnum.endDate];
 
   var formatterDate = DateFormat('dd.MM.yyyy');
   var formatterTime = DateFormat.Hm();
 
-  if (selectedEvent.endDate == null) {
-    info.add(Text(formatterDate.format(selectedEvent.startDate!),
+  if (endDate == null) {
+    info.add(Text(formatterDate.format(startDate!),
         style: Theme_.lightTextTheme.headline5));
-    info.add(Text(formatterTime.format(selectedEvent.startDate!),
+    info.add(Text(formatterTime.format(startDate),
         style: Theme_.lightTextTheme.headline5));
   } else {
     info.add(Text(
-        formatterDate.format(selectedEvent.startDate!) +
+        formatterDate.format(startDate!) +
             " - " +
-            formatterDate.format(selectedEvent.endDate!),
+            formatterDate.format(endDate),
         style: Theme_.lightTextTheme.headline5));
   }
 
@@ -619,9 +717,24 @@ TextSpan userVote(Vote actualUserVote){
 List<Widget> dateEdit(BuildContext context) {
   List<Widget> edit = List.empty(growable: true);
 
+  bool isChecked = BlocProvider.of<DateCubit>(context).moreDayAction;
+
+  edit.add(Row(
+        children: [
+           Checkbox(
+              value: isChecked,
+              fillColor: MaterialStateProperty.resolveWith(getColor),
+              onChanged: (bool? newValue) {
+                BlocProvider.of<DateCubit>(context)
+                    .updateMoreDayCheckbox();
+              }),
+          Text("Viacdňová akcia", style: Theme_.lightTextTheme.headline3)
+        ],
+      ));
+
   edit.add(GestureDetector(
       onTap: () async {
-        if (/*!isChecked*/ true) {
+        if (!isChecked) {
           await showDatePicker(
               context: context,
               locale: const Locale("sk", "SK"),
@@ -630,7 +743,7 @@ List<Widget> dateEdit(BuildContext context) {
               lastDate: DateTime(2025),
               helpText: 'Vyber dátum a čas')
               .then((value) =>
-              BlocProvider.of<DateCubit>(context)
+              BlocProvider.of<ChangesCubit>(context)
                   .updateDate(value));
 
           await showTimePicker(
@@ -638,7 +751,7 @@ List<Widget> dateEdit(BuildContext context) {
               initialTime: TimeOfDay.now(),
               initialEntryMode: TimePickerEntryMode.dial)
               .then((value) =>
-              BlocProvider.of<DateCubit>(context)
+              BlocProvider.of<ChangesCubit>(context)
                   .updateTime(value));
         } else {
           await showDateRangePicker(
@@ -648,7 +761,7 @@ List<Widget> dateEdit(BuildContext context) {
               lastDate: DateTime(2025),
               helpText: 'Vyber dátum a čas')
               .then((value) =>
-              BlocProvider.of<DateCubit>(context)
+              BlocProvider.of<ChangesCubit>(context)
                   .updateDateRange(value));
         }
       },
@@ -682,6 +795,8 @@ Widget editIcon(BuildContext context, bool date){
         iconSize: 30,
         color: Colors.white,
         onPressed: () {
+          BlocProvider.of<ChangesCubit>(context).saveChangesButtonLoad();
+
           if(!date) {
             BlocProvider.of<InfoCubit>(context).showEditField();
           } else{
@@ -714,4 +829,31 @@ Widget backFromEditIcon(BuildContext context, bool date){
       ),
     ),
   );
+}
+
+String iconBasedOnType(TypeEnum type){
+  switch(type){
+    case TypeEnum.dates:{
+      return "assets/icons/calendar.png";
+    }
+
+    case TypeEnum.place:{
+      return "assets/icons/map-marker.png";
+    }
+
+    case TypeEnum.transport:{
+      return "assets/icons/plane.png";
+    }
+
+    case TypeEnum.accommodation:{
+      return "assets/icons/hotel.png";
+    }
+
+    case TypeEnum.estimatedAmount:{
+      return "assets/icons/euro-sign.png";
+    }
+    default: {
+      return "";
+    }
+  }
 }
