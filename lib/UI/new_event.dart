@@ -168,6 +168,9 @@ class _NewEvent extends State<NewEvent> {
     bool isChecked = BlocProvider.of<NewEventCubit>(context).moreDayAction;
     String dateAndTime = BlocProvider.of<NewEventCubit>(context).dateText;
 
+    DateTime actualDateTime = DateTime.now();
+    DateTime endDateTime = actualDateTime.add(const Duration(days: 1825));
+
     return Column(
         children: <Widget>[
       Text(
@@ -265,9 +268,9 @@ class _NewEvent extends State<NewEvent> {
                 await showDatePicker(
                         context: context,
                         locale: const Locale("sk", "SK"),
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2025),
+                        initialDate: actualDateTime,
+                        firstDate: actualDateTime,
+                        lastDate: endDateTime,
                         helpText: 'Vyber dátum a čas')
                     .then((value) => BlocProvider.of<NewEventCubit>(context)
                         .updateDate(value));
@@ -282,8 +285,8 @@ class _NewEvent extends State<NewEvent> {
                 await showDateRangePicker(
                         context: context,
                         locale: const Locale("sk", "SK"),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2025),
+                        firstDate: actualDateTime,
+                        lastDate: endDateTime,
                         helpText: 'Vyber dátum a čas')
                     .then((value) => BlocProvider.of<NewEventCubit>(context)
                         .updateDateRange(value));

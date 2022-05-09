@@ -107,4 +107,12 @@ class EventRepository{
 
     return response;
   }
+
+  Future<Tuple2<bool, String>> updateEvent(String eventID, Map<String, String> valuesToUpdate) async{
+    Database db = await Database.create();
+
+    Tuple2<bool, String> response = await db.updateEvent(eventID, valuesToUpdate);
+
+    return response;
+  }
 }

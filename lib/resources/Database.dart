@@ -318,6 +318,45 @@ class Database{
     }
   }
 
+  Future<Tuple2<bool, String>> updateEvent(String eventID, Map<String, String> valuesToUpdate) async {
+    String tableName_ = "AKCIE";
+
+    if(valuesToUpdate.isNotEmpty){
+
+      Map<String, AttributeValue> key_ = {"ID": AttributeValue(s: eventID)};
+
+      Map<String, AttributeValue> items = {};
+
+      String updateString = "SET ";
+
+      valuesToUpdate.forEach((key, value) {
+        String keyWithDots = ":" + key;
+
+        updateString += key + " = " + keyWithDots + ", ";
+
+        if(key != "OdhadovanaCena") {
+          items[keyWithDots] = AttributeValue(s: value);
+        }
+        else{
+          items[keyWithDots] = AttributeValue(n: value);
+        }
+      });
+      
+      updateString = updateString.substring(0, updateString.length - 2);
+
+      try{
+        UpdateItemOutput output = await service.updateItem(tableName: tableName_, key: key_, updateExpression: updateString, expressionAttributeValues: items);
+
+        return const Tuple2<bool, String>(true, "");
+      }
+      on SocketException {
+        return const Tuple2<bool, String>(false, "Socket");
+      }
+    }else{
+      return const Tuple2<bool, String>(false, "NotExist");
+    }
+  }
+
   Future<List<VoteDatabase>> getVotesForEvents(List<EventDatabase> events) async {
     String tableName_ = "AKCIEHLASOVANIE";
 

@@ -18,3 +18,18 @@ class ChangesSave extends ChangesState{
   @override
   List<Object> get props => [identityHashCode(this)];
 }
+
+class ChangesSuccessfull extends ChangesState{
+  const ChangesSuccessfull();
+
+  @override
+  List<Object> get props => [identityHashCode(this)];
+}
+
+class ChangesStatusMessage extends ChangesState{
+  final String message;
+  const ChangesStatusMessage(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

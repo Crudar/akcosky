@@ -23,8 +23,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EventDetail extends StatefulWidget {
-  EventDetail({Key? key, required this.event}) : super(key: key);
-
+  const EventDetail({Key? key, required this.event}) : super(key: key);
   final Event_ event;
 
   @override
@@ -66,7 +65,7 @@ class EventDetailState extends State<EventDetail> {
               create: (context) => VotingCubit(eventRepository),
             ),
             BlocProvider<ChangesCubit>(
-              create: (context) => ChangesCubit(),
+              create: (context) => ChangesCubit(eventRepository),
             )
           ],
           child: Container(
@@ -119,23 +118,43 @@ class EventDetailState extends State<EventDetail> {
                           child: Padding(
                             padding: const EdgeInsets.only(
                                 left: 15, right: 15, top: 15, bottom: 85),
-                            child: BlocBuilder<ChangesCubit, ChangesState>(
+                            child: BlocConsumer<ChangesCubit, ChangesState>(
                               builder: (context, state) {
                                 if(state is ChangesInitial){
                                   return SingleChildScrollView(
-                                      child: eventInfo(context, selectedEvent, controllers));
+                                      child: //eventInfo(context, selectedEvent, controllers),
+                                      Column(children:[
+                                        eventInfo(context, selectedEvent, controllers),
+                                        saveButtonChanges(context, selectedEvent, controllers)
+                                      ]
+                                  ),
+                                  );
                                 }
                                 else if (state is ChangesSave){
                                   return SingleChildScrollView(
                                     child: Column(children:[
                                         eventInfo(context, selectedEvent, controllers),
-                                        saveButtonChanges(context, selectedEvent)
+                                        //saveButtonChanges(context, selectedEvent, controllers)
                                     ]
                                     ),
                                   );
                                 }
+                                else if(state is ChangesSuccessfull){
+                                  return SingleChildScrollView(
+                                      child: eventInfo(context, selectedEvent, controllers));
+                                }
                                 else{
                                   return SizedBox.shrink();
+                                }
+                              },
+                              listener: (context, state){
+                                if(state is ChangesSuccessfull){
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(content: Text("Akcia bola úspešne aktualizovaná!")));
+                                }
+                                else if(state is ChangesStatusMessage){
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(content: Text(state.message)));
                                 }
                               }
                               ),
@@ -243,22 +262,22 @@ Widget eventInfo(BuildContext context, Event_ _selectedEvent, Map<TypeEnum, Text
   );
 }
 
-Widget saveButtonChanges(BuildContext context, Event_ selectedEvent){
+Widget saveButtonChanges(BuildContext context, Event_ selectedEvent, Map<TypeEnum, TextEditingController> controllers){
   User user = BlocProvider.of<AuthenticationCubit>(context)
       .userRepository
       .getUser();
 
   return Center(child: Padding(padding: const EdgeInsets.only(top: 10, bottom: 10),
-      child: ElevatedButton(
-          onPressed: (() => BlocProvider.of<ChangesCubit>(context).saveChanges()),
-          child: Text(user.id == selectedEvent.createdBy ? "ULOŽ ZMENY" : "NAVRHNI ZMENY"),
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5)),
-            padding: const EdgeInsets.all(7),
-            primary: Color(0xff000428), // <-- Button color
-            onPrimary: Colors.white, // <-- Splash color
-          )))
+        child: ElevatedButton(
+            onPressed: (() => BlocProvider.of<ChangesCubit>(context).saveChanges(selectedEvent, controllers)),
+            child: Text(user.id == selectedEvent.createdBy ? "ULOŽ ZMENY" : "NAVRHNI ZMENY"),
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)),
+              padding: const EdgeInsets.all(7),
+              primary: Color(0xff000428), // <-- Button color
+              onPrimary: Colors.white, // <-- Splash color
+            )))
   );
 }
 
@@ -388,16 +407,16 @@ Widget returnInfoToShow(String input){
 
 Widget returnCorrectIcon(BuildContext context, bool edit, TypeEnum type){
   if(type == TypeEnum.dates && edit){
-    return backFromEditIcon(context, true);
+    return backFromEditIcon(context, true, type);
   }
   else if(type == TypeEnum.dates && edit == false){
-    return editIcon(context, true);
+    return editIcon(context, true, type);
   }
   else if(type != TypeEnum.dates && edit == false){
-    return editIcon(context, false);
+    return editIcon(context, false, type);
   }
   else if (type != TypeEnum.dates && edit){
-    return backFromEditIcon(context, false);
+    return backFromEditIcon(context, false, type);
   }
   else{
     return const SizedBox.shrink();
@@ -717,7 +736,12 @@ TextSpan userVote(Vote actualUserVote){
 List<Widget> dateEdit(BuildContext context) {
   List<Widget> edit = List.empty(growable: true);
 
+  DateTime actualDateTime = DateTime.now();
+  DateTime endDateTime = actualDateTime.add(const Duration(days: 1825));
+
   bool isChecked = BlocProvider.of<DateCubit>(context).moreDayAction;
+
+  String dateAndTime = BlocProvider.of<DateCubit>(context).dateText;
 
   edit.add(Row(
         children: [
@@ -738,12 +762,12 @@ List<Widget> dateEdit(BuildContext context) {
           await showDatePicker(
               context: context,
               locale: const Locale("sk", "SK"),
-              initialDate: DateTime.now(),
-              firstDate: DateTime.now(),
-              lastDate: DateTime(2025),
+              initialDate: actualDateTime,
+              firstDate: actualDateTime,
+              lastDate: endDateTime,
               helpText: 'Vyber dátum a čas')
               .then((value) =>
-              BlocProvider.of<ChangesCubit>(context)
+              BlocProvider.of<DateCubit>(context)
                   .updateDate(value));
 
           await showTimePicker(
@@ -751,19 +775,22 @@ List<Widget> dateEdit(BuildContext context) {
               initialTime: TimeOfDay.now(),
               initialEntryMode: TimePickerEntryMode.dial)
               .then((value) =>
-              BlocProvider.of<ChangesCubit>(context)
+              BlocProvider.of<DateCubit>(context)
                   .updateTime(value));
         } else {
           await showDateRangePicker(
               context: context,
               locale: const Locale("sk", "SK"),
-              firstDate: DateTime.now(),
-              lastDate: DateTime(2025),
+              firstDate: actualDateTime,
+              lastDate: endDateTime,
               helpText: 'Vyber dátum a čas')
               .then((value) =>
-              BlocProvider.of<ChangesCubit>(context)
+              BlocProvider.of<DateCubit>(context)
                   .updateDateRange(value));
         }
+
+        BlocProvider.of<DateCubit>(context).showEditField();
+
       },
       child: Container(
           decoration: BoxDecoration(
@@ -773,7 +800,7 @@ List<Widget> dateEdit(BuildContext context) {
              Padding(
               padding: EdgeInsets.all(13),
               child: Text(
-                "Vyber nový dátum",
+                dateAndTime,
                 style: Theme_.lightTextTheme.headline3,
               ),
             ),
@@ -783,7 +810,7 @@ List<Widget> dateEdit(BuildContext context) {
   return edit;
 }
 
-Widget editIcon(BuildContext context, bool date){
+Widget editIcon(BuildContext context, bool date, TypeEnum type){
   return Center(
     child: Ink(
       decoration: const ShapeDecoration(
@@ -795,8 +822,6 @@ Widget editIcon(BuildContext context, bool date){
         iconSize: 30,
         color: Colors.white,
         onPressed: () {
-          BlocProvider.of<ChangesCubit>(context).saveChangesButtonLoad();
-
           if(!date) {
             BlocProvider.of<InfoCubit>(context).showEditField();
           } else{
@@ -808,7 +833,7 @@ Widget editIcon(BuildContext context, bool date){
   );
 }
 
-Widget backFromEditIcon(BuildContext context, bool date){
+Widget backFromEditIcon(BuildContext context, bool date, TypeEnum type){
   return Center(
     child: Ink(
       decoration: const ShapeDecoration(
