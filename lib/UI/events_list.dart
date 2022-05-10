@@ -11,6 +11,7 @@ import '../theme.dart';
 import 'package:timelines/timelines.dart';
 
 class EventsList extends StatelessWidget {
+  const EventsList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,7 @@ class EventsList extends StatelessWidget {
 
     return BlocProvider(
           create: (context) => EventsCubit(eventRepository: eventRepository),
-          child: EventsListView(),
+          child: const EventsListView(),
         );
   }
 }
@@ -31,13 +32,6 @@ class EventsListView extends StatefulWidget {
 }
 
 class EventsListState extends State<EventsListView> {
-  bool menuVisible = false;
-
-  showMenu() {
-    setState(() {
-      menuVisible = !menuVisible;
-    });
-  }
 
   @override
   Widget build(context) {
@@ -57,7 +51,7 @@ class EventsListState extends State<EventsListView> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Padding(padding: EdgeInsets.only(left: 5),
+                  Padding(padding: const EdgeInsets.only(left: 5),
                       child: Text("Akcošky", style: Theme_.lightTextTheme.headline2)),
                   Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -187,9 +181,14 @@ class EventsListState extends State<EventsListView> {
 
   Future<Map<int?, List<Event_>>> _getEventForUser(
       EventRepository eventRepository, User user) async {
-    Map<int?, List<Event_>> events =
-    await eventRepository.getEventsForUser(user);
+    Map<int?, List<Event_>>? events =
+      await eventRepository.getEventsForUser(user);
 
-    return events;
+    if(events != null){
+      return events;
+    }
+    else{
+      return {};
+    }
   }
 }

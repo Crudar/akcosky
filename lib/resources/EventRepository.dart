@@ -1,7 +1,5 @@
 import 'package:akcosky/models/DateEnum.dart';
-import 'package:akcosky/models/VoteEnum.dart';
 import 'package:tuple/tuple.dart';
-
 import '../Helpers/AsModel.dart';
 import '../models/Database/EventDatabase.dart';
 import '../models/Event_.dart';
@@ -29,21 +27,24 @@ class EventRepository{
     return response;
   }
 
-  Future<Map<int?, List<Event_>>> getEventsForUser(User user) async{
+  Future<Map<int?, List<Event_>>?> getEventsForUser(User user) async{
     if(events.isEmpty){
       Database db = await Database.create();
 
       List<EventDatabase> eventsOfUser = await db.getEventsForUser(user.id);
 
-      List<VoteDatabase> votesDatabase =  await db.getVotesForEvents(eventsOfUser);
+      if(eventsOfUser.isNotEmpty){
+        List<VoteDatabase> votesDatabase =  await db.getVotesForEvents(eventsOfUser);
 
-      Map<String, List<VoteDatabase>> votesGroupedByGroup = groupBy(votesDatabase, (VoteDatabase vote) => vote.eventID);
+        Map<String, List<VoteDatabase>> votesGroupedByGroup = groupBy(votesDatabase, (VoteDatabase vote) => vote.eventID);
 
-      Map<int?, List<Event_>> events_ = groupEventsAndVotes(eventsOfUser, votesGroupedByGroup, user.groups);
+        Map<int?, List<Event_>> events_ = groupEventsAndVotes(eventsOfUser, votesGroupedByGroup, user.groups);
 
-      events = events_;
+        events = events_;
 
-      return events;
+        return events;
+      }
+      return null;
     }
     else{
       return events;

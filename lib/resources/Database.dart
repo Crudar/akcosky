@@ -1,15 +1,11 @@
-import 'dart:collection';
 import 'dart:core';
 import 'package:akcosky/models/Database/EventDatabase.dart';
 import 'dart:io';
-import 'package:akcosky/models/User.dart';
 import 'package:akcosky/models/Database/UserDatabase.dart';
-import 'package:akcosky/models/UserIdentifier.dart';
 import 'package:akcosky/models/VoteEnum.dart';
 import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
 import 'package:akcosky/AppSettings.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
@@ -249,43 +245,45 @@ class Database{
   }
 
   Future<void> getUsersForGroups(Map<String, Group> groups) async{
-    String tableName_ = "Uzivatelia";
+    if(groups.isNotEmpty){
+      String tableName_ = "Uzivatelia";
 
-    String filterExpression_ = '';
-    Map<String, AttributeValue> request = {};
+      String filterExpression_ = '';
+      Map<String, AttributeValue> request = {};
 
-    int incr = 0;
-    groups.forEach((key, value) {
-      String group_ =  ":group" + incr.toString();
+      int incr = 0;
+      groups.forEach((key, value) {
+        String group_ =  ":group" + incr.toString();
 
-      if(filterExpression_.isEmpty){
-        filterExpression_ += "contains (Skupiny, " + group_ + ")";
-      }
-      else{
-        filterExpression_ += " OR contains (Skupiny, " + group_ + ")";
-      }
-      incr++;
+        if(filterExpression_.isEmpty){
+          filterExpression_ += "contains (Skupiny, " + group_ + ")";
+        }
+        else{
+          filterExpression_ += " OR contains (Skupiny, " + group_ + ")";
+        }
+        incr++;
 
-      request.addEntries([MapEntry(group_, AttributeValue(s: key))]);
-    });
-
-    ScanOutput output = await service.scan(tableName: tableName_,
-        filterExpression: filterExpression_,
-        expressionAttributeValues: request);
-
-    if(output.count != 0) {
-      output.items?.forEach((element) {
-        String id = element.entries.firstWhereOrNull((element) => element.key == "ID")?.value.s ?? "";
-        String login = element.entries.firstWhereOrNull((element) => element.key == "Meno_login")?.value.s ?? "";
-        List<String> groupsGetted = element.entries.firstWhereOrNull((element) => element.key == "Skupiny")?.value.ss ?? List.empty();
-
-        groups.forEach((key, value) {
-          if(groupsGetted.contains(key)){
-            groups[key]?.users[id] = login;
-          }
-        });
-
+        request.addEntries([MapEntry(group_, AttributeValue(s: key))]);
       });
+
+      ScanOutput output = await service.scan(tableName: tableName_,
+          filterExpression: filterExpression_,
+          expressionAttributeValues: request);
+
+      if(output.count != 0) {
+        output.items?.forEach((element) {
+          String id = element.entries.firstWhereOrNull((element) => element.key == "ID")?.value.s ?? "";
+          String login = element.entries.firstWhereOrNull((element) => element.key == "Meno_login")?.value.s ?? "";
+          List<String> groupsGetted = element.entries.firstWhereOrNull((element) => element.key == "Skupiny")?.value.ss ?? List.empty();
+
+          groups.forEach((key, value) {
+            if(groupsGetted.contains(key)){
+              groups[key]?.users[id] = login;
+            }
+          });
+
+        });
+      }
     }
   }
 
@@ -451,22 +449,6 @@ class Database{
 
     Map<String, AttributeValue> request = {};
     request.addEntries([MapEntry(user_, AttributeValue(s: userID))]);
-
-    /*int incr = 0;
-
-    votes.forEach((key, value){
-      String votes_ =  ":vote" + incr.toString();
-
-      if(filterExpression_.isEmpty){
-        filterExpression_ += "contains (Hlasovania, " + votes_ + ")";
-      }
-      else{
-        filterExpression_ += " OR contains (Hlasovania, " + votes_ + ")";
-      }
-      incr++;
-
-      request.addEntries([MapEntry(votes_, AttributeValue(s: key))]);
-    });*/
 
     ScanOutput output = await service.scan(tableName: tableName_,
         filterExpression: filterExpression_,
