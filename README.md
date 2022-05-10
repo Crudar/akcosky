@@ -70,3 +70,8 @@ I would say, I'm following the plan well enough. I counted with the fact that I 
 * I would say Matej's code is not clean. There is some structure which seems OK for me, but I would say there could be a lot of improvements.
 * For user who is not familiar with the technology it is hard to read and hard to understand the flow.
 
+
+## Final rating
+
+I would say my app is done and able to be used. There are some functions which would be good to have, but it is not necessary. I was following my time schedule quite good until 8th week I would say. I know that I would not be able to make it on the lesson, but even with working on it at home I was not able to catch up the work which was needed to be done. The detail page of event was the hardest to made. There were a lot of functionality and UI which I did not think of when I was doing the time schedule. I did not regret the choice to made this app in Flutter even when it was completely new for me. I learned a lot about how Flutter works and even how state management works which could be used in some other framework/programming language.
+
