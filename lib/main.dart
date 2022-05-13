@@ -1,13 +1,9 @@
-import 'package:akcosky/UI/email_verification.dart';
-import 'package:akcosky/UI/login.dart';
-import 'package:akcosky/UI/register.dart';
 import 'package:akcosky/app.dart';
-import 'package:akcosky/models/User.dart';
 import 'package:akcosky/resources/AuthenticationRepository.dart';
 import 'package:akcosky/resources/EventRepository.dart';
 import 'package:akcosky/resources/UserRepository.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'AppSettings.dart';
 import 'dart:async';
 
 import 'resources/Database.dart';
@@ -81,7 +77,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _incrementCounter() async{
     String test_1 = await testAsync();
-    print(test_1);
+    if (kDebugMode) {
+      print(test_1);
+    }
 
     setState(() {
       // This call to setState tells the Flutter framework that something has

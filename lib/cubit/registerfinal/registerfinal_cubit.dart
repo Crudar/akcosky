@@ -1,8 +1,9 @@
+import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
+import 'package:dargon2_flutter/dargon2_flutter.dart';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
-import 'package:conduit_password_hash/pbkdf2.dart';
-import 'package:conduit_password_hash/salt.dart';
 import '../../resources/RegisterRepository.dart';
 
 part 'registerfinal_state.dart';
@@ -13,6 +14,7 @@ class RegisterFinalCubit extends Cubit<RegisterFinalState> {
   RegisterFinalCubit(this._registerRepository) : super(RegisterFinalInitial());
 
   Future<void> register() async {
+    DArgon2Flutter.init();
     // TODO - check if username is available - scan with username (call to dabatase) - najlepsie by bolo keby su tie formy jednotne a ukaze to pod tym fieldom
     // TODO - check if email is not used - scan with email (call to dabatase) - najlepsie by bolo keby su tie formy jednotne a ukaze to pod tym fieldom
     emit(RegisterFinalLoading());
@@ -20,15 +22,15 @@ class RegisterFinalCubit extends Cubit<RegisterFinalState> {
     var uuid = const Uuid();
     var id_ = uuid.v4();
 
-    var generator = PBKDF2();
-    var passSalt_ = Salt.generateAsBase64String(24);
+    Salt passSalt = Salt.newSalt();
+    String passSaltBase64 = utf8.decode(passSalt.bytes);
 
-    var passHash_ = generator.generateBase64Key(
-        _registerRepository.password, passSalt_, 10101, 24);
+    var passHash = await argon2.hashPasswordString(_registerRepository.password, salt: passSalt);
+    String passHashBase64 = passHash.base64String;
 
     _registerRepository.id = id_;
-    _registerRepository.passSalt_ = passSalt_;
-    _registerRepository.password = passHash_;
+    _registerRepository.passSalt_ = passSaltBase64;
+    _registerRepository.password = passHashBase64;
 
     bool response = await _registerRepository.addUser();
 

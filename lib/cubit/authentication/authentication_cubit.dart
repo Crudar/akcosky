@@ -1,9 +1,11 @@
+import 'dart:convert';
+
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/resources/AuthenticationRepository.dart';
 import 'package:akcosky/resources/UserRepository.dart';
 import 'package:bloc/bloc.dart';
+import 'package:dargon2_flutter/dargon2_flutter.dart';
 import 'package:meta/meta.dart';
-import 'package:conduit_password_hash/pbkdf2.dart';
 import '../../models/Database/UserDatabase.dart';
 
 part 'authentication_state.dart';
@@ -17,17 +19,14 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
   void login(String username, String password) async{
     UserDatabase? userDomain = await authenticationRepository.logIn(username: username, password: password);
 
-    var generator = PBKDF2();
+    Salt salt = Salt(utf8.encode(userDomain?.passwordSalt ?? ""));
 
-    var passHash_input = generator.generateBase64Key(
-        password, userDomain?.passwordSalt ?? "", 10101, 24);
+    var passHashInput = await argon2.hashPasswordString(password, salt: salt);
+    String passHashInputBase64 = passHashInput.base64String;
 
-    String passHash_fromDb = userDomain?.passwordHash ?? "";
+    String passHashFromDb = userDomain?.passwordHash ?? "";
 
-    /*var passHash_fromDb = generator.generateBase64Key(
-        userDomain?.passwordHash ?? "", userDomain?.passwordSalt ?? "", 10101, 24);*/
-
-    if(passHash_input == passHash_fromDb){
+    if(passHashInputBase64 == passHashFromDb){
       if(userDomain != null) {
         userRepository.setUser(User(userDomain.id, userDomain.login, userDomain.email, userDomain.groups));
       }
