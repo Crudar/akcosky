@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:akcosky/models/User.dart';
 import 'package:akcosky/resources/AuthenticationRepository.dart';
 import 'package:akcosky/resources/UserRepository.dart';
@@ -19,7 +18,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
   void login(String username, String password) async{
     UserDatabase? userDomain = await authenticationRepository.logIn(username: username, password: password);
 
-    Salt salt = Salt(utf8.encode(userDomain?.passwordSalt ?? ""));
+    Salt salt = Salt(base64Decode(userDomain?.passwordSalt ?? ""));
 
     var passHashInput = await argon2.hashPasswordString(password, salt: salt);
     String passHashInputBase64 = passHashInput.base64String;

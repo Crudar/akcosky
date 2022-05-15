@@ -22,10 +22,11 @@ class RegisterFinalCubit extends Cubit<RegisterFinalState> {
     var uuid = const Uuid();
     var id_ = uuid.v4();
 
-    Salt passSalt = Salt.newSalt();
+    Salt passSalt = Salt.newSalt(length: 32);
     String passSaltBase64 = utf8.decode(passSalt.bytes);
 
-    var passHash = await argon2.hashPasswordString(_registerRepository.password, salt: passSalt);
+    var passHash = await argon2.hashPasswordString(_registerRepository.password,
+        salt: passSalt);
     String passHashBase64 = passHash.base64String;
 
     _registerRepository.id = id_;
@@ -37,16 +38,17 @@ class RegisterFinalCubit extends Cubit<RegisterFinalState> {
     if (response)
       emit(RegisterFinalSuccess());
     else {
-      emit(RegisterFinalError("Nemožno vytvoriť užívateľa. Si pripojený na internet?"));
+      emit(RegisterFinalError(
+          "Nemožno vytvoriť užívateľa. Si pripojený na internet?"));
     }
   }
 
   void checkVerificationCode(String verificationCodeInput) {
     if (verificationCodeInput == _registerRepository.verificationCode) {
       register();
-    }
-    else {
-      emit(RegisterFinalError("Chybný verifikačný kód. Skontroluj či si ho zadal správne."));
+    } else {
+      emit(RegisterFinalError(
+          "Chybný verifikačný kód. Skontroluj či si ho zadal správne."));
     }
   }
 }
