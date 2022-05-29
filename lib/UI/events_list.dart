@@ -2,13 +2,17 @@ import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
 import 'package:akcosky/models/Event_.dart';
 import 'package:akcosky/models/TypeEnum.dart';
 import 'package:akcosky/resources/EventRepository.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/events/events_cubit.dart';
+import '../cubit/mainUI/main_ui_cubit.dart';
 import '../models/User.dart';
 import '../theme.dart';
 import 'package:timelines/timelines.dart';
+
+import 'new_event.dart';
 
 class EventsList extends StatelessWidget {
   const EventsList({Key? key}) : super(key: key);
@@ -47,22 +51,63 @@ class EventsListState extends State<EventsListView> {
           AsyncSnapshot<Map<int?, List<Event_>>> events) {
         return SingleChildScrollView(
           child: SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(padding: const EdgeInsets.only(left: 5),
-                      child: Text("Akcošky", style: Theme_.lightTextTheme.headline2)),
-                  Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[listOfEvents(events.data)],
-                    )
-                ],
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(padding: const EdgeInsets.only(left: 5),
+                    child: Text("Akcošky", style: Theme_.lightTextTheme.headline2)),
+                Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    //children: <Widget>[listOfEvents(events.data)],
+                  children: <Widget>[returnWidgetsBasedOnEvents(events.data)],
+                  )
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  Widget returnWidgetsBasedOnEvents(Map<int?, List<Event_>>? events){
+    if(events != null){
+      if(events.isNotEmpty){
+        return listOfEvents(events);
+      }
+      else{
+        return noEventsFound();
+      }
+    }
+    else{
+      return noEventsFound();
+    }
+  }
+
+  Widget noEventsFound(){
+    return Column(
+      children: [
+        Image.asset("assets/icons/events_not_found.png"),
+        Center(
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                  children: [
+                    TextSpan(text: "Jerguš nenašiel žiadne akcie. ", style: Theme_.lightTextTheme.headline2),
+                    TextSpan(
+                        text: "Vytvor nejakú!",
+                        style: Theme_.lightTextTheme.headline2?.copyWith(color: Colors.greenAccent, decoration: TextDecoration.underline),
+                      recognizer: TapGestureRecognizer()..onTap = (){
+                        BlocProvider.of<MainUiCubit>(context)
+                            .getNavBarItem(NavbarItem.vytvor_akciu);
+                      }
+                    )
+                  ]
+              ),
+            )
+        )
+      ],
     );
   }
 

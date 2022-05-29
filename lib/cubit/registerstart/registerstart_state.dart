@@ -1,20 +1,29 @@
 part of 'registerstart_cubit.dart';
 
 @immutable
-abstract class RegisterStartState {
+abstract class RegisterStartState extends Equatable {
   const RegisterStartState();
 }
 
 class RegisterStartInitial extends RegisterStartState {
   const RegisterStartInitial();
+
+  @override
+  List<Object> get props => [identityHashCode(this)];
 }
 
 class RegisterStartLoading extends RegisterStartState{
   const RegisterStartLoading();
+
+  @override
+  List<Object> get props => [identityHashCode(this)];
 }
 
 class RegisterStartAuthenticate extends RegisterStartState{
   const RegisterStartAuthenticate();
+
+  @override
+  List<Object> get props => [identityHashCode(this)];
 }
 
 class RegisterStartError extends RegisterStartState{
@@ -30,4 +39,7 @@ class RegisterStartError extends RegisterStartState{
 
   @override
   int get hashCode => message.hashCode;
+
+  @override
+  List<Object> get props => [identityHashCode(this)];
 }

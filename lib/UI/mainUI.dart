@@ -60,23 +60,25 @@ class _MainUI extends State<MainUI> {
               });
         }),
         body: Container(
-                decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: <Color>[Color(0xff240b36), Color(0xffc31432)])),
-                child: BlocBuilder<MainUiCubit, MainUiState>(
-                    builder: (context, state) {
-                  state as MainUiStateNavigate;
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[Color(0xff240b36), Color(0xffc31432)])),
+          child: BlocBuilder<MainUiCubit, MainUiState>(
+              builder: (context, state) {
+            state as MainUiStateNavigate;
 
-                  if (state.navbarItem == NavbarItem.akcie) {
-                    return EventsList();
-                  } else if (state.navbarItem == NavbarItem.vytvor_akciu) {
-                    return const NewEvent();
-                  } else if (state.navbarItem == NavbarItem.skupiny) {
-                    return const Groups();
-                  }
-                  return Container();
-                })));
+            if (state.navbarItem == NavbarItem.akcie) {
+              return EventsList();
+            } else if (state.navbarItem == NavbarItem.vytvor_akciu) {
+              return const NewEvent();
+            } else if (state.navbarItem == NavbarItem.skupiny) {
+              return const Groups();
+            }
+            return Container();
+          })));
   }
 }

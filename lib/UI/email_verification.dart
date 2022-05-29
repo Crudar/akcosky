@@ -37,8 +37,9 @@ class EmailVerification extends StatelessWidget{
                 }
                 else if (state is RegisterFinalError){
                   ScaffoldMessenger.of(context).showSnackBar(
+                    //TODO ADD KEYBOARD VISIBILITY - IF OFF SHOW AT BOTTOM
                       const SnackBar(
-                          content: Text("Chybný overovací kód")
+                          content: Text("Chybný overovací kód"),
                       )
                   );
                 }
