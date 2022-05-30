@@ -7,8 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PasswordInputWidget extends StatelessWidget {
-  const PasswordInputWidget({Key? key, required this.focusNode}) : super(key: key);
+  const PasswordInputWidget({Key? key, required this.focusNode, required this.passwordAgain}) : super(key: key);
 
+  final bool passwordAgain;
   final FocusNode focusNode;
 
   @override
@@ -50,7 +51,10 @@ class PasswordInputWidget extends StatelessWidget {
           onChanged: (value) {
 
             context.read<ValidationCubit>().onPasswordChanged(value);
-            context.read<ValidationCubit>().onPasswordAgainUnfocused();
+
+            if(passwordAgain) {
+              context.read<ValidationCubit>().onPasswordAgainUnfocused();
+            }
           },
           textInputAction: TextInputAction.next,
           style: Theme_.lightTextTheme.headline3,

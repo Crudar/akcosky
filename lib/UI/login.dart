@@ -1,18 +1,44 @@
+import 'package:akcosky/UI/validation_components/PasswordInputWidget.dart';
+import 'package:akcosky/UI/validation_components/PasswordInputWidgetWithCubit.dart';
+import 'package:akcosky/UI/validation_components/UsernameInputWidget.dart';
 import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:akcosky/theme.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:formz/formz.dart';
 
-class Login extends StatefulWidget{
+import '../cubit/validation/validation_cubit.dart';
+import '../models/validation/StringInput.dart';
+
+class Login extends StatelessWidget {
+
   const Login({Key? key}) : super(key: key);
 
   @override
-  State<Login> createState() => _LoginState();
+  Widget build(BuildContext context) {
+
+    Map<ValidationElement, FormzInput> input = {
+      ValidationElement.username: StringInput.pure(""),
+      ValidationElement.password: StringInput.pure("")
+    };
+
+    return BlocProvider<ValidationCubit>(
+          create: (BuildContext context) => ValidationCubit(inputsMap: input),
+          child: LoginForm(),
+    );
+  }
 }
 
-class _LoginState extends State<Login>{
+class LoginForm extends StatefulWidget{
+  const LoginForm({Key? key}) : super(key: key);
+
+  @override
+  State<LoginForm> createState() => _LoginState();
+}
+
+class _LoginState extends State<LoginForm>{
   bool passwordNotShown = true;
 
   var login = TextEditingController();
@@ -34,6 +60,33 @@ class _LoginState extends State<Login>{
         ..removeCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text("Bol si úspešne zaregistrovaný!")));
     }*/
+  }
+
+  final _usernameFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameFocusNode.addListener(() {
+      if (!_usernameFocusNode.hasFocus) {
+        context.read<ValidationCubit>().onUsernameUnfocused();
+        //FocusScope.of(context).requestFocus(_passwordFocusNode);
+      }
+    });
+    _passwordFocusNode.addListener(() {
+      if (!_passwordFocusNode.hasFocus) {
+        context.read<ValidationCubit>().onPasswordUnfocused();
+        //FocusScope.of(context).requestFocus(_passwordAgainFocusNode);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _usernameFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,53 +120,17 @@ class _LoginState extends State<Login>{
                       const SizedBox(
                         height: 25,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        child: TextField(
-                            controller: login,
-                            decoration: const InputDecoration(
-                              hintText: 'Zadaj prihlasovacie meno',
-                              prefixIcon: Icon(FontAwesomeIcons.user, color: Colors.white)
-                            ),
-                          style: Theme_.lightTextTheme.headline3,
-                          ),
-                      ),
+                      UsernameInputWidget(focusNode: _usernameFocusNode),
                       const SizedBox(
                         height: 25,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        child: TextField(
-                          controller: password,
-                          decoration: InputDecoration(
-                            hintText: 'Zadaj heslo',
-                            prefixIcon: const Icon(FontAwesomeIcons.lock, color: Colors.white),
-                              suffixIcon: IconButton(
-                                  onPressed: () => showPassword(),
-                                  icon: Icon(passwordNotShown ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash, color: Colors.white)
-                              )
-                          ),
-                          style: Theme_.lightTextTheme.headline3,
-                          obscureText: passwordNotShown
-                        ),
-                      ),
+                      PasswordInputWidgetWithCubit(focusNode: _passwordFocusNode, passwordAgain: false),
                       Center(
                           child: Column(
                               children:[
-                          Padding(
+                          const Padding(
                               padding: EdgeInsets.only(top: 50),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  BlocProvider.of<AuthenticationCubit>(context).login(login.text, password.text);
-                                },
-                                child: const Icon(FontAwesomeIcons.arrowRight),
-                                style: ElevatedButton.styleFrom(
-                                  shape: const CircleBorder(),
-                                  padding: const EdgeInsets.all(20),
-                                  primary: Color(0xff000428), // <-- Button color
-                                  onPrimary: Colors.white, // <-- Splash color
-                                )
-                              ),
+                              child: SubmitButtonWidget()
                             ),
                                 Padding(padding: const EdgeInsets.only(top: 15),
                                   child: Builder(
@@ -153,6 +170,32 @@ class _LoginState extends State<Login>{
           ],
         ),
         )
+    );
+  }
+}
+
+class SubmitButtonWidget extends StatelessWidget{
+  const SubmitButtonWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ValidationCubit, ValidationState>(
+      //buildWhen: (previous, current) => previous.status != current.status,
+        builder: (context, state){
+          return ElevatedButton(
+              onPressed: context.read<ValidationCubit>().status.isValidated
+                  ? () => BlocProvider.of<AuthenticationCubit>(context).login(context.read<ValidationCubit>().inputsMap[ValidationElement.username]?.value,
+                  context.read<ValidationCubit>().inputsMap[ValidationElement.password]?.value)
+                  : null,
+              child: const Icon(FontAwesomeIcons.arrowRight),
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(20),
+                primary: Color(0xff000428), // <-- Button color
+                onPrimary: Colors.white, // <-- Splash color
+              )
+          );
+        }
     );
   }
 }

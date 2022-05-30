@@ -204,7 +204,7 @@ class PasswordInputsWidget extends StatelessWidget{
       builder: (context, state) {
         return Column(
           children: [
-            PasswordInputWidget(focusNode: focusNodePassword1),
+            PasswordInputWidget(focusNode: focusNodePassword1, passwordAgain: true),
             const SizedBox(
               height: 25,
             ),

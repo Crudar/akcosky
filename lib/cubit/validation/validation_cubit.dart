@@ -76,7 +76,7 @@ class ValidationCubit extends Cubit<ValidationState> {
   }
 
   void onPasswordAgainUnfocused(){
-    inputsMap[ValidationElement.passwordAgain] = PasswordAgainInput.dirty(password1: inputsMap[ValidationElement.password]?.value, password2: inputsMap[ValidationElement.passwordAgain]?.value);
+    inputsMap[ValidationElement.passwordAgain] = PasswordAgainInput.dirty(password1: inputsMap[ValidationElement.password]?.value, password2: inputsMap[ValidationElement.passwordAgain]?.value ?? "");
 
     validate();
 
