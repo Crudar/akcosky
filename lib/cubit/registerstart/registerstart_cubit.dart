@@ -12,22 +12,22 @@ import '../../models/validation/PasswordAgainInput.dart';
 part 'registerstart_state.dart';
 
 class RegisterStartCubit extends Cubit<RegisterStartState> {
-   EmailInput email;
+   /*EmailInput email;
    StringInput username;
    StringInput password;
    PasswordAgainInput passwordAgain;
-   FormzStatus status;
+   FormzStatus status;*/
 
   final RegisterRepository registerRepository;
 
   RegisterStartCubit({required this.registerRepository,
-  this.email = const EmailInput.pure(),
+  /*this.email = const EmailInput.pure(),
   this.username = const StringInput.pure(),
   this.password = const StringInput.pure(),
   this.passwordAgain = const PasswordAgainInput.pure(""),
-  this.status = FormzStatus.pure}) : super(RegisterStartInitial());
+  this.status = FormzStatus.pure*/}) : super(RegisterStartInitial());
 
-  void onEmailChanged(String emailInput){
+  /*void onEmailChanged(String emailInput){
     final email_ = EmailInput.dirty(emailInput);
     email = email_.valid ? email_ : EmailInput.pure(emailInput);
     status = Formz.validate([email, username, password , passwordAgain]);
@@ -89,12 +89,12 @@ class RegisterStartCubit extends Cubit<RegisterStartState> {
      status = Formz.validate([email, username, password , passwordAgain]);
 
      emit(RegisterStartInitial());
-   }
+   }*/
 
-  Future<void> authenticate(/*String username_, String email_, String pass_*/) async {
-    registerRepository.login = username.value;
-    registerRepository.email = email.value;
-    registerRepository.password = password.value;
+  Future<void> authenticate(String username_, String email_, String pass_) async {
+    registerRepository.login = username_;
+    registerRepository.email = email_;
+    registerRepository.password = pass_;
 
     var rng = new Random();
     var code = rng.nextInt(900000) + 100000;

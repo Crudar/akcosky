@@ -1,12 +1,15 @@
-import 'package:akcosky/UI/email_verification.dart';
-import 'package:akcosky/models/validation/PasswordAgainInput.dart';
+import 'package:akcosky/UI/validation_components/EmailInputWidget.dart';
+import 'package:akcosky/UI/validation_components/PasswordAgainInputWidget.dart';
+import 'package:akcosky/UI/validation_components/PasswordInputWidget.dart';
+import 'package:akcosky/UI/validation_components/UsernameInputWidget.dart';
+import 'package:akcosky/cubit/validation/validation_cubit.dart';
+import 'package:akcosky/models/validation/EmailInput.dart';
+import 'package:akcosky/models/validation/StringInput.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:formz/formz.dart';
 import '../cubit/registerstart/registerstart_cubit.dart';
-import '../models/validation/EmailInput.dart';
-import '../models/validation/StringInput.dart';
+import '../models/validation/PasswordAgainInput.dart';
 import '../resources/RegisterRepository.dart';
 import '../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,14 +17,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class Register extends StatelessWidget {
   final RegisterRepository _registerRepository = RegisterRepository();
 
+  Register({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
+
+    Map<ValidationElement, FormzInput> input = {
+      ValidationElement.email: EmailInput.pure(""),
+      ValidationElement.username: StringInput.pure(""),
+      ValidationElement.password: StringInput.pure(""),
+      ValidationElement.passwordAgain: PasswordAgainInput.pure("")
+    };
+
     return RepositoryProvider.value(
         value: _registerRepository,
-        child: BlocProvider(
-        create: (context) => RegisterStartCubit(registerRepository: _registerRepository),
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<RegisterStartCubit>(
+              create: (context) => RegisterStartCubit(registerRepository: _registerRepository),
+            ),
+            BlocProvider<ValidationCubit>(
+              create: (BuildContext context) => ValidationCubit(inputsMap: input),
+            )
+          ],
           child: RegisterForm(),
-      )
+        )
     );
   }
 }
@@ -70,26 +90,28 @@ class _RegisterState extends State<RegisterForm>{
     super.initState();
     _emailFocusNode.addListener(() {
       if (!_emailFocusNode.hasFocus) {
-        context.read<RegisterStartCubit>().onEmailUnfocused();
+        context.read<ValidationCubit>().onEmailUnfocused();
         //FocusScope.of(context).requestFocus(_usernameFocusNode);
       }
     });
 
     _usernameFocusNode.addListener(() {
       if (!_usernameFocusNode.hasFocus) {
-        context.read<RegisterStartCubit>().onUsernameUnfocused();
+        context.read<ValidationCubit>().onUsernameUnfocused();
         //FocusScope.of(context).requestFocus(_passwordFocusNode);
       }
     });
     _passwordFocusNode.addListener(() {
       if (!_passwordFocusNode.hasFocus) {
-        context.read<RegisterStartCubit>().onPasswordUnfocused();
+        context.read<ValidationCubit>().onPasswordUnfocused();
         //FocusScope.of(context).requestFocus(_passwordAgainFocusNode);
       }
     });
     _passwordAgainFocusNode.addListener(() {
       if (!_passwordAgainFocusNode.hasFocus) {
-        context.read<RegisterStartCubit>().onPasswordAgainUnfocused();
+        context.read<ValidationCubit>().onPasswordAgainUnfocused();
+
+        FocusManager.instance.primaryFocus?.unfocus();
       }
     });
   }
@@ -106,7 +128,6 @@ class _RegisterState extends State<RegisterForm>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //resizeToAvoidBottomInset: true,
       body: Container(
           width: double.infinity,
           height: double.infinity,
@@ -121,25 +142,6 @@ class _RegisterState extends State<RegisterForm>{
                 )
               ),
             child: buildInitialRegisterForm()
-        /*BlocConsumer<RegisterStartCubit, RegisterStartState>(
-          listener: (context, state) {
-            if(state is RegisterStartAuthenticate){
-              Navigator.pushNamed(context, '/registerfinal', arguments: RepositoryProvider.of<RegisterRepository>(context));
-            }
-          },
-          builder: (context, state) {
-            if(state is RegisterStartInitial){
-              return buildInitialRegisterForm();
-            }
-            else if(state is RegisterStartLoading){
-              //TODO LOADING
-              return buildInitialRegisterForm();
-            }
-            else{
-              return buildInitialRegisterForm();
-            }
-          }
-      )*/
         )
     );
   }
@@ -176,82 +178,6 @@ class _RegisterState extends State<RegisterForm>{
                   height: 25,
                 ),
                 PasswordInputsWidget(focusNodePassword1: _passwordFocusNode, focusNodePassword2: _passwordAgainFocusNode),
-                /*Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: TextFormField(
-                    controller: password,
-                    validator: (value) => validateEmpty(value, "heslo"),
-                    decoration: InputDecoration(
-                        hintText: 'Zadaj heslo',
-                        prefixIcon: const Icon(FontAwesomeIcons.lock, color: Colors.white),
-                        errorStyle: const TextStyle(color: Colors.yellow),
-                        focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Colors.white,
-                            )
-                        ),
-                        errorBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Colors.yellow,
-                            )
-                        ),
-                        focusedErrorBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Colors.yellow,
-                            )
-                        ),
-                        suffixIcon: IconButton(
-                            onPressed: () => showPassword(),
-                            icon: Icon(passwordNotShown ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash, color: Colors.white)
-                        )
-                    ),
-                    style: Theme_.lightTextTheme.headline3,
-                    obscureText: passwordNotShown,
-                  ),
-                ),*/
-                /*const SizedBox(
-                  height: 25,
-                ),
-                PasswordAgainInputWidget(focusNode: _passwordAgainFocusNode),*/
-                /*Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: TextFormField(
-                    controller: password_again,
-                    validator: (value) => validatePasswordCheck(value, password.text, "heslo znova"),
-                    decoration: InputDecoration(
-                        hintText: 'Zadaj heslo znova',
-                        prefixIcon: const Icon(FontAwesomeIcons.lock, color: Colors.white),
-                        errorStyle: const TextStyle(color: Colors.yellow),
-                        focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Colors.white,
-                            )
-                        ),
-                        errorBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Colors.yellow,
-                            )
-                        ),
-                        focusedErrorBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Colors.yellow,
-                            )
-                        ),
-                        suffixIcon: IconButton(
-                            onPressed: () => showAgainPassword(),
-                            icon: Icon(passwordAgainNotShown ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash, color: Colors.white)
-                        )
-                    ),
-                    style: Theme_.lightTextTheme.headline3,
-                    obscureText: passwordAgainNotShown,
-                  ),
-                ),*/
                 const Center(
                     child: Padding(
                         padding: EdgeInsets.only(top: 50),
@@ -266,119 +192,6 @@ class _RegisterState extends State<RegisterForm>{
   }
 }
 
-class EmailInputWidget extends StatelessWidget {
-  const EmailInputWidget({Key? key, required this.focusNode}) : super(key: key);
-
-  final FocusNode focusNode;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: BlocBuilder<RegisterStartCubit, RegisterStartState>(
-          builder: (context, state) {
-            EmailInput emailValue = context.read<RegisterStartCubit>().email;
-
-            return TextFormField(
-                initialValue: emailValue.value,
-                focusNode: focusNode,
-                decoration: InputDecoration(
-                  hintText: 'Zadaj e-mail',
-                  prefixIcon: const Icon(FontAwesomeIcons.envelope, color: Colors.white),
-                  errorStyle: const TextStyle(color: Colors.yellow),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                        width: 1,
-                        color: Colors.white,
-                      )
-                  ),
-                  errorBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                        width: 1,
-                        color: Colors.yellow,
-                      )
-                  ),
-                  focusedErrorBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                        width: 1,
-                        color: Colors.yellow,
-                      )
-                  ),
-                  errorText: emailValue.invalid
-                      ? 'Zadaný e-mail je v zlom formáte'
-                      : null,
-                ),
-                keyboardType: TextInputType.emailAddress,
-                onChanged: (value) {
-
-                  context.read<RegisterStartCubit>().onEmailChanged(value);
-                },
-                textInputAction: TextInputAction.next,
-                style: Theme_.lightTextTheme.headline3,
-            );
-          },
-        )
-    );
-  }
-}
-
-class UsernameInputWidget extends StatelessWidget {
-  const UsernameInputWidget({Key? key, required this.focusNode}) : super(key: key);
-
-  final FocusNode focusNode;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: BlocBuilder<RegisterStartCubit, RegisterStartState>(
-        builder: (context, state) {
-          StringInput usernameValue = context.read<RegisterStartCubit>().username;
-
-          return TextFormField(
-            initialValue: usernameValue.value,
-            focusNode: focusNode,
-            decoration: InputDecoration(
-              hintText: 'Zadaj prihlasovacie meno',
-              prefixIcon: const Icon(FontAwesomeIcons.user, color: Colors.white),
-              errorStyle: const TextStyle(color: Colors.yellow),
-              focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.white,
-                  )
-              ),
-              errorBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.yellow,
-                  )
-              ),
-              focusedErrorBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.yellow,
-                  )
-              ),
-              errorText: usernameValue.invalid
-                  ? 'Prihlasovacie meno nesmie byť prázdne'
-                  : null,
-            ),
-            keyboardType: TextInputType.emailAddress,
-            onChanged: (value) {
-
-              context.read<RegisterStartCubit>().onUsernameChanged(value);
-            },
-            textInputAction: TextInputAction.next,
-            style: Theme_.lightTextTheme.headline3,
-          );
-
-        },
-      )
-    );
-  }
-}
-
 class PasswordInputsWidget extends StatelessWidget{
   const PasswordInputsWidget({Key? key, required this.focusNodePassword1, required this.focusNodePassword2}) : super(key: key);
 
@@ -387,7 +200,7 @@ class PasswordInputsWidget extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RegisterStartCubit, RegisterStartState>(
+    return BlocBuilder<ValidationCubit, ValidationState>(
       builder: (context, state) {
         return Column(
           children: [
@@ -403,136 +216,19 @@ class PasswordInputsWidget extends StatelessWidget{
   }
 }
 
-class PasswordInputWidget extends StatelessWidget {
-  const PasswordInputWidget({Key? key, required this.focusNode}) : super(key: key);
-
-  final FocusNode focusNode;
-
-  @override
-  Widget build(BuildContext context) {
-    StringInput passwordValue = context.read<RegisterStartCubit>().password;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: TextFormField(
-            initialValue: passwordValue.value,
-            focusNode: focusNode,
-            decoration: InputDecoration(
-              hintText: 'Zadaj heslo',
-              prefixIcon: const Icon(FontAwesomeIcons.lock, color: Colors.white),
-              errorStyle: const TextStyle(color: Colors.yellow),
-              focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.white,
-                  )
-              ),
-              errorBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.yellow,
-                  )
-              ),
-              focusedErrorBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.yellow,
-                  )
-              ),
-              errorText: passwordValue.invalid
-                  ? 'Heslo nesmie byť prázdne'
-                  : null,
-            ),
-            keyboardType: TextInputType.emailAddress,
-            onChanged: (value) {
-
-              context.read<RegisterStartCubit>().onPasswordChanged(value);
-              context.read<RegisterStartCubit>().onPasswordAgainUnfocused();
-            },
-            textInputAction: TextInputAction.next,
-            style: Theme_.lightTextTheme.headline3,
-          )
-      );
-  }
-}
-
-class PasswordAgainInputWidget extends StatelessWidget {
-  const PasswordAgainInputWidget({Key? key, required this.focusNode}) : super(key: key);
-
-  final FocusNode focusNode;
-
-  @override
-  Widget build(BuildContext context) {
-    PasswordAgainInput passwordAgainValue = context.read<RegisterStartCubit>().passwordAgain;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: TextFormField(
-            initialValue: passwordAgainValue.value,
-            focusNode: focusNode,
-            decoration: InputDecoration(
-              hintText: 'Zadaj heslo znova',
-              prefixIcon: const Icon(FontAwesomeIcons.lock, color: Colors.white),
-              errorStyle: const TextStyle(color: Colors.yellow),
-              focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.white,
-                  )
-              ),
-              errorBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.yellow,
-                  )
-              ),
-              focusedErrorBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.yellow,
-                  )
-              ),
-              errorText: passwordAgainValue.invalid ? returnErrorText(passwordAgainValue) : null,
-            ),
-            keyboardType: TextInputType.text,
-            onChanged: (value) {
-
-              context.read<RegisterStartCubit>().onPasswordAgainChanged(value);
-            },
-            textInputAction: TextInputAction.next,
-            style: Theme_.lightTextTheme.headline3,
-          )
-      );
-  }
-
-  String returnErrorText(PasswordAgainInput inputError){
-    switch(inputError.error){
-      case PasswordAgainInputError.invalid: {
-        return "Heslo nesmie byť prázdne";
-      }
-
-      case PasswordAgainInputError.mismatch:{
-        return "Heslá nie sú rovnaké";
-      }
-
-      default :{
-        return "";
-      }
-    }
-  }
-}
-
 class SubmitButtonWidget extends StatelessWidget{
   const SubmitButtonWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RegisterStartCubit, RegisterStartState>(
+    return BlocBuilder<ValidationCubit, ValidationState>(
         //buildWhen: (previous, current) => previous.status != current.status,
         builder: (context, state){
           return ElevatedButton(
-            onPressed: context.read<RegisterStartCubit>().status.isValidated
-            ? () => BlocProvider.of<RegisterStartCubit>(context).authenticate()
+            onPressed: context.read<ValidationCubit>().status.isValidated
+            ? () => BlocProvider.of<RegisterStartCubit>(context).authenticate(context.read<ValidationCubit>().inputsMap[ValidationElement.username]?.value,
+                context.read<ValidationCubit>().inputsMap[ValidationElement.email]?.value,
+                context.read<ValidationCubit>().inputsMap[ValidationElement.password]?.value)
                 : null,
             child: const Icon(FontAwesomeIcons.arrowRight),
               style: ElevatedButton.styleFrom(
