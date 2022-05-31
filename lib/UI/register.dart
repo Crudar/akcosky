@@ -141,7 +141,25 @@ class _RegisterState extends State<RegisterForm>{
                   ]
                 )
               ),
-            child: buildInitialRegisterForm()
+            child: BlocConsumer<RegisterStartCubit, RegisterStartState>(
+                listener: (context, state) {
+                  if(state is RegisterStartAuthenticate){
+                    Navigator.pushNamed(context, '/registerfinal', arguments: RepositoryProvider.of<RegisterRepository>(context));
+                  }
+                },
+                builder: (context, state) {
+                  if(state is RegisterStartInitial){
+                    return buildInitialRegisterForm();
+                  }
+                  else if(state is RegisterStartLoading){
+                    //TODO LOADING
+                    return buildInitialRegisterForm();
+                  }
+                  else{
+                    return buildInitialRegisterForm();
+                  }
+                }
+            )
         )
     );
   }
@@ -151,43 +169,41 @@ class _RegisterState extends State<RegisterForm>{
 
     return Form(
         key: _formKey,
-        child:
-          Expanded(
-            child: SingleChildScrollView(child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 100),
-                child: Center(
-                  child: Text(
-                    'Registrácia',
-                    style: Theme_.lightTextTheme.headline1,
-                    textAlign: TextAlign.center,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 100),
+              child: Center(
+                child: Text(
+                  'Registrácia',
+                  style: Theme_.lightTextTheme.headline1,
+                  textAlign: TextAlign.center,
                 )
-                )
-              ),
-                const SizedBox(
-                  height: 25,
-                ),
-                EmailInputWidget(focusNode: _emailFocusNode),
-                const SizedBox(
-                  height: 25,
-                ),
-                UsernameInputWidget(focusNode: _usernameFocusNode),
-                const SizedBox(
-                  height: 25,
-                ),
-                PasswordInputsWidget(focusNodePassword1: _passwordFocusNode, focusNodePassword2: _passwordAgainFocusNode),
-                const Center(
-                    child: Padding(
-                        padding: EdgeInsets.only(top: 50),
-                        child: SubmitButtonWidget()
-                    )
-                )
-              ],
+              )
             ),
-            )
+              const SizedBox(
+                height: 25,
+              ),
+              EmailInputWidget(focusNode: _emailFocusNode),
+              const SizedBox(
+                height: 25,
+              ),
+              UsernameInputWidget(focusNode: _usernameFocusNode),
+              const SizedBox(
+                height: 25,
+              ),
+              PasswordInputsWidget(focusNodePassword1: _passwordFocusNode, focusNodePassword2: _passwordAgainFocusNode),
+              const Center(
+                  child: Padding(
+                      padding: EdgeInsets.only(top: 50),
+                      child: SubmitButtonWidget()
+                  )
+              )
+            ],
           ),
+      ),
     );
   }
 }
@@ -235,6 +251,7 @@ class SubmitButtonWidget extends StatelessWidget{
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(20),
                 primary: Color(0xff000428), // <-- Button color
+                onSurface: Colors.black,
                 onPrimary: Colors.white, // <-- Splash color
               )
           );

@@ -16,7 +16,7 @@ class PasswordInputWidgetWithCubit extends StatelessWidget {
         builder: (context, state) {
           return Column(
             children: [
-              PasswordInputWidget(focusNode: focusNode, passwordAgain: true),
+              PasswordInputWidget(focusNode: focusNode, passwordAgain: passwordAgain),
             ],
           );
         }

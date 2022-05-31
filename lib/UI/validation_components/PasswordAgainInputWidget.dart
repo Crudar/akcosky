@@ -45,6 +45,7 @@ class PasswordAgainInputWidget extends StatelessWidget {
             errorText: passwordAgainValue.invalid ? returnErrorText(passwordAgainValue) : null,
           ),
           keyboardType: TextInputType.text,
+          obscureText: true,
           onChanged: (value) {
 
             context.read<ValidationCubit>().onPasswordAgainChanged(value);

@@ -192,6 +192,7 @@ class SubmitButtonWidget extends StatelessWidget{
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(20),
                 primary: Color(0xff000428), // <-- Button color
+                onSurface: Colors.black,
                 onPrimary: Colors.white, // <-- Splash color
               )
           );

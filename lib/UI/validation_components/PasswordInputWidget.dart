@@ -47,7 +47,8 @@ class PasswordInputWidget extends StatelessWidget {
                 ? 'Heslo nesmie byť prázdne'
                 : null,
           ),
-          keyboardType: TextInputType.emailAddress,
+          keyboardType: TextInputType.text,
+          obscureText: true,
           onChanged: (value) {
 
             context.read<ValidationCubit>().onPasswordChanged(value);
