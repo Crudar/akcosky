@@ -1,18 +1,66 @@
+import 'package:akcosky/UI/validation_components/VerificationCodeInputWidget.dart';
 import 'package:akcosky/cubit/registerfinal/registerfinal_cubit.dart';
+import 'package:akcosky/models/validation/VerificationCodeInput.dart';
 import 'package:akcosky/resources/RegisterRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:formz/formz.dart';
+import '../cubit/validation/validation_cubit.dart';
 import '../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class EmailVerification extends StatelessWidget{
-  final RegisterRepository registerRepository;
+class EmailVerification extends StatelessWidget {
+
   const EmailVerification({Key? key, required this.registerRepository}) : super(key: key);
+
+  final RegisterRepository registerRepository;
+
+  @override
+  Widget build(BuildContext context) {
+
+    Map<ValidationElement, FormzInput> input = {
+      ValidationElement.verificationCode: VerificationCodeInput.pure(""),
+    };
+
+    return BlocProvider<ValidationCubit>(
+      create: (BuildContext context) => ValidationCubit(inputsMap: input),
+      child: EmailVerificationForm(registerRepository: registerRepository),
+    );
+  }
+}
+
+class EmailVerificationForm extends StatefulWidget{
+  const EmailVerificationForm({Key? key, required this.registerRepository}) : super(key: key);
+  final RegisterRepository registerRepository;
+
+  @override
+  State<EmailVerificationForm> createState() => _VerificationState();
+}
+
+class _VerificationState extends State<EmailVerificationForm>{
+  final _verificationFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _verificationFocusNode.addListener(() {
+      if (!_verificationFocusNode.hasFocus) {
+        context.read<ValidationCubit>().onVerificationCodeUnfocused();
+        //FocusScope.of(context).requestFocus(_passwordFocusNode);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _verificationFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (context) => RegisterFinalCubit(registerRepository),
+        create: (context) => RegisterFinalCubit(widget.registerRepository),
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             body: Container(
@@ -57,7 +105,6 @@ class EmailVerification extends StatelessWidget{
       );
     }
   Widget buildInitialRegisterFinalForm(){
-    var verificationInput = TextEditingController();
 
     return Column(
       children: <Widget>[
@@ -76,40 +123,43 @@ class EmailVerification extends StatelessWidget{
               const SizedBox(
                 height: 25,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: TextField(
-                  controller: verificationInput,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Zadaj overovací kód z e-mailu',
-                    prefixIcon: Icon(FontAwesomeIcons.key, color: Colors.white),
-                  ),
-                  style: Theme_.lightTextTheme.headline3,
-                ),
-              ),
-              Center(
+               VerificationCodeInputWidget(focusNode: _verificationFocusNode),
+              const Center(
                   child: Padding(
                       padding: EdgeInsets.only(top: 50),
-                      child: Builder(builder: (context) => ElevatedButton(
-                          onPressed: () {
-                            BlocProvider.of<RegisterFinalCubit>(context).checkVerificationCode(verificationInput.text);
-                          },
-                          child: const Icon(FontAwesomeIcons.arrowRight),
-                          style: ElevatedButton.styleFrom(
-                            shape: const CircleBorder(),
-                            padding: const EdgeInsets.all(20),
-                            primary: Color(0xff000428), // <-- Button color
-                            onPrimary: Colors.white, // <-- Splash color
-                          )
-                      )
-                    )
+                      child: SubmitButtonWidget()
                   )
               )
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class SubmitButtonWidget extends StatelessWidget{
+  const SubmitButtonWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ValidationCubit, ValidationState>(
+      //buildWhen: (previous, current) => previous.status != current.status,
+        builder: (context, state){
+          return ElevatedButton(
+              onPressed: context.read<ValidationCubit>().status.isValidated
+                  ? () => BlocProvider.of<RegisterFinalCubit>(context).checkVerificationCode(context.read<ValidationCubit>().inputsMap[ValidationElement.verificationCode]?.value)
+                  : null,
+              child: const Icon(FontAwesomeIcons.arrowRight),
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(20),
+                primary: Color(0xff000428), // <-- Button color
+                onSurface: Colors.black,
+                onPrimary: Colors.white, // <-- Splash color
+              )
+          );
+        }
     );
   }
 }

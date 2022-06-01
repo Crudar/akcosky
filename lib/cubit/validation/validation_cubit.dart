@@ -1,3 +1,4 @@
+import 'package:akcosky/models/validation/VerificationCodeInput.dart';
 import 'package:bloc/bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:meta/meta.dart';
@@ -8,7 +9,7 @@ import '../../models/validation/StringInput.dart';
 
 part 'validation_state.dart';
 
-enum ValidationElement{username, password, passwordAgain, email}
+enum ValidationElement{username, password, passwordAgain, email, verificationCode}
 
 class ValidationCubit extends Cubit<ValidationState> {
   ValidationCubit({
@@ -77,6 +78,22 @@ class ValidationCubit extends Cubit<ValidationState> {
 
   void onPasswordAgainUnfocused(){
     inputsMap[ValidationElement.passwordAgain] = PasswordAgainInput.dirty(password1: inputsMap[ValidationElement.password]?.value, password2: inputsMap[ValidationElement.passwordAgain]?.value ?? "");
+
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void onVerificationCodeChanged(String verificationInput){
+    final verification_ = VerificationCodeInput.dirty(verificationInput);
+    inputsMap[ValidationElement.verificationCode] = verification_.valid ? verification_ : VerificationCodeInput.pure(verificationInput);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void onVerificationCodeUnfocused(){
+    inputsMap[ValidationElement.verificationCode] = VerificationCodeInput.dirty(inputsMap[ValidationElement.verificationCode]?.value);
 
     validate();
 
