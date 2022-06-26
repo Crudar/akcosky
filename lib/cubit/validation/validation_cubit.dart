@@ -1,3 +1,4 @@
+import 'package:akcosky/models/validation/ActivityTypeInput.dart';
 import 'package:akcosky/models/validation/DateInput.dart';
 import 'package:akcosky/models/validation/VerificationCodeInput.dart';
 import 'package:bloc/bloc.dart';
@@ -10,7 +11,7 @@ import '../../models/validation/StringInput.dart';
 
 part 'validation_state.dart';
 
-enum ValidationElement{username, password, passwordAgain, email, verificationCode, date}
+enum ValidationElement{username, password, passwordAgain, email, verificationCode, date, activityType}
 
 class ValidationCubit extends Cubit<ValidationState> {
   ValidationCubit({
@@ -119,6 +120,22 @@ class ValidationCubit extends Cubit<ValidationState> {
 
   void onDateUnfocused(){
     inputsMap[ValidationElement.date] = VerificationCodeInput.dirty(inputsMap[ValidationElement.date]?.value);
+
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void onActivityTypeClicked(){
+    final activityType_ = ActivityTypeInput.dirty(true);
+    inputsMap[ValidationElement.activityType] = activityType_.valid ? activityType_ : ActivityTypeInput.pure(true);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void onActivityTypeUnfocused(){
+    inputsMap[ValidationElement.activityType] = VerificationCodeInput.dirty(inputsMap[ValidationElement.activityType]?.value);
 
     validate();
 

@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:akcosky/UI/validation_components/event/ActivityTypeWidget.dart';
 import 'package:akcosky/UI/validation_components/event/DateInputWidget.dart';
 import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
 import 'package:akcosky/cubit/events/events_cubit.dart';
 import 'package:akcosky/cubit/newevent/newevent_cubit.dart';
 import 'package:akcosky/models/UserChip.dart';
+import 'package:akcosky/models/validation/DateInput.dart';
 import 'package:akcosky/resources/EventRepository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,7 @@ import 'package:formz/formz.dart';
 import '../Helpers/DatePickerColor.dart';
 import '../cubit/validation/validation_cubit.dart';
 import '../models/Group.dart';
+import '../models/validation/ActivityTypeInput.dart';
 import '../models/validation/StringInput.dart';
 import '../theme.dart';
 
@@ -27,7 +30,8 @@ class NewEvent extends StatelessWidget {
   Widget build(BuildContext context) {
 
     Map<ValidationElement, FormzInput> input = {
-      ValidationElement.date: StringInput.pure(""),
+      ValidationElement.date: DateInput.pure(false),
+      ValidationElement.activityType: ActivityTypeInput.pure(false)
     };
 
     EventRepository eventRepository = RepositoryProvider.of<EventRepository>(context);
@@ -209,7 +213,7 @@ class _NewEvent extends State<NewEventForm> {
           style: Theme_.lightTextTheme.headline2,
         ),
       ),
-      Container(margin: const EdgeInsets.only(top: 10), height: 60, child: listOfActivityTypes(context, actionTypes)),
+      ActivityTypeWidget(isError: false, actionTypes: actionTypes),
       Padding(
         padding: EdgeInsets.only(top: 5),
         child: Text(
@@ -238,46 +242,6 @@ class _NewEvent extends State<NewEventForm> {
       ),
       DateInputWidget(isError: false),
     ]);
-  }
-
-  Widget listOfActivityTypes(context, List<String> types) {
-    String currentSelectedActivityTypeIcon = BlocProvider.of<NewEventCubit>(context).selectedActivityTypeIcon;
-
-    return ListView.separated(
-        itemBuilder: (BuildContext context, index) {
-          final String currentItem = types[index];
-
-          if (currentItem != currentSelectedActivityTypeIcon) {
-            return ElevatedButton(
-                onPressed: () {
-                  BlocProvider.of<NewEventCubit>(context).updateSelectedActivityType(index, currentItem);
-                },
-                child: Image.asset(currentItem),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  padding: const EdgeInsets.all(7),
-                  primary: Colors.white, // <-- Button color
-                  onPrimary: Colors.white, // <-- Splash color
-                ));
-          } else {
-            return ElevatedButton(
-                onPressed: () {},
-                child: Image.asset(currentItem, color: Colors.white),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  padding: const EdgeInsets.all(7),
-                  primary: const Color(0xff000428), // <-- Button color
-                  onPrimary: Colors.white, // <-- Splash color
-                ));
-          }
-        },
-        itemCount: types.length,
-        shrinkWrap: true,
-        padding: EdgeInsets.all(5),
-        scrollDirection: Axis.horizontal,
-        separatorBuilder: (context, index) => const SizedBox(
-              width: 15,
-            ));
   }
 
   Widget participants(BuildContext context) {
