@@ -74,7 +74,7 @@ class _MainUI extends State<MainUI> {
             if (state.navbarItem == NavbarItem.akcie) {
               return EventsList();
             } else if (state.navbarItem == NavbarItem.vytvor_akciu) {
-              return const NewEvent();
+              return NewEvent();
             } else if (state.navbarItem == NavbarItem.skupiny) {
               return const Groups();
             }

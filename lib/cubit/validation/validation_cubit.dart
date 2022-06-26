@@ -1,3 +1,4 @@
+import 'package:akcosky/models/validation/DateInput.dart';
 import 'package:akcosky/models/validation/VerificationCodeInput.dart';
 import 'package:bloc/bloc.dart';
 import 'package:formz/formz.dart';
@@ -9,7 +10,7 @@ import '../../models/validation/StringInput.dart';
 
 part 'validation_state.dart';
 
-enum ValidationElement{username, password, passwordAgain, email, verificationCode}
+enum ValidationElement{username, password, passwordAgain, email, verificationCode, date}
 
 class ValidationCubit extends Cubit<ValidationState> {
   ValidationCubit({
@@ -94,6 +95,30 @@ class ValidationCubit extends Cubit<ValidationState> {
 
   void onVerificationCodeUnfocused(){
     inputsMap[ValidationElement.verificationCode] = VerificationCodeInput.dirty(inputsMap[ValidationElement.verificationCode]?.value);
+
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void onDateClicked(){
+    final date_ = DateInput.dirty(true);
+    inputsMap[ValidationElement.date] = date_.valid ? date_ : DateInput.pure(true);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void onDateUnClicked(){
+    final date_ = DateInput.dirty(false);
+    inputsMap[ValidationElement.date] = date_.valid ? date_ : DateInput.pure(false);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void onDateUnfocused(){
+    inputsMap[ValidationElement.date] = VerificationCodeInput.dirty(inputsMap[ValidationElement.date]?.value);
 
     validate();
 

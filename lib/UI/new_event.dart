@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:akcosky/UI/validation_components/event/DateInputWidget.dart';
 import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
 import 'package:akcosky/cubit/events/events_cubit.dart';
 import 'package:akcosky/cubit/newevent/newevent_cubit.dart';
@@ -10,19 +11,49 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:formz/formz.dart';
 
 import '../Helpers/DatePickerColor.dart';
+import '../cubit/validation/validation_cubit.dart';
 import '../models/Group.dart';
+import '../models/validation/StringInput.dart';
 import '../theme.dart';
 
-class NewEvent extends StatefulWidget {
-  const NewEvent({Key? key}) : super(key: key);
+class NewEvent extends StatelessWidget {
+
+  NewEvent({Key? key}) : super(key: key);
 
   @override
-  State<NewEvent> createState() => _NewEvent();
+  Widget build(BuildContext context) {
+
+    Map<ValidationElement, FormzInput> input = {
+      ValidationElement.date: StringInput.pure(""),
+    };
+
+    EventRepository eventRepository = RepositoryProvider.of<EventRepository>(context);
+
+    return MultiBlocProvider(
+          providers: [
+            BlocProvider<NewEventCubit>(
+              create: (context) => NewEventCubit(eventRepository),
+            ),
+            BlocProvider<ValidationCubit>(
+              create: (BuildContext context) => ValidationCubit(inputsMap: input),
+            )
+          ],
+          child: NewEventForm(),
+    );
+  }
 }
 
-class _NewEvent extends State<NewEvent> {
+class NewEventForm extends StatefulWidget {
+  const NewEventForm({Key? key}) : super(key: key);
+
+  @override
+  State<NewEventForm> createState() => _NewEvent();
+}
+
+class _NewEvent extends State<NewEventForm> {
   var eventTitle = TextEditingController();
   var eventDescription = TextEditingController();
   var eventPlace = TextEditingController();
@@ -32,21 +63,16 @@ class _NewEvent extends State<NewEvent> {
 
   @override
   Widget build(BuildContext context) {
-    EventRepository eventRepository = RepositoryProvider.of<EventRepository>(context);
 
-    return BlocProvider(
-      create: (context) => NewEventCubit(eventRepository),
-      child: BlocConsumer<NewEventCubit, NewEventState>(
-          listener: (context, state) {
+    return BlocConsumer<NewEventCubit, NewEventState>(listener: (context, state) {
         if (state is NewEventFinish) {
           Navigator.pop(context, true);
         } else if (state is NewEventError) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
         }
       }, builder: (context, state) {
         return initialNewEventPage(context);
-      }),
+      },
     );
   }
 
@@ -55,15 +81,13 @@ class _NewEvent extends State<NewEvent> {
 
     return FutureBuilder(
         future: _initImages(),
-        builder:
-            (BuildContext context, AsyncSnapshot<List<String>> actionTypes) {
+        builder: (BuildContext context, AsyncSnapshot<List<String>> actionTypes) {
           return SafeArea(
               left: false,
               right: false,
               child: Stepper(
                 currentStep: currentStep_,
-                controlsBuilder:
-                    (BuildContext context, ControlsDetails controls) {
+                controlsBuilder: (BuildContext context, ControlsDetails controls) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: Row(
@@ -74,27 +98,22 @@ class _NewEvent extends State<NewEvent> {
                                 onPressed: controls.onStepCancel,
                                 child: const Text('SPÄŤ'),
                                 style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                                   padding: const EdgeInsets.all(7),
                                   primary: Colors.white, // <-- Button color
-                                  onPrimary:
-                                      Color(0xff36454F), // <-- Splash color
+                                  onPrimary: Color(0xff36454F), // <-- Splash color
                                 )),
                           ),
                         const SizedBox(width: 15),
                         Expanded(
                             child: ElevatedButton(
-                                onPressed: controls.onStepContinue,
-                                child: currentStep_ != 2
-                                    ? const Text('ĎALEJ')
-                                    : const Text("DOKONČI"),
+                                onPressed: context.read<ValidationCubit>().status.isValidated
+                                    ? controls.onStepContinue : null,
+                                child: currentStep_ != 2 ? const Text('ĎALEJ') : const Text("DOKONČI"),
                                 style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                                   padding: const EdgeInsets.all(7),
-                                  primary:
-                                      Color(0xff000428), // <-- Button color
+                                  primary: Color(0xff000428), // <-- Button color
                                   onPrimary: Colors.white, // <-- Splash color
                                 ))),
                       ],
@@ -103,8 +122,7 @@ class _NewEvent extends State<NewEvent> {
                 },
                 onStepContinue: () {
                   if (currentStep_ != 2) {
-                    BlocProvider.of<NewEventCubit>(context)
-                        .updateStepperState(currentStep_ += 1);
+                    BlocProvider.of<NewEventCubit>(context).updateStepperState(currentStep_ += 1);
                   } else {
                     BlocProvider.of<NewEventCubit>(context).finishCreation(
                         eventTitle.text,
@@ -113,48 +131,35 @@ class _NewEvent extends State<NewEvent> {
                         eventTransport.text,
                         eventAccommodation.text,
                         eventEstimatedPrice.text,
-                        BlocProvider.of<AuthenticationCubit>(context)
-                            .userRepository
-                            .getUser()
-                            .id);
+                        BlocProvider.of<AuthenticationCubit>(context).userRepository.getUser().id);
                   }
                 },
                 onStepCancel: () {
-                  BlocProvider.of<NewEventCubit>(context)
-                      .updateStepperState(currentStep_ -= 1);
+                  BlocProvider.of<NewEventCubit>(context).updateStepperState(currentStep_ -= 1);
                 },
                 type: StepperType.horizontal,
                 steps: <Step>[
                   Step(
                     isActive: currentStep_ == 0,
-                    state: currentStep_ > 0
-                        ? StepState.complete
-                        : StepState.indexed,
+                    state: currentStep_ > 0 ? StepState.complete : StepState.indexed,
                     title: const Text('Základné \ninformácie'),
                     content: Container(
                       alignment: Alignment.centerLeft,
-                      child: basicInformation(
-                          context, actionTypes.data ?? List.empty()),
+                      child: basicInformation(context, actionTypes.data ?? List.empty()),
                     ),
                   ),
                   Step(
                     isActive: currentStep_ == 1,
-                    state: currentStep_ > 1
-                        ? StepState.complete
-                        : StepState.indexed,
+                    state: currentStep_ > 1 ? StepState.complete : StepState.indexed,
                     title: const Text('Účastníci'),
                     content: Container(
                         alignment: Alignment.centerLeft,
-                        child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 2000),
-                            child: participants(context))),
+                        child: AnimatedSwitcher(duration: const Duration(milliseconds: 2000), child: participants(context))),
                   ),
                   Step(
                     isActive: currentStep_ == 2,
                     title: const Text('Dodatočné\ninformácie'),
-                    content: Container(
-                        alignment: Alignment.centerLeft,
-                        child: additionalInformation()),
+                    content: Container(alignment: Alignment.centerLeft, child: additionalInformation()),
                   )
                 ],
               ));
@@ -165,14 +170,8 @@ class _NewEvent extends State<NewEvent> {
     context,
     List<String> actionTypes,
   ) {
-    bool isChecked = BlocProvider.of<NewEventCubit>(context).moreDayAction;
-    String dateAndTime = BlocProvider.of<NewEventCubit>(context).dateText;
 
-    DateTime actualDateTime = DateTime.now();
-    DateTime endDateTime = actualDateTime.add(const Duration(days: 1825));
-
-    return Column(
-        children: <Widget>[
+    return Column(children: <Widget>[
       Text(
         'Názov akcie',
         style: Theme_.lightTextTheme.headline2,
@@ -182,9 +181,7 @@ class _NewEvent extends State<NewEvent> {
         child: TextField(
           controller: eventTitle,
           keyboardType: TextInputType.text,
-          decoration: const InputDecoration(
-              hintText: 'Zadaj názov akcie',
-              prefixIcon: Icon(Icons.title, color: Colors.white)),
+          decoration: const InputDecoration(hintText: 'Zadaj názov akcie', prefixIcon: Icon(Icons.title, color: Colors.white)),
           style: Theme_.lightTextTheme.headline3,
         ),
       ),
@@ -201,23 +198,18 @@ class _NewEvent extends State<NewEvent> {
           controller: eventDescription,
           keyboardType: TextInputType.multiline,
           maxLines: null,
-          decoration: const InputDecoration(
-              hintText: 'Zadaj popis/plán akcie',
-              prefixIcon: Icon(FontAwesomeIcons.edit, color: Colors.white)),
+          decoration: const InputDecoration(hintText: 'Zadaj popis/plán akcie', prefixIcon: Icon(FontAwesomeIcons.edit, color: Colors.white)),
           style: Theme_.lightTextTheme.headline3,
         ),
       ),
       Padding(
         padding: EdgeInsets.only(top: 5),
         child: Text(
-          'Typ akcie',
+          'Vyber typ akcie',
           style: Theme_.lightTextTheme.headline2,
         ),
       ),
-      Container(
-          margin: const EdgeInsets.only(top: 10),
-          height: 60,
-          child: listOfActivityTypes(context, actionTypes)),
+      Container(margin: const EdgeInsets.only(top: 10), height: 60, child: listOfActivityTypes(context, actionTypes)),
       Padding(
         padding: EdgeInsets.only(top: 5),
         child: Text(
@@ -231,10 +223,8 @@ class _NewEvent extends State<NewEvent> {
           controller: eventPlace,
           keyboardType: TextInputType.text,
           maxLines: null,
-          decoration: const InputDecoration(
-              hintText: 'Zadaj miesto konania akcie',
-              prefixIcon:
-                  Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.white)),
+          decoration:
+              const InputDecoration(hintText: 'Zadaj miesto konania akcie', prefixIcon: Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.white)),
           //TODO - miesto na výber z google máp
           style: Theme_.lightTextTheme.headline3,
         ),
@@ -246,73 +236,12 @@ class _NewEvent extends State<NewEvent> {
           style: Theme_.lightTextTheme.headline2,
         ),
       ),
-      Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              Checkbox(
-                  value: isChecked,
-                  fillColor: MaterialStateProperty.resolveWith(getColor),
-                  onChanged: (bool? newValue) {
-                    BlocProvider.of<NewEventCubit>(context)
-                        .updateMoreDayCheckbox();
-                  }),
-              Text("Viacdňová akcia", style: Theme_.lightTextTheme.headline3)
-            ],
-          )),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        child: GestureDetector(
-            onTap: () async {
-              if (!isChecked) {
-                await showDatePicker(
-                        context: context,
-                        locale: const Locale("sk", "SK"),
-                        initialDate: actualDateTime,
-                        firstDate: actualDateTime,
-                        lastDate: endDateTime,
-                        helpText: 'Vyber dátum a čas')
-                    .then((value) => BlocProvider.of<NewEventCubit>(context)
-                        .updateDate(value));
-
-                await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                        initialEntryMode: TimePickerEntryMode.dial)
-                    .then((value) => BlocProvider.of<NewEventCubit>(context)
-                        .updateTime(value));
-              } else {
-                await showDateRangePicker(
-                        context: context,
-                        locale: const Locale("sk", "SK"),
-                        firstDate: actualDateTime,
-                        lastDate: endDateTime,
-                        helpText: 'Vyber dátum a čas')
-                    .then((value) => BlocProvider.of<NewEventCubit>(context)
-                        .updateDateRange(value));
-              }
-            },
-            child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white),
-                    borderRadius: BorderRadius.circular(5)),
-                child: Row(children: [
-                  const Padding(
-                    padding: EdgeInsets.all(15),
-                    child: Icon(FontAwesomeIcons.calendar, color: Colors.white),
-                  ),
-                  Text(
-                    dateAndTime,
-                    style: Theme_.lightTextTheme.headline3,
-                  ),
-                ]))), //TODO - DatePicker
-      )
+      DateInputWidget(isError: false),
     ]);
   }
 
   Widget listOfActivityTypes(context, List<String> types) {
-    String currentSelectedActivityTypeIcon =
-        BlocProvider.of<NewEventCubit>(context).selectedActivityTypeIcon;
+    String currentSelectedActivityTypeIcon = BlocProvider.of<NewEventCubit>(context).selectedActivityTypeIcon;
 
     return ListView.separated(
         itemBuilder: (BuildContext context, index) {
@@ -321,13 +250,11 @@ class _NewEvent extends State<NewEvent> {
           if (currentItem != currentSelectedActivityTypeIcon) {
             return ElevatedButton(
                 onPressed: () {
-                  BlocProvider.of<NewEventCubit>(context)
-                      .updateSelectedActivityType(index, currentItem);
+                  BlocProvider.of<NewEventCubit>(context).updateSelectedActivityType(index, currentItem);
                 },
                 child: Image.asset(currentItem),
                 style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                   padding: const EdgeInsets.all(7),
                   primary: Colors.white, // <-- Button color
                   onPrimary: Colors.white, // <-- Splash color
@@ -337,8 +264,7 @@ class _NewEvent extends State<NewEvent> {
                 onPressed: () {},
                 child: Image.asset(currentItem, color: Colors.white),
                 style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                   padding: const EdgeInsets.all(7),
                   primary: const Color(0xff000428), // <-- Button color
                   onPrimary: Colors.white, // <-- Splash color
@@ -355,10 +281,7 @@ class _NewEvent extends State<NewEvent> {
   }
 
   Widget participants(BuildContext context) {
-    Map<String, Group> groups = BlocProvider.of<AuthenticationCubit>(context)
-        .userRepository
-        .getUser()
-        .groups;
+    Map<String, Group> groups = BlocProvider.of<AuthenticationCubit>(context).userRepository.getUser().groups;
     Group selectedGroup = BlocProvider.of<NewEventCubit>(context).selectedGroup;
     Map<String, UserChip> participants = BlocProvider.of<NewEventCubit>(context).usersFromSelectedGroup;
     bool chooseAll_ = BlocProvider.of<NewEventCubit>(context).chooseAll;
@@ -367,24 +290,20 @@ class _NewEvent extends State<NewEvent> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Center(
-            child:
-                Text("Vyber skupinu", style: Theme_.lightTextTheme.headline2)),
+        Center(child: Text("Vyber skupinu", style: Theme_.lightTextTheme.headline2)),
         Wrap(direction: Axis.horizontal, children: returnUserChips(context, groups, selectedGroup)),
-        if (selectedGroup.id != "")
-          Center(
-              child: Text("Vyber účastníkov",
-                  style: Theme_.lightTextTheme.headline2)),
+        if (selectedGroup.id != "") Center(child: Text("Vyber účastníkov", style: Theme_.lightTextTheme.headline2)),
         selectAll(context, chooseAll_, selectedGroup.id),
-        Wrap(direction: Axis.horizontal, children: List<Widget>.generate(participants.length, (index)
-        {
-          return userChip(context, participants.values.elementAt(index));
-        }) ),
+        Wrap(
+            direction: Axis.horizontal,
+            children: List<Widget>.generate(participants.length, (index) {
+              return userChip(context, participants.values.elementAt(index));
+            })),
       ],
     );
   }
 
-  List<Widget> returnUserChips(BuildContext context, Map<String, Group> groups, Group selectedGroup){
+  List<Widget> returnUserChips(BuildContext context, Map<String, Group> groups, Group selectedGroup) {
     List<Widget> widgets = List.empty(growable: true);
     groups.forEach((key, value) => widgets.add(groupChip(context, value, selectedGroup)));
 
@@ -401,8 +320,7 @@ class _NewEvent extends State<NewEvent> {
               ),
               backgroundColor: const Color(0xff000428),
               onPressed: () {
-                BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedUser(userChip.user.id);
+                BlocProvider.of<NewEventCubit>(context).updateSelectedUser(userChip.user.id);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     } else {
@@ -414,8 +332,7 @@ class _NewEvent extends State<NewEvent> {
               ),
               backgroundColor: Colors.white,
               onPressed: () {
-                BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedUser(userChip.user.id);
+                BlocProvider.of<NewEventCubit>(context).updateSelectedUser(userChip.user.id);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     }
@@ -431,8 +348,7 @@ class _NewEvent extends State<NewEvent> {
               ),
               backgroundColor: const Color(0xff000428),
               onPressed: () {
-                BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedGroup(group);
+                BlocProvider.of<NewEventCubit>(context).updateSelectedGroup(group);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     } else {
@@ -444,8 +360,7 @@ class _NewEvent extends State<NewEvent> {
               ),
               backgroundColor: Colors.white,
               onPressed: () {
-                BlocProvider.of<NewEventCubit>(context)
-                    .updateSelectedGroup(group);
+                BlocProvider.of<NewEventCubit>(context).updateSelectedGroup(group);
               }),
           padding: const EdgeInsets.only(left: 3, right: 3));
     }
@@ -465,8 +380,7 @@ class _NewEvent extends State<NewEvent> {
             ),
             backgroundColor: const Color(0xff000428),
             onPressed: () {
-              BlocProvider.of<NewEventCubit>(context)
-                  .updateAllUsersInSelectedGroup();
+              BlocProvider.of<NewEventCubit>(context).updateAllUsersInSelectedGroup();
             });
       } else {
         return ActionChip(
@@ -480,8 +394,7 @@ class _NewEvent extends State<NewEvent> {
             ),
             backgroundColor: Colors.white,
             onPressed: () {
-              BlocProvider.of<NewEventCubit>(context)
-                  .updateAllUsersInSelectedGroup();
+              BlocProvider.of<NewEventCubit>(context).updateAllUsersInSelectedGroup();
             });
       }
     } else {
@@ -500,9 +413,7 @@ class _NewEvent extends State<NewEvent> {
         child: TextField(
           controller: eventTransport,
           keyboardType: TextInputType.text,
-          decoration: const InputDecoration(
-              hintText: 'Vlož link na dopravu',
-              prefixIcon: Icon(FontAwesomeIcons.plane, color: Colors.white)),
+          decoration: const InputDecoration(hintText: 'Vlož link na dopravu', prefixIcon: Icon(FontAwesomeIcons.plane, color: Colors.white)),
           style: Theme_.lightTextTheme.headline3,
         ),
       ),
@@ -519,9 +430,7 @@ class _NewEvent extends State<NewEvent> {
           controller: eventAccommodation,
           keyboardType: TextInputType.multiline,
           maxLines: null,
-          decoration: const InputDecoration(
-              hintText: 'Vlož link na ubytovanie',
-              prefixIcon: Icon(FontAwesomeIcons.hotel, color: Colors.white)),
+          decoration: const InputDecoration(hintText: 'Vlož link na ubytovanie', prefixIcon: Icon(FontAwesomeIcons.hotel, color: Colors.white)),
           style: Theme_.lightTextTheme.headline3,
         ),
       ),
@@ -538,9 +447,7 @@ class _NewEvent extends State<NewEvent> {
           controller: eventEstimatedPrice,
           keyboardType: TextInputType.multiline,
           maxLines: null,
-          decoration: const InputDecoration(
-              hintText: 'Zadaj odhadovanú cenu',
-              prefixIcon: Icon(FontAwesomeIcons.euroSign, color: Colors.white)),
+          decoration: const InputDecoration(hintText: 'Zadaj odhadovanú cenu', prefixIcon: Icon(FontAwesomeIcons.euroSign, color: Colors.white)),
           style: Theme_.lightTextTheme.headline3,
         ),
       ),
@@ -553,9 +460,7 @@ class _NewEvent extends State<NewEvent> {
     final Map<String, dynamic> manifestMap = json.decode(manifestContent);
     // >> To get paths you need these 2 lines
 
-    final imagePaths = manifestMap.keys
-        .where((String key) => key.contains('activityTypes/'))
-        .toList();
+    final imagePaths = manifestMap.keys.where((String key) => key.contains('activityTypes/')).toList();
 
     return imagePaths;
   }
