@@ -11,7 +11,7 @@ import '../../models/validation/StringInput.dart';
 
 part 'validation_state.dart';
 
-enum ValidationElement{username, password, passwordAgain, email, verificationCode, date, activityType}
+enum ValidationElement{username, password, passwordAgain, email, verificationCode, title, description, place, date, activityType}
 
 class ValidationCubit extends Cubit<ValidationState> {
   ValidationCubit({
@@ -119,7 +119,7 @@ class ValidationCubit extends Cubit<ValidationState> {
   }
 
   void onDateUnfocused(){
-    inputsMap[ValidationElement.date] = VerificationCodeInput.dirty(inputsMap[ValidationElement.date]?.value);
+    inputsMap[ValidationElement.date] = DateInput.dirty(inputsMap[ValidationElement.date]?.value);
 
     validate();
 
@@ -136,6 +136,22 @@ class ValidationCubit extends Cubit<ValidationState> {
 
   void onActivityTypeUnfocused(){
     inputsMap[ValidationElement.activityType] = VerificationCodeInput.dirty(inputsMap[ValidationElement.activityType]?.value);
+
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void onNewEventInputChanged(String input, ValidationElement element){
+    final newEventInput = StringInput.dirty(input);
+    inputsMap[element] = newEventInput.valid ? newEventInput : StringInput.pure(input);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void onNewEventInputUnfocused(ValidationElement element){
+    inputsMap[element] = StringInput.dirty(inputsMap[element]?.value);
 
     validate();
 

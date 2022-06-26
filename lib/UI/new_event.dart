@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:akcosky/UI/validation_components/event/ActivityTypeWidget.dart';
 import 'package:akcosky/UI/validation_components/event/DateInputWidget.dart';
+import 'package:akcosky/UI/validation_components/event/NewEventInputWidget.dart';
 import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
 import 'package:akcosky/cubit/events/events_cubit.dart';
 import 'package:akcosky/cubit/newevent/newevent_cubit.dart';
@@ -30,6 +31,9 @@ class NewEvent extends StatelessWidget {
   Widget build(BuildContext context) {
 
     Map<ValidationElement, FormzInput> input = {
+      ValidationElement.title: StringInput.pure(''),
+      ValidationElement.description: StringInput.pure(''),
+      ValidationElement.place: StringInput.pure(''),
       ValidationElement.date: DateInput.pure(false),
       ValidationElement.activityType: ActivityTypeInput.pure(false)
     };
@@ -64,6 +68,44 @@ class _NewEvent extends State<NewEventForm> {
   var eventTransport = TextEditingController();
   var eventAccommodation = TextEditingController();
   var eventEstimatedPrice = TextEditingController();
+
+  final _titleFocusNode = FocusNode();
+  final _descriptionFocusNode = FocusNode();
+  final _placeFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _titleFocusNode.addListener(() {
+      if (!_titleFocusNode.hasFocus) {
+        context.read<ValidationCubit>().onNewEventInputUnfocused(ValidationElement.title);
+        //FocusScope.of(context).requestFocus(_usernameFocusNode);
+      }
+    });
+
+    _descriptionFocusNode.addListener(() {
+      if (!_descriptionFocusNode.hasFocus) {
+        context.read<ValidationCubit>().onNewEventInputUnfocused(ValidationElement.description);
+        //FocusScope.of(context).requestFocus(_usernameFocusNode);
+      }
+    });
+
+    _placeFocusNode.addListener(() {
+      if (!_placeFocusNode.hasFocus) {
+        context.read<ValidationCubit>().onNewEventInputUnfocused(ValidationElement.place);
+
+        FocusManager.instance.primaryFocus?.unfocus();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _titleFocusNode.dispose();
+    _descriptionFocusNode.dispose();
+    _placeFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,15 +222,8 @@ class _NewEvent extends State<NewEventForm> {
         'Názov akcie',
         style: Theme_.lightTextTheme.headline2,
       ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        child: TextField(
-          controller: eventTitle,
-          keyboardType: TextInputType.text,
-          decoration: const InputDecoration(hintText: 'Zadaj názov akcie', prefixIcon: Icon(Icons.title, color: Colors.white)),
-          style: Theme_.lightTextTheme.headline3,
-        ),
-      ),
+      NewEventInputWidget(focusNode: _titleFocusNode, element_: ValidationElement.title, icon: Icons.title, hintText: "Zadaj názov akcie",
+          errorText: "Názov akcie nesmie byť prázdny"),
       Padding(
         padding: EdgeInsets.only(top: 5),
         child: Text(
@@ -196,16 +231,8 @@ class _NewEvent extends State<NewEventForm> {
           style: Theme_.lightTextTheme.headline2,
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        child: TextField(
-          controller: eventDescription,
-          keyboardType: TextInputType.multiline,
-          maxLines: null,
-          decoration: const InputDecoration(hintText: 'Zadaj popis/plán akcie', prefixIcon: Icon(FontAwesomeIcons.edit, color: Colors.white)),
-          style: Theme_.lightTextTheme.headline3,
-        ),
-      ),
+      NewEventInputWidget(focusNode: _descriptionFocusNode, element_: ValidationElement.description, icon: FontAwesomeIcons.edit, hintText: "Zadaj popis/plán akcie",
+        errorText: "Popis/plán akcie nesmie byť prázdny", keyboard: TextInputType.multiline,),
       Padding(
         padding: EdgeInsets.only(top: 5),
         child: Text(
@@ -221,18 +248,8 @@ class _NewEvent extends State<NewEventForm> {
           style: Theme_.lightTextTheme.headline2,
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        child: TextField(
-          controller: eventPlace,
-          keyboardType: TextInputType.text,
-          maxLines: null,
-          decoration:
-              const InputDecoration(hintText: 'Zadaj miesto konania akcie', prefixIcon: Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.white)),
-          //TODO - miesto na výber z google máp
-          style: Theme_.lightTextTheme.headline3,
-        ),
-      ),
+      NewEventInputWidget(focusNode: _placeFocusNode, element_: ValidationElement.place, icon: FontAwesomeIcons.mapMarkerAlt, hintText: "Zadaj miesto konania akcie",
+        errorText: "Miesto akcie nesmie byť prázdne"),
       Padding(
         padding: EdgeInsets.only(top: 10),
         child: Text(
