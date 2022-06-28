@@ -125,91 +125,103 @@ class _NewEvent extends State<NewEventForm> {
   Widget initialNewEventPage(BuildContext context) {
     int currentStep_ = BlocProvider.of<NewEventCubit>(context).stepperState;
 
-    return FutureBuilder(
-        future: _initImages(),
-        builder: (BuildContext context, AsyncSnapshot<List<String>> actionTypes) {
-          return SafeArea(
-              left: false,
-              right: false,
-              child: Stepper(
-                currentStep: currentStep_,
-                controlsBuilder: (BuildContext context, ControlsDetails controls) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Row(
-                      children: <Widget>[
-                        if (currentStep_ != 0)
+    return BlocBuilder<ValidationCubit, ValidationState>(
+      builder: (context, state)
+    {
+      return FutureBuilder(
+          future: _initImages(),
+          builder: (BuildContext context, AsyncSnapshot<List<String>> actionTypes) {
+            return SafeArea(
+                left: false,
+                right: false,
+                child: Stepper(
+                  currentStep: currentStep_,
+                  controlsBuilder: (BuildContext context, ControlsDetails controls) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Row(
+                        children: <Widget>[
+                          if (currentStep_ != 0)
+                            Expanded(
+                              child: ElevatedButton(
+                                  onPressed: controls.onStepCancel,
+                                  child: const Text('SPÄŤ'),
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                                    padding: const EdgeInsets.all(7),
+                                    primary: Colors.white, // <-- Button color
+                                    onPrimary: Color(0xff36454F), // <-- Splash color
+                                  )),
+                            ),
+                          const SizedBox(width: 15),
                           Expanded(
-                            child: ElevatedButton(
-                                onPressed: controls.onStepCancel,
-                                child: const Text('SPÄŤ'),
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                                  padding: const EdgeInsets.all(7),
-                                  primary: Colors.white, // <-- Button color
-                                  onPrimary: Color(0xff36454F), // <-- Splash color
-                                )),
-                          ),
-                        const SizedBox(width: 15),
-                        Expanded(
-                            child: ElevatedButton(
-                                onPressed: context.read<ValidationCubit>().status.isValidated
-                                    ? controls.onStepContinue : null,
-                                child: currentStep_ != 2 ? const Text('ĎALEJ') : const Text("DOKONČI"),
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                                  padding: const EdgeInsets.all(7),
-                                  primary: Color(0xff000428), // <-- Button color
-                                  onPrimary: Colors.white, // <-- Splash color
-                                ))),
-                      ],
-                    ),
-                  );
-                },
-                onStepContinue: () {
-                  if (currentStep_ != 2) {
-                    BlocProvider.of<NewEventCubit>(context).updateStepperState(currentStep_ += 1);
-                  } else {
-                    BlocProvider.of<NewEventCubit>(context).finishCreation(
-                        eventTitle.text,
-                        eventDescription.text,
-                        eventPlace.text,
-                        eventTransport.text,
-                        eventAccommodation.text,
-                        eventEstimatedPrice.text,
-                        BlocProvider.of<AuthenticationCubit>(context).userRepository.getUser().id);
-                  }
-                },
-                onStepCancel: () {
-                  BlocProvider.of<NewEventCubit>(context).updateStepperState(currentStep_ -= 1);
-                },
-                type: StepperType.horizontal,
-                steps: <Step>[
-                  Step(
-                    isActive: currentStep_ == 0,
-                    state: currentStep_ > 0 ? StepState.complete : StepState.indexed,
-                    title: const Text('Základné \ninformácie'),
-                    content: Container(
-                      alignment: Alignment.centerLeft,
-                      child: basicInformation(context, actionTypes.data ?? List.empty()),
-                    ),
-                  ),
-                  Step(
-                    isActive: currentStep_ == 1,
-                    state: currentStep_ > 1 ? StepState.complete : StepState.indexed,
-                    title: const Text('Účastníci'),
-                    content: Container(
+                              child: ElevatedButton(
+                                  onPressed: context
+                                      .read<ValidationCubit>()
+                                      .status
+                                      .isValidated
+                                      ? controls.onStepContinue : null,
+                                  child: currentStep_ != 2 ? const Text('ĎALEJ') : const Text("DOKONČI"),
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                                    padding: const EdgeInsets.all(7),
+                                    primary: Color(0xff000428), // <-- Button color
+                                    onPrimary: Colors.white, // <-- Splash color
+                                  ))),
+                        ],
+                      ),
+                    );
+                  },
+                  onStepContinue: () {
+                    if (currentStep_ != 2) {
+                      BlocProvider.of<NewEventCubit>(context).updateStepperState(currentStep_ += 1);
+                    } else {
+                      BlocProvider.of<NewEventCubit>(context).finishCreation(
+                          eventTitle.text,
+                          eventDescription.text,
+                          eventPlace.text,
+                          eventTransport.text,
+                          eventAccommodation.text,
+                          eventEstimatedPrice.text,
+                          BlocProvider
+                              .of<AuthenticationCubit>(context)
+                              .userRepository
+                              .getUser()
+                              .id);
+                    }
+                  },
+                  onStepCancel: () {
+                    BlocProvider.of<NewEventCubit>(context).updateStepperState(currentStep_ -= 1);
+                  },
+                  type: StepperType.horizontal,
+                  steps: <Step>[
+                    Step(
+                      isActive: currentStep_ == 0,
+                      state: currentStep_ > 0 ? StepState.complete : StepState.indexed,
+                      title: const Text('Základné \ninformácie'),
+                      content: Container(
                         alignment: Alignment.centerLeft,
-                        child: AnimatedSwitcher(duration: const Duration(milliseconds: 2000), child: participants(context))),
-                  ),
-                  Step(
-                    isActive: currentStep_ == 2,
-                    title: const Text('Dodatočné\ninformácie'),
-                    content: Container(alignment: Alignment.centerLeft, child: additionalInformation()),
-                  )
-                ],
-              ));
-        });
+                        child: basicInformation(context, actionTypes.data ?? List.empty()),
+                      ),
+                    ),
+                    Step(
+                      isActive: currentStep_ == 1,
+                      state: currentStep_ > 1 ? StepState.complete : StepState.indexed,
+                      title: const Text('Účastníci'),
+                      content: Container(
+                          alignment: Alignment.centerLeft,
+                          child: AnimatedSwitcher(duration: const Duration(milliseconds: 2000), child: participants(context))),
+                    ),
+                    Step(
+                      isActive: currentStep_ == 2,
+                      title: const Text('Dodatočné\ninformácie'),
+                      content: Container(alignment: Alignment.centerLeft, child: additionalInformation()),
+                    )
+                  ],
+                ));
+          });
+    }
+    );
   }
 
   Widget basicInformation(
