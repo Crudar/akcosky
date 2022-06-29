@@ -67,7 +67,6 @@ class NewEventInputWidget extends StatelessWidget{
 
                 context.read<ValidationCubit>().onNewEventInputChanged(value, element_);
               },
-              textInputAction: TextInputAction.next,
               style: Theme_.lightTextTheme.headline3,
             );
           },
