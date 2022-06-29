@@ -79,7 +79,7 @@ class _NewEvent extends State<NewEventForm> {
     _titleFocusNode.addListener(() {
       if (!_titleFocusNode.hasFocus) {
         context.read<ValidationCubit>().onNewEventInputUnfocused(ValidationElement.title);
-        //FocusScope.of(context).requestFocus(_usernameFocusNode);
+        FocusScope.of(context).requestFocus(_descriptionFocusNode);
       }
     });
 
