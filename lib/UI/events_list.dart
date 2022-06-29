@@ -12,6 +12,7 @@ import '../models/User.dart';
 import '../theme.dart';
 import 'package:timelines/timelines.dart';
 
+import 'events_list_shimmer.dart';
 import 'new_event.dart';
 
 class EventsList extends StatelessWidget {
@@ -49,24 +50,30 @@ class EventsListState extends State<EventsListView> {
       future: _getEventForUser(eventRepository, user),
       builder: (BuildContext context,
           AsyncSnapshot<Map<int?, List<Event_>>> events) {
-        return SingleChildScrollView(
-          child: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(padding: const EdgeInsets.only(left: 5),
-                    child: Text("Akcošky", style: Theme_.lightTextTheme.headline2)),
-                Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    //children: <Widget>[listOfEvents(events.data)],
-                  children: <Widget>[returnWidgetsBasedOnEvents(events.data)],
-                  )
-              ],
-            ),
-          ),
-        );
+
+        switch(events.connectionState){
+          case(ConnectionState.waiting):
+            return const EventsListShimmer();
+          default:
+            return SingleChildScrollView(
+              child: SafeArea(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(padding: const EdgeInsets.only(left: 5),
+                        child: Text("Akcošky", style: Theme_.lightTextTheme.headline2)),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      //children: <Widget>[listOfEvents(events.data)],
+                      children: <Widget>[returnWidgetsBasedOnEvents(events.data)],
+                    )
+                  ],
+                ),
+              ),
+            );
+        }
       },
     );
   }

@@ -8,6 +8,7 @@ import '../cubit/events/events_cubit.dart';
 import '../theme.dart';
 import 'package:timelines/timelines.dart';
 
+import 'events_list_shimmer.dart';
 import 'groups.dart';
 
 class MainUI extends StatefulWidget {
@@ -73,6 +74,7 @@ class _MainUI extends State<MainUI> {
 
             if (state.navbarItem == NavbarItem.akcie) {
               return EventsList();
+              //return EventsListShimmer();
             } else if (state.navbarItem == NavbarItem.vytvor_akciu) {
               return NewEvent();
             } else if (state.navbarItem == NavbarItem.skupiny) {
