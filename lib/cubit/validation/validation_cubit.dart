@@ -1,5 +1,6 @@
 import 'package:akcosky/models/validation/ActivityTypeInput.dart';
 import 'package:akcosky/models/validation/DateInput.dart';
+import 'package:akcosky/models/validation/ParticipantsInput.dart';
 import 'package:akcosky/models/validation/VerificationCodeInput.dart';
 import 'package:bloc/bloc.dart';
 import 'package:formz/formz.dart';
@@ -11,7 +12,7 @@ import '../../models/validation/StringInput.dart';
 
 part 'validation_state.dart';
 
-enum ValidationElement{username, password, passwordAgain, email, verificationCode, title, description, place, date, activityType}
+enum ValidationElement{username, password, passwordAgain, email, verificationCode, title, description, place, date, activityType, participants}
 
 class ValidationCubit extends Cubit<ValidationState> {
   ValidationCubit({
@@ -155,6 +156,28 @@ class ValidationCubit extends Cubit<ValidationState> {
 
     validate();
 
+    emit(ValidationInitial());
+  }
+
+  void onParticipantClicked(int clickedCount){
+    final participant = ParticipantsInput.dirty(clickedCount);
+    inputsMap[ValidationElement.participants] = participant.valid ? participant : ParticipantsInput.pure(clickedCount);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void addInput(ValidationElement element, FormzInput input){
+    inputsMap[element] = input;
+
+    validate();
+    emit(ValidationInitial());
+  }
+
+  void removeInput(ValidationElement element){
+    inputsMap.remove(element);
+
+    validate();
     emit(ValidationInitial());
   }
 

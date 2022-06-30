@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:akcosky/UI/validation_components/event/ActivityTypeWidget.dart';
 import 'package:akcosky/UI/validation_components/event/DateInputWidget.dart';
 import 'package:akcosky/UI/validation_components/event/NewEventInputWidget.dart';
+import 'package:akcosky/UI/validation_components/event/ParticipantsPickerWidget.dart';
 import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
 import 'package:akcosky/cubit/events/events_cubit.dart';
 import 'package:akcosky/cubit/newevent/newevent_cubit.dart';
 import 'package:akcosky/models/UserChip.dart';
 import 'package:akcosky/models/validation/DateInput.dart';
+import 'package:akcosky/models/validation/ParticipantsInput.dart';
 import 'package:akcosky/resources/EventRepository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -175,6 +177,13 @@ class _NewEvent extends State<NewEventForm> {
                   onStepContinue: () {
                     if (currentStep_ != 2) {
                       BlocProvider.of<NewEventCubit>(context).updateStepperState(currentStep_ += 1);
+
+                      if(currentStep_ == 1){
+                        int participantsCount = BlocProvider.of<NewEventCubit>(context).getCountOfWantedParticipants();
+
+                        BlocProvider.of<ValidationCubit>(context).addInput(ValidationElement.participants, ParticipantsInput.pure(participantsCount));
+                      }
+
                     } else {
                       BlocProvider.of<NewEventCubit>(context).finishCreation(
                           eventTitle.text,
@@ -192,6 +201,10 @@ class _NewEvent extends State<NewEventForm> {
                   },
                   onStepCancel: () {
                     BlocProvider.of<NewEventCubit>(context).updateStepperState(currentStep_ -= 1);
+
+                    if(currentStep_ == 0){
+                      BlocProvider.of<ValidationCubit>(context).removeInput(ValidationElement.participants);
+                    }
                   },
                   type: StepperType.horizontal,
                   steps: <Step>[
@@ -210,7 +223,7 @@ class _NewEvent extends State<NewEventForm> {
                       title: const Text('Účastníci'),
                       content: Container(
                           alignment: Alignment.centerLeft,
-                          child: AnimatedSwitcher(duration: const Duration(milliseconds: 2000), child: participants(context))),
+                          child: AnimatedSwitcher(duration: const Duration(milliseconds: 2000), child: ParticipantsPickerWidget())),
                     ),
                     Step(
                       isActive: currentStep_ == 2,
@@ -273,7 +286,7 @@ class _NewEvent extends State<NewEventForm> {
     ]);
   }
 
-  Widget participants(BuildContext context) {
+  /*Widget participants(BuildContext context) {
     Map<String, Group> groups = BlocProvider.of<AuthenticationCubit>(context).userRepository.getUser().groups;
     Group selectedGroup = BlocProvider.of<NewEventCubit>(context).selectedGroup;
     Map<String, UserChip> participants = BlocProvider.of<NewEventCubit>(context).usersFromSelectedGroup;
@@ -394,7 +407,7 @@ class _NewEvent extends State<NewEventForm> {
       return const SizedBox.shrink();
     }
   }
-
+*/
   Widget additionalInformation() {
     return Column(children: <Widget>[
       Text(

@@ -137,6 +137,18 @@ class NewEventCubit extends Cubit<NewEventState> {
 
   }
 
+  getCountOfWantedParticipants(){
+    int count = 0;
+
+    usersFromSelectedGroup.forEach((key, value) {
+      if(value.selected == true){
+        count++;
+      }
+    });
+
+    return count;
+  }
+
   finishCreation(String title, String description, String place, String transport, String accommodation, String estimatedPrice,
       String createdBy) async {
     double estimatedPriceDouble = 0;
