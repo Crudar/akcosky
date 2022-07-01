@@ -35,15 +35,17 @@ class _MainUI extends State<MainUI> {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(FontAwesomeIcons.calendar, color: Colors.white),
+                  activeIcon: Icon(FontAwesomeIcons.calendar, color: Colors.greenAccent),
                   label: 'Akcie',
                 ),
                 BottomNavigationBarItem(
-                  icon:
-                      Icon(FontAwesomeIcons.calendarPlus, color: Colors.white),
+                  icon: Icon(FontAwesomeIcons.plusCircle, color: Colors.white),
+                  activeIcon: Icon(FontAwesomeIcons.plusCircle, color: Colors.greenAccent),
                   label: 'Vytvor akciu',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(FontAwesomeIcons.userFriends, color: Colors.white),
+                  activeIcon: Icon(FontAwesomeIcons.userFriends, color: Colors.greenAccent),
                   label: 'Skupiny',
                 ),
               ],
