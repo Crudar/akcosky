@@ -119,12 +119,6 @@ flutter:
     - assets/icons/activityHeaders/hiking.jpg
     - assets/icons/activityHeaders/track-bicycle.jpg
 
-    - assets/icons/navbar/add_selected.png
-    - assets/icons/navbar/add_unselected.png
-    - assets/icons/navbar/calendar_selected.png
-    - assets/icons/navbar/calendar_unselected.png
-    - assets/icons/navbar/groups_selected.png
-    - assets/icons/navbar/groups_unselected.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

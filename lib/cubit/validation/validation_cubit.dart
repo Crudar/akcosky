@@ -1,6 +1,7 @@
 import 'package:akcosky/models/validation/ActivityTypeInput.dart';
 import 'package:akcosky/models/validation/DateInput.dart';
 import 'package:akcosky/models/validation/ParticipantsInput.dart';
+import 'package:akcosky/models/validation/NonAuthenticated.dart';
 import 'package:akcosky/models/validation/VerificationCodeInput.dart';
 import 'package:bloc/bloc.dart';
 import 'package:formz/formz.dart';
@@ -12,7 +13,7 @@ import '../../models/validation/StringInput.dart';
 
 part 'validation_state.dart';
 
-enum ValidationElement{username, password, passwordAgain, email, verificationCode, title, description, place, date, activityType, participants}
+enum ValidationElement{username, password, passwordAgain, nonauthenticated, email, verificationCode, title, description, place, date, activityType, participants}
 
 class ValidationCubit extends Cubit<ValidationState> {
   ValidationCubit({
@@ -58,6 +59,9 @@ class ValidationCubit extends Cubit<ValidationState> {
   void onPasswordChanged(String passwordInput){
     final password_ = StringInput.dirty(passwordInput);
     inputsMap[ValidationElement.password] = password_.valid ? password_ : StringInput.pure(passwordInput);
+
+    checkNonAuthenticated();
+
     validate();
 
     emit(ValidationInitial());
@@ -85,6 +89,24 @@ class ValidationCubit extends Cubit<ValidationState> {
     validate();
 
     emit(ValidationInitial());
+  }
+
+  void onNonAuthenticated(){
+    final nonauthenticated_ = NonAuthenticated.dirty(true);
+    inputsMap[ValidationElement.nonauthenticated] = nonauthenticated_.valid ? nonauthenticated_ : NonAuthenticated.dirty(true);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void checkNonAuthenticated(){
+    FormzInput? value = inputsMap[ValidationElement.nonauthenticated];
+
+    if(value != null){
+      if(value.invalid){
+        inputsMap[ValidationElement.nonauthenticated] = NonAuthenticated.dirty(false);
+      }
+    }
   }
 
   void onVerificationCodeChanged(String verificationInput){

@@ -1,6 +1,7 @@
 import 'package:akcosky/cubit/validation/validation_cubit.dart';
 import 'package:flutter/material.dart';
 import '../../cubit/registerstart/registerstart_cubit.dart';
+import '../../models/validation/NonAuthenticated.dart';
 import '../../models/validation/StringInput.dart';
 import '../../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +16,7 @@ class PasswordInputWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     StringInput passwordValue = context.read<ValidationCubit>().inputsMap[ValidationElement.password] as StringInput;
+    NonAuthenticated nonauthenticated = context.read<ValidationCubit>().inputsMap[ValidationElement.nonauthenticated] as NonAuthenticated;
 
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -43,9 +45,7 @@ class PasswordInputWidget extends StatelessWidget {
                   color: Colors.yellow,
                 )
             ),
-            errorText: passwordValue.invalid
-                ? 'Heslo nesmie byť prázdne'
-                : null,
+            errorText: determineErrorMessage(passwordValue, nonauthenticated),
           ),
           keyboardType: TextInputType.text,
           obscureText: true,
@@ -62,4 +62,18 @@ class PasswordInputWidget extends StatelessWidget {
         )
     );
   }
+
+  String? determineErrorMessage(StringInput passwordValue, NonAuthenticated nonauthenticated){
+    if(passwordValue.invalid){
+      return "Heslo nesmie byť prázdne";
+    }
+
+    if(nonauthenticated.invalid){
+      return "Zadané používateľské meno alebo heslo je neplatné";
+    }
+
+    return null;
+
+  }
+
 }

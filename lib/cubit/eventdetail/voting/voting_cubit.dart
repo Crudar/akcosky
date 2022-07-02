@@ -14,8 +14,6 @@ class VotingCubit extends Cubit<VotingState> {
   VotingCubit(this._eventRepository) : super(VotingInitial());
 
   voting(Vote vote) async {
-    // TODO - save to DB + save to event and reload or reload whole event load
-
     Tuple2<bool, String> response = await _eventRepository.updateUserVote(vote);
 
     if (response.item1) {

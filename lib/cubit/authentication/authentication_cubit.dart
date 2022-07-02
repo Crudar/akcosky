@@ -10,7 +10,7 @@ import '../../models/Database/UserDatabase.dart';
 part 'authentication_state.dart';
 
 class AuthenticationCubit extends Cubit<AuthenticationState> {
-  AuthenticationCubit({required this.authenticationRepository, required this.userRepository}) : super(AuthenticationUnAuthenticated());
+  AuthenticationCubit({required this.authenticationRepository, required this.userRepository}) : super(AuthenticationInitial());
 
   final AuthenticationRepository authenticationRepository;
   final UserRepository userRepository;
@@ -18,23 +18,31 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
   void login(String username, String password) async{
     UserDatabase? userDomain = await authenticationRepository.logIn(username: username, password: password);
 
-    Salt salt = Salt(base64Decode(userDomain?.passwordSalt ?? ""));
+    if(userDomain != null) {
+      if (userDomain.id.isEmpty) {
+        emit(AuthenticationUnAuthenticated());
 
-    var passHashInput = await argon2.hashPasswordString(password, salt: salt);
-    String passHashInputBase64 = passHashInput.base64String;
-
-    String passHashFromDb = userDomain?.passwordHash ?? "";
-
-    if(passHashInputBase64 == passHashFromDb){
-      if(userDomain != null) {
-        userRepository.setUser(User(userDomain.id, userDomain.login, userDomain.email, userDomain.groups));
+        return;
       }
+    }
 
-      emit(AuthenticationAuthenticated());
-    }
-    else{
-      emit(AuthenticationUnAuthenticated());
-    }
+      Salt salt = Salt(base64Decode(userDomain?.passwordSalt ?? ""));
+
+      var passHashInput = await argon2.hashPasswordString(password, salt: salt);
+      String passHashInputBase64 = passHashInput.base64String;
+
+      String passHashFromDb = userDomain?.passwordHash ?? "";
+
+      if(passHashInputBase64 == passHashFromDb){
+        if(userDomain != null) {
+          userRepository.setUser(User(userDomain.id, userDomain.login, userDomain.email, userDomain.groups));
+        }
+
+        emit(AuthenticationAuthenticated());
+      }
+      else{
+        emit(AuthenticationUnAuthenticated());
+      }
   }
 
   //TODO - check if user is authenticated (if userdata are in local storage) - something like this - https://bloclibrary.dev/#/flutterlogintutorial?id=authentication-repository

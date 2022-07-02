@@ -2,6 +2,7 @@ import 'package:akcosky/UI/validation_components/PasswordInputWidget.dart';
 import 'package:akcosky/UI/validation_components/PasswordInputWidgetWithCubit.dart';
 import 'package:akcosky/UI/validation_components/UsernameInputWidget.dart';
 import 'package:akcosky/cubit/authentication/authentication_cubit.dart';
+import 'package:akcosky/models/validation/NonAuthenticated.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:akcosky/theme.dart';
@@ -21,7 +22,8 @@ class Login extends StatelessWidget {
 
     Map<ValidationElement, FormzInput> input = {
       ValidationElement.username: StringInput.pure(""),
-      ValidationElement.password: StringInput.pure("")
+      ValidationElement.password: StringInput.pure(""),
+      ValidationElement.nonauthenticated: NonAuthenticated.pure()
     };
 
     return BlocProvider<ValidationCubit>(
@@ -179,24 +181,31 @@ class SubmitButtonWidget extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ValidationCubit, ValidationState>(
-      //buildWhen: (previous, current) => previous.status != current.status,
-        builder: (context, state){
-          return ElevatedButton(
-              onPressed: context.read<ValidationCubit>().status.isValidated
-                  ? () => BlocProvider.of<AuthenticationCubit>(context).login(context.read<ValidationCubit>().inputsMap[ValidationElement.username]?.value,
-                  context.read<ValidationCubit>().inputsMap[ValidationElement.password]?.value)
-                  : null,
-              child: const Icon(FontAwesomeIcons.arrowRight),
-              style: ElevatedButton.styleFrom(
-                shape: const CircleBorder(),
-                padding: const EdgeInsets.all(20),
-                primary: Color(0xff000428), // <-- Button color
-                onSurface: Colors.black,
-                onPrimary: Colors.white, // <-- Splash color
-              )
-          );
-        }
-    );
+    return BlocConsumer<AuthenticationCubit, AuthenticationState>(
+          listener: (context, state) {
+            if(state is AuthenticationUnAuthenticated){
+              context.read<ValidationCubit>().onNonAuthenticated();
+            }
+          },
+        builder: (context, state) {
+          return BlocBuilder<ValidationCubit, ValidationState>(
+            builder: (context, state) {
+              return ElevatedButton(
+                  onPressed: context.read<ValidationCubit>().status.isValidated
+                      ? () => BlocProvider.of<AuthenticationCubit>(context).login(context.read<ValidationCubit>().inputsMap[ValidationElement.username]?.value,
+                      context.read<ValidationCubit>().inputsMap[ValidationElement.password]?.value)
+                      : null,
+                  child: const Icon(FontAwesomeIcons.arrowRight),
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(20),
+                    primary: Color(0xff000428), // <-- Button color
+                    onSurface: Colors.black,
+                    onPrimary: Colors.white, // <-- Splash color
+                  )
+              );
+            });
+        },
+      );
+    }
   }
-}

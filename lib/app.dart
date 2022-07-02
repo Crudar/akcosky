@@ -124,10 +124,7 @@ class _AppViewState extends State<AppView> {
       builder: (context, child){
         return BlocListener<AuthenticationCubit, AuthenticationState>(
           listener: (context, state){
-            if (state is AuthenticationUnAuthenticated) {
-              _navigator.pushNamedAndRemoveUntil('/', (route) => false); // TODO - toto nech nenaviguje na login lebo tam uz je, nech skusi ukazat snackbar ???
-              }
-            else if(state is AuthenticationAuthenticated){
+            if(state is AuthenticationAuthenticated){
               _navigator.pushNamedAndRemoveUntil('/mainUI', (route) => false);
               }
             },
