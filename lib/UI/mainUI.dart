@@ -30,22 +30,22 @@ class _MainUI extends State<MainUI> {
           return BottomNavigationBar(
               currentIndex: state.index,
               backgroundColor: Colors.black,
-              selectedItemColor: Colors.greenAccent,
-              unselectedItemColor: Colors.grey,
+              selectedItemColor: Color(0xffd3d7da),
+              unselectedItemColor: Color(0xff898d90),
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: Icon(FontAwesomeIcons.calendar, color: Colors.white),
-                  activeIcon: Icon(FontAwesomeIcons.calendar, color: Colors.greenAccent),
+                  icon: Icon(FontAwesomeIcons.calendarAlt, color: Color(0xff898d90)),
+                  activeIcon: Icon(FontAwesomeIcons.calendarAlt, color: Color(0xffd3d7da)),
                   label: 'Akcie',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(FontAwesomeIcons.plusCircle, color: Colors.white),
-                  activeIcon: Icon(FontAwesomeIcons.plusCircle, color: Colors.greenAccent),
+                  icon: Icon(FontAwesomeIcons.plusCircle, color: Color(0xff898d90)),
+                  activeIcon: Icon(FontAwesomeIcons.plusCircle, color: Color(0xffd3d7da)),
                   label: 'Vytvor akciu',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(FontAwesomeIcons.userFriends, color: Colors.white),
-                  activeIcon: Icon(FontAwesomeIcons.userFriends, color: Colors.greenAccent),
+                  icon: Icon(FontAwesomeIcons.userFriends, color: Color(0xff898d90)),
+                  activeIcon: Icon(FontAwesomeIcons.userFriends, color: Color(0xffd3d7da)),
                   label: 'Skupiny',
                 ),
               ],
