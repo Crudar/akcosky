@@ -4,11 +4,6 @@ import 'package:akcosky/cubit/mainUI/main_ui_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/events/events_cubit.dart';
-import '../theme.dart';
-import 'package:timelines/timelines.dart';
-
-import 'events_list_shimmer.dart';
 import 'groups.dart';
 
 class MainUI extends StatefulWidget {

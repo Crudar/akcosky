@@ -23,7 +23,7 @@ class RegisterFinalCubit extends Cubit<RegisterFinalState> {
     var id_ = uuid.v4();
 
     Salt passSalt = Salt.newSalt(length: 32);
-    String passSaltBase64 = utf8.decode(passSalt.bytes);
+    String passSaltBase64 = base64.encode(passSalt.bytes);
 
     var passHash = await argon2.hashPasswordString(_registerRepository.password,
         salt: passSalt);

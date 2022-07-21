@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:formz/formz.dart';
 import '../../cubit/validation/validation_cubit.dart';
 import '../../models/validation/VerificationCodeInput.dart';
 import '../../theme.dart';
@@ -17,6 +18,8 @@ class VerificationCodeInputWidget extends StatelessWidget {
         child: BlocBuilder<ValidationCubit, ValidationState>(
         builder: (context, state) {
           VerificationCodeInput verificationCode = context.read<ValidationCubit>().inputsMap[ValidationElement.verificationCode] as VerificationCodeInput;
+
+          FormzInput? verificationCodeFailure = context.read<ValidationCubit>().inputsMap[ValidationElement.verificationCodeFailure];
 
           return TextFormField(
             initialValue: verificationCode.value,
@@ -43,7 +46,7 @@ class VerificationCodeInputWidget extends StatelessWidget {
                     color: Colors.yellow,
                   ),
               ),
-              errorText: verificationCode.invalid ? returnErrorText(verificationCode) : null,
+              errorText: determineErrorMessage(verificationCode, verificationCodeFailure),
             ),
             keyboardType: TextInputType.number,
             onChanged: (value) {
@@ -57,7 +60,7 @@ class VerificationCodeInputWidget extends StatelessWidget {
     );
   }
 
-  String returnErrorText(VerificationCodeInput verificationError){
+  String? returnErrorText(VerificationCodeInput verificationError){
     switch(verificationError.error){
       case VerificationCodeInputError.empty: {
         return "Overovací kód nesmie byť prázdny";
@@ -72,9 +75,26 @@ class VerificationCodeInputWidget extends StatelessWidget {
       }
 
       default :{
-        return "";
+        return null;
       }
     }
+  }
+
+  String? determineErrorMessage(VerificationCodeInput verificationCode, FormzInput? verificationCodeFailure){
+   String? returnMessage;
+
+   if(verificationCode.invalid) {
+     returnMessage = returnErrorText(verificationCode);
+   }
+
+    if(verificationCodeFailure != null){
+      if(verificationCodeFailure.invalid){
+        returnMessage = "Zadaný zlý verifikačný kód";
+      }
+    }
+
+    return returnMessage;
+
   }
 
 }

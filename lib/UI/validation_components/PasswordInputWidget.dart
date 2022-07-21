@@ -1,5 +1,6 @@
 import 'package:akcosky/cubit/validation/validation_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:formz/formz.dart';
 import '../../cubit/registerstart/registerstart_cubit.dart';
 import '../../models/validation/NonAuthenticated.dart';
 import '../../models/validation/StringInput.dart';
@@ -16,7 +17,8 @@ class PasswordInputWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     StringInput passwordValue = context.read<ValidationCubit>().inputsMap[ValidationElement.password] as StringInput;
-    NonAuthenticated nonauthenticated = context.read<ValidationCubit>().inputsMap[ValidationElement.nonauthenticated] as NonAuthenticated;
+
+    FormzInput? nonauthenticated = context.read<ValidationCubit>().inputsMap[ValidationElement.nonauthenticated];
 
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -63,13 +65,15 @@ class PasswordInputWidget extends StatelessWidget {
     );
   }
 
-  String? determineErrorMessage(StringInput passwordValue, NonAuthenticated nonauthenticated){
+  String? determineErrorMessage(StringInput passwordValue, FormzInput? nonauthenticated){
     if(passwordValue.invalid){
       return "Heslo nesmie byť prázdne";
     }
 
-    if(nonauthenticated.invalid){
-      return "Zadané používateľské meno alebo heslo je neplatné";
+    if(nonauthenticated != null){
+      if(nonauthenticated.invalid){
+        return "Zadané používateľské meno alebo heslo je neplatné";
+      }
     }
 
     return null;

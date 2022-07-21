@@ -3,6 +3,7 @@ import 'package:akcosky/models/validation/DateInput.dart';
 import 'package:akcosky/models/validation/ParticipantsInput.dart';
 import 'package:akcosky/models/validation/NonAuthenticated.dart';
 import 'package:akcosky/models/validation/VerificationCodeInput.dart';
+import 'package:akcosky/models/validation/VerificationCodeSuccess.dart';
 import 'package:bloc/bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:meta/meta.dart';
@@ -13,7 +14,7 @@ import '../../models/validation/StringInput.dart';
 
 part 'validation_state.dart';
 
-enum ValidationElement{username, password, passwordAgain, nonauthenticated, email, verificationCode, title, description, place, date, activityType, participants}
+enum ValidationElement{username, password, passwordAgain, nonauthenticated, email, verificationCode, title, description, place, date, activityType, participants, verificationCodeFailure}
 
 class ValidationCubit extends Cubit<ValidationState> {
   ValidationCubit({
@@ -112,6 +113,9 @@ class ValidationCubit extends Cubit<ValidationState> {
   void onVerificationCodeChanged(String verificationInput){
     final verification_ = VerificationCodeInput.dirty(verificationInput);
     inputsMap[ValidationElement.verificationCode] = verification_.valid ? verification_ : VerificationCodeInput.pure(verificationInput);
+
+    checkVerificationCodeFailure();
+
     validate();
 
     emit(ValidationInitial());
@@ -187,6 +191,24 @@ class ValidationCubit extends Cubit<ValidationState> {
     validate();
 
     emit(ValidationInitial());
+  }
+
+  void onVerificationCodeFailure(){
+    final verificationcodefailure = VerificationCodeFailure.dirty(true);
+    inputsMap[ValidationElement.verificationCodeFailure] = verificationcodefailure.valid ? verificationcodefailure : VerificationCodeFailure.dirty(true);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void checkVerificationCodeFailure(){
+    FormzInput? value = inputsMap[ValidationElement.verificationCodeFailure];
+
+    if(value != null){
+      if(value.invalid){
+        inputsMap[ValidationElement.verificationCodeFailure] = VerificationCodeFailure.dirty(false);
+      }
+    }
   }
 
   void addInput(ValidationElement element, FormzInput input){

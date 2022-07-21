@@ -1,6 +1,7 @@
 import 'package:akcosky/UI/validation_components/VerificationCodeInputWidget.dart';
 import 'package:akcosky/cubit/registerfinal/registerfinal_cubit.dart';
 import 'package:akcosky/models/validation/VerificationCodeInput.dart';
+import 'package:akcosky/models/validation/VerificationCodeSuccess.dart';
 import 'package:akcosky/resources/RegisterRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -20,6 +21,7 @@ class EmailVerification extends StatelessWidget {
 
     Map<ValidationElement, FormzInput> input = {
       ValidationElement.verificationCode: VerificationCodeInput.pure(""),
+      ValidationElement.verificationCodeFailure: VerificationCodeFailure.pure()
     };
 
     return BlocProvider<ValidationCubit>(
@@ -84,12 +86,7 @@ class _VerificationState extends State<EmailVerificationForm>{
                   );
                 }
                 else if (state is RegisterFinalError){
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    //TODO ADD KEYBOARD VISIBILITY - IF OFF SHOW AT BOTTOM
-                      const SnackBar(
-                          content: Text("Chybný overovací kód"),
-                      )
-                  );
+                  context.read<ValidationCubit>().onVerificationCodeFailure();
                 }
                 else if (state is RegisterFinalSuccess){
                   //Navigator.popUntil(context, ModalRoute.withName('/'));

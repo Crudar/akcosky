@@ -20,14 +20,4 @@ class RegisterFinalSuccess extends RegisterFinalState{
 class RegisterFinalError extends RegisterFinalState{
   final String message;
   const RegisterFinalError(this.message);
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is RegisterFinalError &&
-              runtimeType == other.runtimeType &&
-              message == other.message;
-
-  @override
-  int get hashCode => message.hashCode;
 }
