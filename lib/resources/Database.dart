@@ -6,7 +6,6 @@ import 'package:akcosky/models/VoteEnum.dart';
 import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
 import 'package:akcosky/AppSettings.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
 import '../models/Group.dart';
@@ -506,6 +505,44 @@ class Database{
     }
   }
 
+
+  Future<UserDatabase?> checkUserByEmailOrLogin(String usernameToCheck, String emailToCheck) async{
+    String tableName_ = "Uzivatelia";
+
+    String filterExpressionLogin_ = 'Meno_login = :m';
+    String filterExpressionEmail_ = 'Email = :e';
+
+    Map<String, AttributeValue> request = {};
+    request.addEntries([MapEntry(":m", AttributeValue(s: usernameToCheck))]);
+    request.addEntries([MapEntry(":e", AttributeValue(s: emailToCheck))]);
+
+    String filterExpression_ = filterExpressionLogin_ + " OR " + filterExpressionEmail_;
+
+    ScanOutput output = await service.scan(tableName: tableName_,
+        filterExpression: filterExpression_,
+        expressionAttributeValues: request);
+
+    if(output.count != 0){
+      Map<String, AttributeValue> response = output.items![0];
+      String? id = response.entries.firstWhere((element) => element.key == "ID").value.s;
+      String? username = response.entries.firstWhere((element) => element.key == "Meno_login").value.s;
+      String? passwordHash = response.entries.firstWhere((element) => element.key == "Hash_HESLA").value.s;
+      String? passwordSalt = response.entries.firstWhere((element) => element.key == "Salt").value.s;
+      String? email = response.entries.firstWhere((element) => element.key == "Email").value.s;
+      List<String> groupIDs = List.empty(growable: true);
+
+      response.entries.firstWhereOrNull((element) => element.key == "Skupiny")?.value.ss?.forEach((element) {
+        groupIDs.add(element);
+      });
+
+      UserDatabase userDomain = UserDatabase(id.toString(), username ?? "", email ?? "", passwordHash ?? "", passwordSalt ?? "", groupIDs);
+
+      return userDomain;
+    }
+    else {
+      return null;
+    }
+  }
 }
 
 

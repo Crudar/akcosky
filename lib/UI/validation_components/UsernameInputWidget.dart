@@ -1,6 +1,6 @@
 import 'package:akcosky/cubit/validation/validation_cubit.dart';
 import 'package:flutter/material.dart';
-import '../../cubit/registerstart/registerstart_cubit.dart';
+import '../../models/validation/UsernameAdditional.dart';
 import '../../models/validation/StringInput.dart';
 import '../../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +21,8 @@ class UsernameInputWidget extends StatelessWidget {
             StringInput usernameValue = context
                 .read<ValidationCubit>()
                 .inputsMap[ValidationElement.username] as StringInput;
+
+            UsernameAdditional? usernameAdditional = context.read<ValidationCubit>().inputsMap[ValidationElement.usernameAdditional] as UsernameAdditional?;
 
             return TextFormField(
               initialValue: usernameValue.value,
@@ -45,9 +47,7 @@ class UsernameInputWidget extends StatelessWidget {
                   width: 1,
                   color: Colors.yellow,
                 )),
-                errorText: usernameValue.invalid
-                    ? 'Prihlasovacie meno nesmie byť prázdne'
-                    : null,
+                errorText: determineErrorMessage(usernameValue, usernameAdditional),
               ),
               keyboardType: TextInputType.text,
               onChanged: (value) {
@@ -59,4 +59,21 @@ class UsernameInputWidget extends StatelessWidget {
           },
         ));
   }
+
+  String? determineErrorMessage(StringInput usernameValue, UsernameAdditional? usernameAdditional){
+    if(usernameAdditional != null){
+      if(usernameAdditional.invalid){
+        if(usernameAdditional.error == UsernameAdditionalError.collision){
+          return "Prihlasovacie meno sa už používa.";
+        }
+      }
+    }
+
+    if(usernameValue.invalid){
+      return "Prihlasovacie meno nesmie byť prázdne";
+    }
+
+    return null;
+  }
+
 }

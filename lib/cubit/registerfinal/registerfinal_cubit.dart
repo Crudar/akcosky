@@ -15,8 +15,6 @@ class RegisterFinalCubit extends Cubit<RegisterFinalState> {
 
   Future<void> register() async {
     DArgon2Flutter.init();
-    // TODO - check if username is available - scan with username (call to dabatase) - najlepsie by bolo keby su tie formy jednotne a ukaze to pod tym fieldom
-    // TODO - check if email is not used - scan with email (call to dabatase) - najlepsie by bolo keby su tie formy jednotne a ukaze to pod tym fieldom
     emit(RegisterFinalLoading());
 
     var uuid = const Uuid();

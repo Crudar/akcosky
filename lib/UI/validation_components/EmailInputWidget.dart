@@ -1,6 +1,6 @@
 import 'package:akcosky/cubit/validation/validation_cubit.dart';
+import 'package:akcosky/models/validation/EmailAdditional.dart';
 import 'package:flutter/material.dart';
-import '../../cubit/registerstart/registerstart_cubit.dart';
 import '../../models/validation/EmailInput.dart';
 import '../../theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,6 +18,8 @@ class EmailInputWidget extends StatelessWidget {
         child: BlocBuilder<ValidationCubit, ValidationState>(
           builder: (context, state) {
             EmailInput emailValue = context.read<ValidationCubit>().inputsMap[ValidationElement.email] as EmailInput;
+
+            EmailAdditional? emailAdditional = context.read<ValidationCubit>().inputsMap[ValidationElement.emailAdditional] as EmailAdditional?;
 
             return TextFormField(
               initialValue: emailValue.value,
@@ -44,9 +46,7 @@ class EmailInputWidget extends StatelessWidget {
                       color: Colors.yellow,
                     )
                 ),
-                errorText: emailValue.invalid
-                    ? 'Zadaný e-mail je v zlom formáte'
-                    : null,
+                errorText: determineErrorMessage(emailValue, emailAdditional),
               ),
               keyboardType: TextInputType.emailAddress,
               onChanged: (value) {
@@ -59,5 +59,21 @@ class EmailInputWidget extends StatelessWidget {
           },
         )
     );
+  }
+
+  String? determineErrorMessage(EmailInput emailValue, EmailAdditional? emailAdditional){
+    if(emailAdditional != null){
+      if(emailAdditional.invalid){
+        if(emailAdditional.error == EmailAdditionalError.collision){
+          return "Zadaný email sa už používa.";
+        }
+      }
+    }
+
+    if(emailValue.invalid){
+      return "Zadaný e-mail je v zlom formáte";
+    }
+
+    return null;
   }
 }

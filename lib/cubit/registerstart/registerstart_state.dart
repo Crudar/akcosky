@@ -1,5 +1,7 @@
 part of 'registerstart_cubit.dart';
 
+enum RegisterStartCheckErrorType { username, email, usernameAndEmail }
+
 @immutable
 abstract class RegisterStartState extends Equatable {
   const RegisterStartState();
@@ -21,6 +23,14 @@ class RegisterStartLoading extends RegisterStartState{
 
 class RegisterStartAuthenticate extends RegisterStartState{
   const RegisterStartAuthenticate();
+
+  @override
+  List<Object> get props => [identityHashCode(this)];
+}
+
+class RegisterStartCheckError extends RegisterStartState{
+  final RegisterStartCheckErrorType type;
+  const RegisterStartCheckError(this.type);
 
   @override
   List<Object> get props => [identityHashCode(this)];

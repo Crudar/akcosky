@@ -3,7 +3,9 @@ import 'package:akcosky/UI/validation_components/PasswordAgainInputWidget.dart';
 import 'package:akcosky/UI/validation_components/PasswordInputWidget.dart';
 import 'package:akcosky/UI/validation_components/UsernameInputWidget.dart';
 import 'package:akcosky/cubit/validation/validation_cubit.dart';
+import 'package:akcosky/models/validation/EmailAdditional.dart';
 import 'package:akcosky/models/validation/EmailInput.dart';
+import 'package:akcosky/models/validation/UsernameAdditional.dart';
 import 'package:akcosky/models/validation/StringInput.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -26,7 +28,10 @@ class Register extends StatelessWidget {
       ValidationElement.email: EmailInput.pure(""),
       ValidationElement.username: StringInput.pure(""),
       ValidationElement.password: StringInput.pure(""),
-      ValidationElement.passwordAgain: PasswordAgainInput.pure("")
+      ValidationElement.passwordAgain: PasswordAgainInput.pure(""),
+
+      ValidationElement.emailAdditional: EmailAdditional.pure(),
+      ValidationElement.usernameAdditional: UsernameAdditional.pure()
     };
 
     return RepositoryProvider.value(
@@ -145,6 +150,21 @@ class _RegisterState extends State<RegisterForm>{
                 listener: (context, state) {
                   if(state is RegisterStartAuthenticate){
                     Navigator.pushNamed(context, '/registerfinal', arguments: RepositoryProvider.of<RegisterRepository>(context));
+                  }
+                  else if (state is RegisterStartCheckError){
+                    if(state.type == RegisterStartCheckErrorType.usernameAndEmail){
+                      context.read<ValidationCubit>().onUsernameAdditional();
+                      context.read<ValidationCubit>().onEmailAdditional();
+                    }
+                    else if(state.type == RegisterStartCheckErrorType.username){
+                      context.read<ValidationCubit>().onUsernameAdditional();
+                    }
+                    else if(state.type == RegisterStartCheckErrorType.email){
+                      context.read<ValidationCubit>().onEmailAdditional();
+                    }
+
+                    //onUsernameCheckCollision
+                    //onEmailCheckCollision
                   }
                 },
                 builder: (context, state) {

@@ -1,5 +1,6 @@
 import 'package:akcosky/models/validation/ActivityTypeInput.dart';
 import 'package:akcosky/models/validation/DateInput.dart';
+import 'package:akcosky/models/validation/EmailAdditional.dart';
 import 'package:akcosky/models/validation/ParticipantsInput.dart';
 import 'package:akcosky/models/validation/NonAuthenticated.dart';
 import 'package:akcosky/models/validation/VerificationCodeInput.dart';
@@ -11,10 +12,12 @@ import 'package:meta/meta.dart';
 import '../../models/validation/EmailInput.dart';
 import '../../models/validation/PasswordAgainInput.dart';
 import '../../models/validation/StringInput.dart';
+import '../../models/validation/UsernameAdditional.dart';
 
 part 'validation_state.dart';
 
-enum ValidationElement{username, password, passwordAgain, nonauthenticated, email, verificationCode, title, description, place, date, activityType, participants, verificationCodeFailure}
+enum ValidationElement{username, password, passwordAgain, nonauthenticated, email, verificationCode, title, description, place, date,
+  activityType, participants, verificationCodeFailure, usernameAdditional, emailAdditional}
 
 class ValidationCubit extends Cubit<ValidationState> {
   ValidationCubit({
@@ -28,6 +31,9 @@ class ValidationCubit extends Cubit<ValidationState> {
   void onEmailChanged(String emailInput){
     final email_ = EmailInput.dirty(emailInput);
     inputsMap[ValidationElement.email] = email_.valid ? email_ : EmailInput.pure(emailInput);
+
+    checkEmailAdditional();
+
     validate();
 
     emit(ValidationInitial());
@@ -44,6 +50,9 @@ class ValidationCubit extends Cubit<ValidationState> {
   void onUsernameChanged(String usernameInput){
     final username_ = StringInput.dirty(usernameInput);
     inputsMap[ValidationElement.username] = username_.valid ? username_ : StringInput.pure(usernameInput);
+
+    checkUsernameAdditional();
+
     validate();
 
     emit(ValidationInitial());
@@ -207,6 +216,42 @@ class ValidationCubit extends Cubit<ValidationState> {
     if(value != null){
       if(value.invalid){
         inputsMap[ValidationElement.verificationCodeFailure] = VerificationCodeFailure.dirty(false);
+      }
+    }
+  }
+
+  void onUsernameAdditional(){
+    final registerCollision = UsernameAdditional.dirty(true);
+    inputsMap[ValidationElement.usernameAdditional] = registerCollision.valid ? registerCollision : UsernameAdditional.dirty(true);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void checkUsernameAdditional(){
+    FormzInput? value = inputsMap[ValidationElement.usernameAdditional];
+
+    if(value != null){
+      if(value.invalid){
+        inputsMap[ValidationElement.usernameAdditional] = UsernameAdditional.dirty(false);
+      }
+    }
+  }
+
+  void onEmailAdditional(){
+    final emailAdditional = EmailAdditional.dirty(true);
+    inputsMap[ValidationElement.emailAdditional] = emailAdditional.valid ? emailAdditional : EmailAdditional.dirty(true);
+    validate();
+
+    emit(ValidationInitial());
+  }
+
+  void checkEmailAdditional(){
+    FormzInput? value = inputsMap[ValidationElement.emailAdditional];
+
+    if(value != null){
+      if(value.invalid){
+        inputsMap[ValidationElement.emailAdditional] = EmailAdditional.dirty(false);
       }
     }
   }

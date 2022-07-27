@@ -1,4 +1,5 @@
 
+import 'package:akcosky/models/Database/UserDatabase.dart';
 import 'package:akcosky/resources/Database.dart';
 
 class RegisterRepository{
@@ -23,5 +24,13 @@ class RegisterRepository{
     bool response = await db.addUserToDatabase(id, login, email, password, passSalt_);
 
     return response;
+  }
+
+  Future<UserDatabase?> checkIfEmailOrUsernameAlreadyExists()async{
+    Database db = await Database.create();
+
+    UserDatabase? user = await db.checkUserByEmailOrLogin(login, email);
+
+    return user;
   }
 }
